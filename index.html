@@ -613,7 +613,7 @@ init();
     const left=document.querySelector('.left-col');
     if(!manage||!round||!leader||!left)return;
 
-    if(window.innerWidth>=1181){
+    if(window.innerWidth>=1181 && document.body.classList.contains('is-admin')){
       const styles=getComputedStyle(left);
       const gap=parseFloat(styles.rowGap||styles.gap||0)||0;
       const target=Math.round(manage.getBoundingClientRect().height + round.getBoundingClientRect().height + gap);
@@ -634,6 +634,7 @@ init();
     const round=document.getElementById('roundPanel');
     if(manage)observer.observe(manage,{subtree:true,childList:true,characterData:true,attributes:true});
     if(round)observer.observe(round,{subtree:true,childList:true,characterData:true,attributes:true});
+    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
   });
 })();
 </script>
