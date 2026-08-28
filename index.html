@@ -359,9 +359,41 @@ let data=emptyData(), state={players:[],rounds:[]}, selected=new Set(), loserId=
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-function emptyData(){return{players:[],rounds:[],nextPlayerId:1,nextRoundId:1,listName:''}}
+function currentSeasonKey(date=new Date()){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+}
+function seasonNameFromKey(key){
+  if(!key)return '';
+  const [year,month]=key.split('-').map(Number);
+  if(!year||!month)return '';
+  const d=new Date(year,month-1,1);
+  const name=new Intl.DateTimeFormat('sv-SE',{month:'long',year:'numeric'}).format(d);
+  return name.charAt(0).toUpperCase()+name.slice(1);
+}
+function emptyData(){
+  return{
+    players:[],rounds:[],nextPlayerId:1,nextRoundId:1,
+    listName:seasonNameFromKey(currentSeasonKey()),
+    seasonKey:currentSeasonKey()
+  };
+}
 function cloneImportedData(){return JSON.parse(JSON.stringify(IMPORTED_INITIAL_DATA))}
-function normalizeLoaded(x){return{players:Array.isArray(x.players)?x.players:[],rounds:Array.isArray(x.rounds)?x.rounds:[],nextPlayerId:Number(x.nextPlayerId)||1,nextRoundId:Number(x.nextRoundId)||1,listName:typeof x.listName==='string'?x.listName:''}}
+function normalizeLoaded(x){
+  let seasonKey=typeof x.seasonKey==='string'?x.seasonKey:'';
+  if(!seasonKey&&Array.isArray(x.rounds)&&x.rounds.length){
+    const dated=x.rounds.map(r=>new Date(r.played_at)).filter(d=>!Number.isNaN(d.getTime())).sort((a,b)=>b-a);
+    if(dated.length)seasonKey=currentSeasonKey(dated[0]);
+  }
+  if(!seasonKey)seasonKey=currentSeasonKey();
+  return{
+    players:Array.isArray(x.players)?x.players:[],
+    rounds:Array.isArray(x.rounds)?x.rounds:[],
+    nextPlayerId:Number(x.nextPlayerId)||1,
+    nextRoundId:Number(x.nextRoundId)||1,
+    listName:typeof x.listName==='string'?x.listName:'',
+    seasonKey
+  };
+}
 async function fetchRemoteRow(){const{data:row,error}=await sb.from('klask_state').select('data,archive').eq('id',1).maybeSingle();if(error)throw error;return row}
 async function ensureRemoteRow(){const imported=cloneImportedData();const{error}=await sb.from('klask_state').upsert({id:1,data:imported,archive:[]});if(error)throw error;return{data:imported,archive:[]}}
 async function loadRemoteState(){try{let row=await fetchRemoteRow();if(!row)row=await ensureRemoteRow();return{data:normalizeLoaded(row.data||{}),archive:Array.isArray(row.archive)?row.archive:[]}}catch(e){console.error('Kunde inte hämta data från Supabase',e);toast('Kunde inte ansluta till databasen.');return{data:cloneImportedData(),archive:[]}}}
@@ -407,16 +439,23 @@ function snapshotCurrentStandings(){
   computeState();
   const ranked=rankingOrder([...state.players].filter(p=>p.games>0));
   if(!ranked.length)return null;
-  const name=(data.listName||'').trim()||new Intl.DateTimeFormat('sv-SE',{year:'numeric',month:'long'}).format(new Date());
+  let qualifiedPosition=0;
+  const ranking=ranked.map(p=>{
+    const qualified=p.games>=MIN_MATCHES;
+    return{
+      position:qualified?++qualifiedPosition:null,
+      name:p.name,games:p.games,losses:p.losses,
+      loss_pct:p.loss_pct,rank_score:p.rank_score,qualified
+    };
+  });
+  const seasonKey=data.seasonKey||currentSeasonKey();
   return{
     id:Date.now(),
-    name,
+    seasonKey,
+    name:seasonNameFromKey(seasonKey),
     saved_at:new Date().toISOString(),
     formula:{type:'weighted_loss_rate',m:BAYESIAN_M,C:0.25,min_matches:MIN_MATCHES},
-    ranking:ranked.map(p=>({
-      position:p.games>=MIN_MATCHES?p.current_position:'DNQ',name:p.name,games:p.games,losses:p.losses,
-      loss_pct:p.loss_pct,rank_score:p.rank_score,qualified:p.games>=MIN_MATCHES
-    }))
+    ranking
   };
 }
 function archiveCurrentStandings(){
@@ -439,20 +478,34 @@ function renderArchive(){
   archive.forEach(item=>{
     const box=document.createElement('div');
     box.className='archive-month';
-    const qualifiedWinner=(item.ranking||[]).find(p=>p.position!=='DNQ'&&p.qualified!==false);
-    const winner=qualifiedWinner?qualifiedWinner.name:'–';
+    const fullRanking=item.ranking||[];
+    const qualified=fullRanking
+      .filter(p=>p.qualified!==false&&p.position!==null&&p.position!=='DNQ')
+      .sort((a,b)=>Number(a.position)-Number(b.position));
+    const top3=qualified.slice(0,3);
+    const medals=['🥇','🥈','🥉'];
+    const podiumHtml=top3.length
+      ?top3.map((p,i)=>`<div class="archive-podium-player"><span>${medals[i]}</span><strong>${esc(p.name)}</strong></div>`).join('')
+      :'<span>Ingen spelare kvalificerade sig.</span>';
     const saved=fmtDate(item.saved_at);
-    box.innerHTML=`<div class="archive-head"><div><strong>${esc(item.name)}</strong><br><span>Vinnare: ${esc(winner)}</span></div><span>Sparad ${esc(saved)}</span></div><div class="archive-ranking"></div>`;
+    box.innerHTML=`<div class="archive-head"><div><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div></div><div class="archive-head-right"><span>Sparad ${esc(saved)}</span><span class="archive-toggle">Visa hela tabellen ▼</span></div></div><div class="archive-ranking"></div>`;
     const ranking=box.querySelector('.archive-ranking');
-    (item.ranking||[]).forEach(p=>{
+    fullRanking.forEach(p=>{
       const pct=p.loss_pct==null?'–':p.loss_pct.toFixed(1).replace('.',',')+'%';
-      const score=p.rank_score==null?'–':p.rank_score.toFixed(1).replace('.',',')+'%';
+      const qualifiedPlayer=p.qualified!==false&&p.position!==null&&p.position!=='DNQ';
+      const position=qualifiedPlayer?`${p.position}.`:'DNQ';
+      const games=qualifiedPlayer?`${p.games} matcher`:`${p.games}/${MIN_MATCHES} matcher`;
       const row=document.createElement('div');
-      row.className='archive-row';
-      row.innerHTML=`<div class="pos">${p.position}.</div><div class="name">${esc(p.name)}</div><div class="num">${p.games} matcher</div><div class="num losses">${p.losses} förluster</div><div class="score">${score}</div>`;
+      row.className='archive-row'+(!qualifiedPlayer?' archive-dnq':'');
+      row.innerHTML=`<div class="pos">${position}</div><div class="name">${esc(p.name)}</div><div class="num">${games}</div><div class="num losses">${p.losses} förluster</div><div class="score">${pct}</div>`;
       ranking.appendChild(row);
     });
-    box.querySelector('.archive-head').onclick=()=>box.classList.toggle('open');
+    const head=box.querySelector('.archive-head');
+    const toggle=box.querySelector('.archive-toggle');
+    head.onclick=()=>{
+      box.classList.toggle('open');
+      toggle.textContent=box.classList.contains('open')?'Dölj hela tabellen ▲':'Visa hela tabellen ▼';
+    };
     root.appendChild(box);
   });
 }
@@ -609,6 +662,37 @@ $('#rankingInfoBtn').onclick=()=>$('#rankingInfo').classList.toggle('hidden');
 
 function fmt(s){const d=new Date(s);return Number.isNaN(d.getTime())?(s||'Datum saknas'):new Intl.DateTimeFormat('sv-SE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d)}
 
+async function rolloverMonthIfNeeded(){
+  const activeKey=data.seasonKey;
+  const newKey=currentSeasonKey();
+  if(activeKey===newKey)return false;
+
+  if(Array.isArray(data.rounds)&&data.rounds.length>0){
+    const alreadyArchived=archiveCache.some(item=>item.seasonKey===activeKey);
+    if(!alreadyArchived){
+      const snapshot=snapshotCurrentStandings();
+      if(snapshot)archiveCache.unshift(snapshot);
+    }
+  }
+
+  const existingPlayers=data.players.map(p=>({id:p.id,name:p.name}));
+  const nextPlayerId=data.nextPlayerId;
+  data={
+    players:existingPlayers,
+    rounds:[],
+    nextPlayerId,
+    nextRoundId:1,
+    listName:seasonNameFromKey(newKey),
+    seasonKey:newKey
+  };
+  selected.clear();
+  loserId=null;
+  editing=null;
+  showAllHistory=false;
+  await persistState();
+  return true;
+}
+
 async function init(){
   const note=$('#syncNote');
   const{data:sessionData}=await sb.auth.getSession();
@@ -616,10 +700,11 @@ async function init(){
   const remote=await loadRemoteState();
   data=remote.data;
   archiveCache=remote.archive;
+  const monthChanged=await rolloverMonthIfNeeded();
   render();
   subscribeRealtime();
   sb.auth.onAuthStateChange((_event,session)=>{setAdminUI(!!session)});
-  if(note)note.textContent='Ansluten – tabellen uppdateras live.';
+  if(note)note.textContent=monthChanged?'Ny månad startad – föregående slutställning har sparats.':'Ansluten – tabellen uppdateras live.';
 }
 init();
 </script>
@@ -771,5 +856,21 @@ init();
   .rank-games{grid-column:3 !important}
   .rank-losses{grid-column:4 !important}
   .rank-pct{grid-column:5 !important}
+}
+</style>
+
+<style>
+/* Månadskort med topp tre + DNQ i arkivet */
+.archive-podium{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px}
+.archive-podium-player{display:flex;align-items:center;gap:5px;color:#dfe9f2;font-size:12px}
+.archive-podium-player strong{font-size:12px}
+.archive-head-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.archive-toggle{color:var(--teal)!important;font-weight:850}
+.archive-dnq{opacity:.65}
+.archive-dnq .pos{color:#8fa7bb;font-size:10px;letter-spacing:.04em}
+@media(max-width:620px){
+  .archive-head{align-items:flex-start}
+  .archive-podium{flex-direction:column;gap:3px}
+  .archive-head-right{align-items:flex-end}
 }
 </style>
