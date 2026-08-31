@@ -686,7 +686,7 @@ function renderLeaderboard(){
   if(!state.players.length){root.innerHTML='<div class="empty">Ingen ställning ännu.</div>';return}
   const ranked=rankingOrder(state.players);
   ranked.forEach(p=>{
-    const row=document.createElement('div');row.className='rank-row'+(p.games<MIN_MATCHES?' dnq-row':'');
+    const row=document.createElement('div');row.className='rank-row'+(p.games<MIN_MATCHES?' dnq-row':'')+(selected.has(p.id)?' selected-rank-row':'');
     const qualified=p.games>=MIN_MATCHES;
     const position=p.current_position;
     let trophy='',cls='';
@@ -945,6 +945,18 @@ init();
 })();
 </script>
 
+
+<style>
+/* Markera spelare i ställningen när de är valda till nästa omgång */
+.rank-row.selected-rank-row{
+  border-color:var(--teal) !important;
+  background:linear-gradient(145deg,#143b3d,#163644) !important;
+  box-shadow:0 0 0 2px rgba(67,215,196,.08) inset;
+}
+.rank-row.selected-rank-row .rank-name{
+  color:#ffffff;
+}
+</style>
 </body>
 </html>
 
