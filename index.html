@@ -373,7 +373,7 @@ function seasonNameFromKey(key){
 function emptyData(){
   return{
     players:[],rounds:[],nextPlayerId:1,nextRoundId:1,
-    listName:seasonNameFromKey(currentSeasonKey()),
+    listName:'',
     seasonKey:currentSeasonKey()
   };
 }
@@ -452,7 +452,7 @@ function snapshotCurrentStandings(){
   return{
     id:Date.now(),
     seasonKey,
-    name:seasonNameFromKey(seasonKey),
+    name:(data.listName||'').trim()||'Namnlös ställning',
     saved_at:new Date().toISOString(),
     formula:{type:'weighted_loss_rate',m:BAYESIAN_M,C:0.25,min_matches:MIN_MATCHES},
     ranking
@@ -622,7 +622,11 @@ function renderLeaderboard(){
     }
     const positionHtml=qualified?`<span class="trophy ${cls}">${trophy}</span><b>${position}</b>${changeHtml}`:'<span class="dnq-label">DNQ</span>';
     const gamesHtml=qualified?`${p.games} matcher`:`${p.games}/${MIN_MATCHES} matcher`;
-    row.innerHTML=`<div class="rank-pos">${positionHtml}</div><div class="rank-name">${esc(p.name)}</div><div class="rank-games">${gamesHtml}</div><div class="rank-losses">${p.losses} förluster</div><div class="rank-pct ${pctClass}">${pct}</div>`;
+    const formDots=(p.form||[]).map(result=>`<span class="form-dot${result==='loss'?' loss':''}" title="${result==='loss'?'Förlust':'Ingen förlust'}"></span>`).join('');
+    const missingForm=Math.max(0,6-(p.form||[]).length);
+    const emptyDots='<span class="form-dot empty-form"></span>'.repeat(missingForm);
+    const formHtml=`<div class="rank-form"><span class="rank-form-label">Form</span>${emptyDots}${formDots}</div>`;
+    row.innerHTML=`<div class="rank-pos">${positionHtml}</div><div class="rank-name">${esc(p.name)}</div><div class="rank-games">${gamesHtml}</div><div class="rank-losses">${p.losses} förluster</div><div class="rank-pct ${pctClass}">${pct}</div>${formHtml}`;
     root.appendChild(row);
   });
 }
@@ -682,7 +686,7 @@ async function rolloverMonthIfNeeded(){
     rounds:[],
     nextPlayerId,
     nextRoundId:1,
-    listName:seasonNameFromKey(newKey),
+    listName:'',
     seasonKey:newKey
   };
   selected.clear();
@@ -846,16 +850,53 @@ init();
 </style>
 
 <style>
-.rank-form,.rank-form-label{display:none !important}
+/* Form senaste 6 matcher bredvid förlustprocenten */
+.rank-form{
+  display:flex !important;
+  grid-column:6 !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:5px !important;
+  min-width:118px !important;
+  padding-left:10px !important;
+  border-left:1px solid rgba(255,255,255,.10) !important;
+}
+.rank-form-label{
+  display:inline-block !important;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:#8299ac;
+  font-weight:850;
+  margin-right:3px;
+}
+.form-dot.empty-form{
+  background:transparent;
+  border:1px solid #40576c;
+  box-shadow:none;
+  opacity:.55;
+}
 @media (min-width:821px){
   .rank-row{
-    grid-template-columns:56px minmax(120px,1fr) 100px 100px 82px !important;
+    grid-template-columns:56px minmax(120px,1fr) 92px 92px 78px 145px !important;
   }
   .rank-pos{grid-column:1 !important}
   .rank-name{grid-column:2 !important}
   .rank-games{grid-column:3 !important}
   .rank-losses{grid-column:4 !important}
   .rank-pct{grid-column:5 !important}
+  .rank-form{grid-column:6 !important}
+}
+@media(max-width:820px){
+  .rank-row{
+    grid-template-columns:44px minmax(90px,1fr) 76px 72px 66px !important;
+  }
+  .rank-form{
+    grid-column:2 / -1 !important;
+    border-left:0 !important;
+    padding-left:0 !important;
+    margin-top:3px !important;
+  }
 }
 </style>
 
@@ -872,5 +913,29 @@ init();
   .archive-head{align-items:flex-start}
   .archive-podium{flex-direction:column;gap:3px}
   .archive-head-right{align-items:flex-end}
+}
+</style>
+
+<style>
+/* Bredare leaderboard och smalare vänsterspalt/Tidigare månader på desktop */
+@media (min-width:1181px){
+  .layout{
+    grid-template-columns:minmax(0,1fr) minmax(680px,1.15fr) !important;
+  }
+  #leaderPanel{
+    min-width:680px;
+  }
+  .rank-row{
+    grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px !important;
+  }
+  .rank-form{
+    min-width:140px !important;
+    padding-left:10px !important;
+    gap:5px !important;
+  }
+  .archive-panel{
+    padding-left:12px;
+    padding-right:12px;
+  }
 }
 </style>
