@@ -470,6 +470,28 @@ function saveData(){persistState()}
 function loadArchive(){return archiveCache}
 function saveArchive(items){archiveCache=items;persistState()}
 
+// Hjälpfunktioner för framtida statistikvyer.
+// Äldre arkivposter som saknar rounds fungerar fortfarande och ger bara en tom lista.
+function getArchivedRounds(item){
+  return item&&Array.isArray(item.rounds)?item.rounds:[];
+}
+function getRoundsForSeason(seasonKey){
+  if(data.seasonKey===seasonKey)return [...data.rounds];
+  const archived=archiveCache.find(item=>item.seasonKey===seasonKey);
+  return archived?[...getArchivedRounds(archived)]:[];
+}
+function getAllTimeRounds(){
+  return [
+    ...archiveCache.flatMap(item=>getArchivedRounds(item)),
+    ...data.rounds
+  ].sort((a,b)=>{
+    const ad=new Date(a.played_at).getTime();
+    const bd=new Date(b.played_at).getTime();
+    if(Number.isFinite(ad)&&Number.isFinite(bd)&&ad!==bd)return ad-bd;
+    return (a.id||0)-(b.id||0);
+  });
+}
+
 let realtimeChannel=null;
 function subscribeRealtime(){
   if(realtimeChannel)return;
@@ -520,7 +542,16 @@ function snapshotCurrentStandings(){
     name:(data.listName||'').trim()||'Namnlös ställning',
     saved_at:new Date().toISOString(),
     formula:{type:'weighted_loss_rate',m:BAYESIAN_M,C:0.25,min_matches:MIN_MATCHES},
-    ranking
+    ranking,
+    // Spara även spelare och alla matcher för perioden.
+    // Det gör att vi senare kan räkna månadsstatistik, H2H och all-time-statistik.
+    players:data.players.map(p=>({id:p.id,name:p.name})),
+    rounds:data.rounds.map(r=>({
+      id:r.id,
+      player_ids:Array.isArray(r.player_ids)?[...r.player_ids]:[],
+      loser_id:r.loser_id,
+      played_at:r.played_at
+    }))
   };
 }
 function archiveCurrentStandings(){
