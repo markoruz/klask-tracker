@@ -639,7 +639,7 @@ function currentStreak(playerRounds,pid){
   return streak;
 }
 function recentForm(playerRounds,pid,count=6){
-  return playerRounds.slice(-count).map(r=>r.loser_id===pid?'loss':'safe');
+  return playerRounds.slice(-count).reverse().map(r=>r.loser_id===pid?'loss':'safe');
 }
 
 function computeState(){
