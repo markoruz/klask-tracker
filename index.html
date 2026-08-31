@@ -265,6 +265,18 @@ body.is-admin .admin-only{display:block}
 .match-round-block .loser-title{margin-bottom:8px}
 .match-round-block .loser-grid{grid-template-columns:repeat(4,1fr)}
 @media(max-width:620px){.match-round-block .loser-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Planerad period och adminverktyg för arkiv */
+.period-duration-line{position:relative;overflow:hidden;background:rgba(88,229,192,.18)!important}
+.period-duration-progress{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#58e5c0,#3bcbb1);border-radius:999px;transition:width .35s ease}
+.period-duration.is-closed .period-duration-progress{background:#58e5c0}
+.period-form-card{max-width:460px}
+.period-form-label{display:flex;flex-direction:column;gap:6px;color:#dce8f4;font-size:12px;font-weight:800;margin-top:10px}
+.period-form-label input{width:100%;box-sizing:border-box;background:#0b1d2e;color:#fff;border:1px solid #2a4963;border-radius:9px;padding:10px 11px;font:inherit}
+.period-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.archive-admin-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
+.archive-admin-actions .btn{padding:5px 8px;min-height:28px;font-size:10px}
+@media(max-width:620px){.period-date-grid{grid-template-columns:1fr}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -382,8 +394,21 @@ body.is-admin .admin-only{display:block}
   <h2 class="standings-title"><span id="standingsTitle">Ställning</span> <button id="rankingInfoBtn" class="info-btn" type="button" aria-label="Så fungerar ställningen" title="Så fungerar ställningen">ⓘ</button></h2>
   <div id="periodControls" class="period-controls-inline admin-only hidden">
     <div id="periodStatus" class="period-status"></div>
+    <button id="editPeriodDates" type="button" class="btn period-btn">Redigera datum</button>
     <button id="deleteSeason" type="button" class="btn btn-danger period-btn">Avsluta period</button>
     <button id="startNewPeriod" type="button" class="btn btn-primary period-btn hidden">Starta ny period</button>
+  </div>
+</div>
+<div id="periodDuration" class="period-duration" aria-label="Periodens längd">
+  <div class="period-duration-track">
+    <span class="period-duration-start-dot" aria-hidden="true"></span>
+    <span class="period-duration-line" aria-hidden="true"><span id="periodDurationProgress" class="period-duration-progress"></span></span>
+    <span class="period-duration-end-icon" aria-hidden="true">🏆</span>
+  </div>
+  <div class="period-duration-meta">
+    <span id="periodStartLabel">–</span>
+    <strong id="periodDurationLabel">–</strong>
+    <span id="periodEndLabel">Idag</span>
   </div>
 </div>
 <div id="rankingInfo" class="info-popover hidden"><strong>Hur bestäms ställningen?</strong><br>Ställningen använder en Bayesian-ranking med m = 18 och 25 % som utgångspunkt, eftersom en av fyra spelare förlorar varje match. Minst 18 spelade matcher krävs för en officiell placering. Spelare med färre än 18 matcher visas längst ner som <strong>DNQ</strong> (Did Not Qualify) tills de når 18 matcher. Vid 18 matcher väger spelarens egna resultat och ligans utgångsvärde lika mycket; därefter får de egna resultaten allt större betydelse.</div>
@@ -417,6 +442,45 @@ body.is-admin .admin-only{display:block}
     </div>
   </div>
 </div>
+<div id="startPeriodModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="startPeriodTitle">
+  <div class="modal-card period-form-card">
+    <h3 id="startPeriodTitle">Starta ny period</h3>
+    <p style="color:var(--soft);line-height:1.5;margin:0 0 12px">Ange namn samt periodens planerade start- och slutdatum. Tidslinjen fylls automatiskt utifrån dagens datum.</p>
+    <label class="period-form-label">Namn på ställning<input id="newPeriodName" type="text" placeholder="Ex. September 2026"></label>
+    <div class="period-date-grid">
+      <label class="period-form-label">Startdatum<input id="newPeriodStart" type="date"></label>
+      <label class="period-form-label">Slutdatum<input id="newPeriodEnd" type="date"></label>
+    </div>
+    <div class="modal-actions">
+      <button id="cancelStartPeriod" type="button" class="btn">Avbryt</button>
+      <button id="confirmStartPeriod" type="button" class="btn btn-primary">Starta period</button>
+    </div>
+  </div>
+</div>
+<div id="editPeriodDatesModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="editPeriodDatesTitle">
+  <div class="modal-card period-form-card">
+    <h3 id="editPeriodDatesTitle">Redigera periodens datum</h3>
+    <p style="color:var(--soft);line-height:1.5;margin:0 0 12px">Ändra start- eller slutdatum. Tidslinjen räknas om direkt utifrån dagens datum.</p>
+    <div class="period-date-grid">
+      <label class="period-form-label">Startdatum<input id="editPeriodStart" type="date"></label>
+      <label class="period-form-label">Slutdatum<input id="editPeriodEnd" type="date"></label>
+    </div>
+    <div class="modal-actions">
+      <button id="cancelEditPeriodDates" type="button" class="btn">Avbryt</button>
+      <button id="saveEditPeriodDates" type="button" class="btn btn-primary">Spara datum</button>
+    </div>
+  </div>
+</div>
+<div id="archiveEditModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="archiveEditTitle">
+  <div class="modal-card period-form-card">
+    <h3 id="archiveEditTitle">Redigera tidigare tävling</h3>
+    <label class="period-form-label">Namn<input id="archiveEditName" type="text"></label>
+    <div class="modal-actions">
+      <button id="archiveEditCancel" type="button" class="btn">Avbryt</button>
+      <button id="archiveEditSave" type="button" class="btn btn-primary">Spara</button>
+    </div>
+  </div>
+</div>
 <div id="toast" class="toast"></div>
 <div id="historyModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
   <div class="modal-card history-modal-card">
@@ -445,7 +509,7 @@ let isAdmin=false,archiveCache=[];
 const BAYESIAN_M=18;
 const MIN_MATCHES=18;
 const IMPORTED_INITIAL_DATA={"players":[{"id":1,"name":"Josefine"},{"id":2,"name":"David"},{"id":3,"name":"Björn"},{"id":4,"name":"Marcus"},{"id":5,"name":"Marko"},{"id":6,"name":"Hasse"},{"id":7,"name":"Lisa"},{"id":8,"name":"Erik"},{"id":9,"name":"Karin"},{"id":10,"name":"Sanne"}],"rounds":[{"id":1,"player_ids":[2,1,5,9],"loser_id":9,"played_at":"2026-08-17T11:54:00+02:00"},{"id":2,"player_ids":[2,1,5,9],"loser_id":9,"played_at":"2026-08-17T11:54:00+02:00"},{"id":3,"player_ids":[2,1,5,9],"loser_id":1,"played_at":"2026-08-17T11:54:00+02:00"},{"id":4,"player_ids":[2,1,9,3],"loser_id":1,"played_at":"2026-08-17T12:45:00+02:00"},{"id":5,"player_ids":[2,1,9,3],"loser_id":9,"played_at":"2026-08-17T12:45:00+02:00"},{"id":6,"player_ids":[2,1,9,3],"loser_id":3,"played_at":"2026-08-17T12:45:00+02:00"},{"id":7,"player_ids":[1,9,6,7],"loser_id":9,"played_at":"2026-08-18T11:02:00+02:00"},{"id":8,"player_ids":[1,9,6,7],"loser_id":9,"played_at":"2026-08-18T11:02:00+02:00"},{"id":9,"player_ids":[1,9,6,7],"loser_id":7,"played_at":"2026-08-18T11:02:00+02:00"},{"id":10,"player_ids":[2,1,9,6],"loser_id":9,"played_at":"2026-08-18T12:30:00+02:00"},{"id":11,"player_ids":[2,1,9,6],"loser_id":9,"played_at":"2026-08-18T12:30:00+02:00"},{"id":12,"player_ids":[2,1,9,6],"loser_id":9,"played_at":"2026-08-18T12:30:00+02:00"},{"id":13,"player_ids":[2,1,9,6],"loser_id":2,"played_at":"2026-08-18T15:05:00+02:00"},{"id":14,"player_ids":[2,1,9,6],"loser_id":9,"played_at":"2026-08-18T15:05:00+02:00"},{"id":15,"player_ids":[2,1,9,6],"loser_id":6,"played_at":"2026-08-18T15:05:00+02:00"},{"id":16,"player_ids":[2,1,7,4],"loser_id":2,"played_at":"2026-08-19T10:49:00+02:00"},{"id":17,"player_ids":[2,1,7,4],"loser_id":7,"played_at":"2026-08-19T10:49:00+02:00"},{"id":18,"player_ids":[2,1,7,4],"loser_id":4,"played_at":"2026-08-19T10:49:00+02:00"},{"id":19,"player_ids":[1,3,4,10],"loser_id":10,"played_at":"2026-08-20T10:05:00+02:00"},{"id":20,"player_ids":[1,3,4,10],"loser_id":10,"played_at":"2026-08-20T10:05:00+02:00"},{"id":21,"player_ids":[1,3,4,10],"loser_id":1,"played_at":"2026-08-20T10:05:00+02:00"},{"id":22,"player_ids":[1,3,7,8],"loser_id":8,"played_at":"2026-08-20T15:59:00+02:00"},{"id":23,"player_ids":[1,3,7,8],"loser_id":8,"played_at":"2026-08-20T15:59:00+02:00"},{"id":24,"player_ids":[1,3,7,8],"loser_id":7,"played_at":"2026-08-20T15:59:00+02:00"},{"id":25,"player_ids":[2,1,3,6],"loser_id":6,"played_at":"2026-08-21T09:19:00+02:00"},{"id":26,"player_ids":[2,1,3,6],"loser_id":6,"played_at":"2026-08-21T09:19:00+02:00"},{"id":27,"player_ids":[2,1,3,6],"loser_id":6,"played_at":"2026-08-21T09:19:00+02:00"},{"id":28,"player_ids":[2,1,3,6],"loser_id":3,"played_at":"2026-08-21T12:33:00+02:00"},{"id":29,"player_ids":[2,1,3,6],"loser_id":6,"played_at":"2026-08-21T12:33:00+02:00"},{"id":30,"player_ids":[2,1,3,6],"loser_id":6,"played_at":"2026-08-21T12:33:00+02:00"},{"id":31,"player_ids":[2,1,3,4],"loser_id":3,"played_at":"2026-08-21T12:48:00+02:00"},{"id":32,"player_ids":[2,1,3,4],"loser_id":4,"played_at":"2026-08-21T12:48:00+02:00"},{"id":33,"player_ids":[2,1,3,4],"loser_id":1,"played_at":"2026-08-21T12:48:00+02:00"},{"id":34,"player_ids":[2,1,3,6],"loser_id":2,"played_at":"2026-08-21T14:57:00+02:00"},{"id":35,"player_ids":[2,1,3,6],"loser_id":3,"played_at":"2026-08-21T14:57:00+02:00"},{"id":36,"player_ids":[2,1,3,6],"loser_id":6,"played_at":"2026-08-21T14:57:00+02:00"},{"id":37,"player_ids":[1,3,4,8],"loser_id":1,"played_at":"2026-08-21T16:09:00+02:00"},{"id":38,"player_ids":[1,3,4,8],"loser_id":3,"played_at":"2026-08-21T16:10:00+02:00"},{"id":39,"player_ids":[1,3,4,8],"loser_id":8,"played_at":"2026-08-21T16:10:00+02:00"},{"id":40,"player_ids":[2,1,3,7],"loser_id":2,"played_at":"2026-08-24T13:24:00+02:00"},{"id":41,"player_ids":[2,1,3,7],"loser_id":2,"played_at":"2026-08-24T13:24:00+02:00"},{"id":42,"player_ids":[2,1,3,7],"loser_id":7,"played_at":"2026-08-24T13:24:00+02:00"},{"id":43,"player_ids":[2,1,3,7],"loser_id":7,"played_at":"2026-08-24T13:24:00+02:00"},{"id":44,"player_ids":[2,1,3,7],"loser_id":1,"played_at":"2026-08-24T13:25:00+02:00"},{"id":45,"player_ids":[2,1,3,7],"loser_id":7,"played_at":"2026-08-24T13:26:00+02:00"},{"id":46,"player_ids":[2,1,3,4],"loser_id":4,"played_at":"2026-08-24T15:13:00+02:00"},{"id":47,"player_ids":[2,1,3,4],"loser_id":3,"played_at":"2026-08-24T15:13:00+02:00"},{"id":48,"player_ids":[2,1,3,4],"loser_id":1,"played_at":"2026-08-24T15:13:00+02:00"},{"id":49,"player_ids":[1,2,3,9],"loser_id":1,"played_at":"2026-08-25T09:31:15.257Z"},{"id":50,"player_ids":[1,2,3,9],"loser_id":2,"played_at":"2026-08-25T09:31:19.054Z"},{"id":51,"player_ids":[1,2,3,9],"loser_id":2,"played_at":"2026-08-25T09:31:22.587Z"},{"id":52,"player_ids":[1,2,3,9],"loser_id":1,"played_at":"2026-08-25T11:06:38.760Z"},{"id":53,"player_ids":[1,2,3,9],"loser_id":2,"played_at":"2026-08-25T11:06:45.171Z"},{"id":54,"player_ids":[1,2,3,9],"loser_id":3,"played_at":"2026-08-25T11:07:01.549Z"},{"id":55,"player_ids":[2,3,9,8],"loser_id":3,"played_at":"2026-08-25T12:45:08.681Z"},{"id":56,"player_ids":[2,3,8,9],"loser_id":3,"played_at":"2026-08-25T12:45:12.339Z"},{"id":57,"player_ids":[2,3,8,9],"loser_id":3,"played_at":"2026-08-25T12:45:19.819Z"},{"id":58,"player_ids":[1,2,3,9],"loser_id":2,"played_at":"2026-08-25T14:16:24.773Z"},{"id":59,"player_ids":[1,2,3,9],"loser_id":3,"played_at":"2026-08-25T14:16:29.975Z"},{"id":60,"player_ids":[1,2,3,9],"loser_id":9,"played_at":"2026-08-25T14:16:33.899Z"},{"id":61,"player_ids":[1,2,6,9],"loser_id":9,"played_at":"2026-08-26T08:55:02.360Z"},{"id":62,"player_ids":[1,2,6,9],"loser_id":9,"played_at":"2026-08-26T08:55:09.969Z"},{"id":63,"player_ids":[1,2,6,9],"loser_id":1,"played_at":"2026-08-26T08:55:15.412Z"},{"id":64,"player_ids":[2,6,9,10],"loser_id":6,"played_at":"2026-08-26T10:39:16.301Z"},{"id":65,"player_ids":[2,6,9,10],"loser_id":9,"played_at":"2026-08-26T10:39:21.036Z"},{"id":66,"player_ids":[2,6,9,10],"loser_id":10,"played_at":"2026-08-26T10:39:25.866Z"},{"id":67,"player_ids":[1,2,6,9],"loser_id":6,"played_at":"2026-08-26T13:25:45.627Z"},{"id":68,"player_ids":[1,2,6,9],"loser_id":9,"played_at":"2026-08-26T13:25:49.750Z"},{"id":69,"player_ids":[1,2,6,9],"loser_id":1,"played_at":"2026-08-26T13:25:54.417Z"},{"id":70,"player_ids":[1,6,7,9],"loser_id":6,"played_at":"2026-08-27T07:24:49.233Z"},{"id":71,"player_ids":[1,6,7,9],"loser_id":6,"played_at":"2026-08-27T07:24:56.031Z"},{"id":72,"player_ids":[1,6,7,9],"loser_id":7,"played_at":"2026-08-27T07:25:01.297Z"},{"id":73,"player_ids":[2,5,6,8],"loser_id":8,"played_at":"2026-08-27T13:35:50.072Z"},{"id":74,"player_ids":[2,5,6,8],"loser_id":8,"played_at":"2026-08-27T13:35:54.728Z"},{"id":75,"player_ids":[2,5,6,8],"loser_id":8,"played_at":"2026-08-27T13:36:06.644Z"}],"nextPlayerId":11,"nextRoundId":76,"listName":"Silly Season"};
-let data=emptyData(), state={players:[],rounds:[]}, selected=new Set(), matchLosers=[null,null,null], editing=null, showAllHistory=false;
+let data=emptyData(), state={players:[],rounds:[]}, selected=new Set(), matchLosers=[null,null,null], editing=null, showAllHistory=false, editingArchiveId=null;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
@@ -466,6 +530,9 @@ function emptyData(){
     listName:'',
     seasonKey:currentSeasonKey(),
     periodClosed:false,
+    periodStartedAt:new Date().toISOString(),
+    periodEndedAt:null,
+    periodPlannedEndAt:null,
     inactivePlayerIds:[]
   };
 }
@@ -485,6 +552,13 @@ function normalizeLoaded(x){
     listName:typeof x.listName==='string'?x.listName:'',
     seasonKey,
     periodClosed:x.periodClosed===true,
+    periodStartedAt:(()=>{
+      if(typeof x.periodStartedAt==='string'&&x.periodStartedAt)return x.periodStartedAt;
+      const dated=(Array.isArray(x.rounds)?x.rounds:[]).map(r=>new Date(r.played_at)).filter(d=>!Number.isNaN(d.getTime())).sort((a,b)=>a-b);
+      return dated.length?dated[0].toISOString():new Date().toISOString();
+    })(),
+    periodEndedAt:typeof x.periodEndedAt==='string'&&x.periodEndedAt?x.periodEndedAt:null,
+    periodPlannedEndAt:typeof x.periodPlannedEndAt==='string'&&x.periodPlannedEndAt?x.periodPlannedEndAt:null,
     inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[]
   };
 }
@@ -568,6 +642,9 @@ function snapshotCurrentStandings(){
     seasonKey,
     name:(data.listName||'').trim()||'Namnlös ställning',
     saved_at:new Date().toISOString(),
+    period_started_at:data.periodStartedAt||null,
+    period_ended_at:data.periodEndedAt||new Date().toISOString(),
+    period_planned_end_at:data.periodPlannedEndAt||null,
     closed_manually:true,
     formula:{type:'weighted_loss_rate',m:BAYESIAN_M,C:0.25,min_matches:MIN_MATCHES},
     ranking,
@@ -638,11 +715,41 @@ function renderArchive(){
       }).join('')
       :'<span>Ingen spelare kvalificerade sig.</span>';
     const saved=fmtDate(item.saved_at);
-    box.innerHTML=`<div class="archive-head"><div><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div></div><div class="archive-head-right"><span>Sparad ${esc(saved)}</span><button type="button" class="btn archive-toggle">Visa slutställning →</button></div></div>`;
+    const adminActions=isAdmin?`<div class="archive-admin-actions"><button type="button" class="btn archive-edit">Redigera</button><button type="button" class="btn btn-danger archive-delete">Ta bort</button></div>`:'';
+    box.innerHTML=`<div class="archive-head"><div><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div></div><div class="archive-head-right"><span>Sparad ${esc(saved)}</span><button type="button" class="btn archive-toggle">Visa slutställning →</button>${adminActions}</div></div>`;
     box.querySelector('.archive-toggle').onclick=()=>openArchiveModal(item);
+    const editBtn=box.querySelector('.archive-edit');
+    if(editBtn)editBtn.onclick=()=>openArchiveEdit(item);
+    const deleteBtn=box.querySelector('.archive-delete');
+    if(deleteBtn)deleteBtn.onclick=async()=>{
+      if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+      if(!confirm(`Ta bort ${item.name||'den här tävlingen'} permanent från Tidigare månader?`))return;
+      archiveCache=archiveCache.filter(x=>x.id!==item.id);
+      await persistState();render();toast('Tävlingen togs bort.');
+    };
     root.appendChild(box);
   });
 }
+
+function openArchiveEdit(item){
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  editingArchiveId=item.id;
+  const input=$('#archiveEditName');
+  if(input)input.value=item.name||'';
+  $('#archiveEditModal')?.classList.remove('hidden');
+  setTimeout(()=>input?.focus(),0);
+}
+$('#archiveEditCancel').onclick=()=>{editingArchiveId=null;$('#archiveEditModal').classList.add('hidden')};
+$('#archiveEditSave').onclick=async()=>{
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  const item=archiveCache.find(x=>x.id===editingArchiveId);
+  const name=$('#archiveEditName').value.trim();
+  if(!item||!name)return toast('Ange ett namn.');
+  item.name=name;
+  await persistState();
+  editingArchiveId=null;$('#archiveEditModal').classList.add('hidden');render();toast('Namnet uppdaterades.');
+};
+$('#archiveEditModal').addEventListener('click',e=>{if(e.target===$('#archiveEditModal')){$('#archiveEditModal').classList.add('hidden');editingArchiveId=null}});
 
 function lastLoss(pid,rs){const loss=[...rs].filter(r=>r.loser_id===pid).sort((a,b)=>b.id-a.id)[0];if(!loss)return null;const names=(loss.player_ids||[]).map(id=>(data.players.find(p=>p.id===id)||{}).name).filter(Boolean);return{date:fmtDate(loss.played_at),players:names}}
 function fmtDate(s){const d=new Date(s);return Number.isNaN(d.getTime())?(s||'Datum saknas'):new Intl.DateTimeFormat('sv-SE',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}
@@ -730,7 +837,37 @@ function computeState(){
   const rounds=[...data.rounds].sort((a,b)=>b.id-a.id).map(r=>({id:r.id,played_at:r.played_at,loser_id:r.loser_id,loser_name:(data.players.find(p=>p.id===r.loser_id)||{name:'Okänd'}).name,players:(r.player_ids||[]).map(id=>data.players.find(p=>p.id===id)).filter(Boolean).map(p=>({id:p.id,name:p.name}))}));
   state={players,rounds};
 }
-function render(){computeState();const closed=data.periodClosed===true;document.body.classList.toggle('period-closed',closed);const roundNumber=$('#currentRoundNumber');if(roundNumber)roundNumber.textContent=`#${Math.floor(data.rounds.length/3)+1}`;renderPlayers();renderSlots();renderLeaderboard();renderHistory();renderArchive();const name=(data.listName||'').trim();const title=$('#standingsTitle');if(title)title.textContent=name?'Ställning i '+name:'Ställning';const inp=$('#listName'),saveBtn=$('#saveListName'),editBtn=$('#editListName');if(inp)inp.value=data.listName||'';const hasName=!!name;if(inp)inp.disabled=hasName||closed;if(saveBtn){saveBtn.classList.toggle('hidden',hasName||closed);if(!hasName)saveBtn.textContent='Spara namn'}if(editBtn)editBtn.classList.toggle('hidden',!hasName||closed);const controls=$('#periodControls'),endBtn=$('#deleteSeason'),startBtn=$('#startNewPeriod'),status=$('#periodStatus');if(controls)controls.classList.toggle('hidden',!isAdmin);if(endBtn)endBtn.classList.toggle('hidden',!isAdmin||closed);if(startBtn)startBtn.classList.toggle('hidden',!isAdmin||!closed);if(status)status.textContent=closed?'Perioden är avslutad och sparad i Tidigare månader.':'Pågående period';}
+function formatPeriodDate(value){
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return '–';
+  return new Intl.DateTimeFormat('sv-SE',{day:'2-digit',month:'2-digit'}).format(d);
+}
+function renderPeriodDuration(){
+  const wrap=$('#periodDuration'),startEl=$('#periodStartLabel'),durationEl=$('#periodDurationLabel'),endEl=$('#periodEndLabel'),progressEl=$('#periodDurationProgress');
+  if(!wrap||!startEl||!durationEl||!endEl)return;
+  let start=new Date(data.periodStartedAt||'');
+  if(Number.isNaN(start.getTime())){
+    const dated=(data.rounds||[]).map(r=>new Date(r.played_at)).filter(d=>!Number.isNaN(d.getTime())).sort((a,b)=>a-b);
+    start=dated[0]||new Date();
+  }
+  const planned=data.periodPlannedEndAt?new Date(data.periodPlannedEndAt):null;
+  const actualEnd=data.periodClosed&&data.periodEndedAt?new Date(data.periodEndedAt):new Date();
+  const end=(planned&&!Number.isNaN(planned.getTime()))?planned:actualEnd;
+  const dayMs=86400000;
+  const totalMs=Math.max(dayMs,end-start);
+  const now=data.periodClosed&&data.periodEndedAt?new Date(data.periodEndedAt):new Date();
+  const progress=Math.max(0,Math.min(1,(now-start)/totalMs));
+  const elapsedDays=Math.max(1,Math.floor((now-start)/dayMs)+1);
+  const totalDays=Math.max(1,Math.floor((end-start)/dayMs)+1);
+  startEl.textContent=formatPeriodDate(start);
+  durationEl.textContent=(planned&&!Number.isNaN(planned.getTime()))?`${elapsedDays} av ${totalDays} dagar`:(elapsedDays===1?'1 dag':`${elapsedDays} dagar`);
+  endEl.textContent=data.periodClosed&&data.periodEndedAt?formatPeriodDate(new Date(data.periodEndedAt)):(planned&&!Number.isNaN(planned.getTime())?formatPeriodDate(planned):'Idag');
+  if(progressEl)progressEl.style.width=`${progress*100}%`;
+  wrap.classList.toggle('is-closed',data.periodClosed===true);
+}
+
+
+function render(){computeState();const closed=data.periodClosed===true;document.body.classList.toggle('period-closed',closed);const roundNumber=$('#currentRoundNumber');if(roundNumber)roundNumber.textContent=`#${Math.floor(data.rounds.length/3)+1}`;renderPlayers();renderSlots();renderLeaderboard();renderHistory();renderArchive();const name=(data.listName||'').trim();const title=$('#standingsTitle');if(title)title.textContent=name?'Ställning i '+name:'Ställning';renderPeriodDuration();const inp=$('#listName'),saveBtn=$('#saveListName'),editBtn=$('#editListName');if(inp)inp.value=data.listName||'';const hasName=!!name;if(inp)inp.disabled=hasName||closed;if(saveBtn){saveBtn.classList.toggle('hidden',hasName||closed);if(!hasName)saveBtn.textContent='Spara namn'}if(editBtn)editBtn.classList.toggle('hidden',!hasName||closed);const controls=$('#periodControls'),editDatesBtn=$('#editPeriodDates'),endBtn=$('#deleteSeason'),startBtn=$('#startNewPeriod'),status=$('#periodStatus');if(controls)controls.classList.toggle('hidden',!isAdmin);if(editDatesBtn)editDatesBtn.classList.toggle('hidden',!isAdmin||closed);if(endBtn)endBtn.classList.toggle('hidden',!isAdmin||closed);if(startBtn)startBtn.classList.toggle('hidden',!isAdmin||!closed);if(status)status.textContent=closed?'Perioden är avslutad och sparad i Tidigare månader.':'Pågående period';}
 function renderPlayers(){
   const root=$('#playersGrid');root.innerHTML='';
   if(!state.players.length){root.innerHTML='<div class="empty">Inga spelare ännu.</div>';return}
@@ -1012,6 +1149,36 @@ $('#modalDelete').onclick=()=>{
   const ids=new Set(editing.ids);data.rounds=data.rounds.filter(r=>!ids.has(r.id));saveData();$('#modal').classList.add('hidden');editing=null;render();toast('Omgång raderad.');
 };
 
+$('#editPeriodDates').onclick=()=>{
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  if(data.periodClosed)return;
+  const start=data.periodStartedAt?new Date(data.periodStartedAt):new Date();
+  const end=data.periodPlannedEndAt?new Date(data.periodPlannedEndAt):new Date();
+  const dateValue=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  $('#editPeriodStart').value=dateValue(start);
+  $('#editPeriodEnd').value=dateValue(end);
+  $('#editPeriodDatesModal').classList.remove('hidden');
+};
+$('#cancelEditPeriodDates').onclick=()=>$('#editPeriodDatesModal').classList.add('hidden');
+$('#saveEditPeriodDates').onclick=async()=>{
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  if(data.periodClosed)return;
+  const startDate=$('#editPeriodStart').value;
+  const endDate=$('#editPeriodEnd').value;
+  if(!startDate||!endDate)return toast('Ange både start- och slutdatum.');
+  const startObj=new Date(startDate+'T00:00:00');
+  const endObj=new Date(endDate+'T23:59:59');
+  if(endObj<startObj)return toast('Slutdatum måste vara efter startdatum.');
+  data.periodStartedAt=startObj.toISOString();
+  data.periodPlannedEndAt=endObj.toISOString();
+  data.seasonKey=currentSeasonKey(startObj);
+  await persistState();
+  $('#editPeriodDatesModal').classList.add('hidden');
+  render();
+  toast('Periodens datum uppdaterades.');
+};
+$('#editPeriodDatesModal').addEventListener('click',e=>{if(e.target===$('#editPeriodDatesModal'))$('#editPeriodDatesModal').classList.add('hidden')});
+
 $('#deleteSeason').onclick=()=>{
   if(!isAdmin)return toast('Du måste vara inloggad som admin.');
   if(data.periodClosed)return;
@@ -1022,8 +1189,9 @@ $('#cancelDeleteSeason').onclick=()=>{$('#deleteSeasonModal').classList.add('hid
 $('#confirmDeleteSeason').onclick=async()=>{
   if(!isAdmin)return toast('Du måste vara inloggad som admin.');
   if(data.periodClosed)return;
+  data.periodEndedAt=new Date().toISOString();
   const snap=snapshotCurrentStandings();
-  if(!snap)return toast('Det finns ingen ställning att arkivera.');
+  if(!snap){data.periodEndedAt=null;return toast('Det finns ingen ställning att arkivera.');}
   archiveCache.unshift(snap);
   data.periodClosed=true;
   selected.clear();
@@ -1036,32 +1204,45 @@ $('#confirmDeleteSeason').onclick=async()=>{
   render();
   toast('Perioden är avslutad och sparad under Tidigare månader.');
 };
-$('#startNewPeriod').onclick=async()=>{
+$('#startNewPeriod').onclick=()=>{
   if(!isAdmin)return toast('Du måste vara inloggad som admin.');
   if(!data.periodClosed)return;
+  const today=new Date();
+  const yyyy=today.getFullYear(),mm=String(today.getMonth()+1).padStart(2,'0'),dd=String(today.getDate()).padStart(2,'0');
+  $('#newPeriodName').value='';
+  $('#newPeriodStart').value=`${yyyy}-${mm}-${dd}`;
+  const monthEnd=new Date(yyyy,today.getMonth()+1,0);
+  $('#newPeriodEnd').value=`${monthEnd.getFullYear()}-${String(monthEnd.getMonth()+1).padStart(2,'0')}-${String(monthEnd.getDate()).padStart(2,'0')}`;
+  $('#startPeriodModal').classList.remove('hidden');
+  setTimeout(()=>$('#newPeriodName')?.focus(),0);
+};
+$('#cancelStartPeriod').onclick=()=>$('#startPeriodModal').classList.add('hidden');
+$('#confirmStartPeriod').onclick=async()=>{
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  if(!data.periodClosed)return;
+  const name=$('#newPeriodName').value.trim();
+  const startDate=$('#newPeriodStart').value;
+  const endDate=$('#newPeriodEnd').value;
+  if(!name)return toast('Ange ett namn på ställningen.');
+  if(!startDate||!endDate)return toast('Ange både start- och slutdatum.');
+  const startObj=new Date(startDate+'T00:00:00');
+  const endObj=new Date(endDate+'T23:59:59');
+  if(endObj<startObj)return toast('Slutdatum måste vara efter startdatum.');
   const existingPlayers=data.players.map(p=>({id:p.id,name:p.name}));
   const nextPlayerId=data.nextPlayerId;
   const inactivePlayerIds=Array.isArray(data.inactivePlayerIds)?[...data.inactivePlayerIds]:[];
   data={
-    players:existingPlayers,
-    rounds:[],
-    nextPlayerId,
-    nextRoundId:1,
-    listName:'',
-    seasonKey:currentSeasonKey(),
-    periodClosed:false,
+    players:existingPlayers,rounds:[],nextPlayerId,nextRoundId:1,
+    listName:name,seasonKey:currentSeasonKey(startObj),periodClosed:false,
+    periodStartedAt:startObj.toISOString(),periodEndedAt:null,periodPlannedEndAt:endObj.toISOString(),
     inactivePlayerIds
   };
-  selected.clear();
-  matchLosers=[null,null,null];
-  editing=null;
-  showAllHistory=false;
+  selected.clear();matchLosers=[null,null,null];editing=null;showAllHistory=false;
   await persistState();
-  render();
-  const inp=$('#listName');
-  if(inp){inp.disabled=false;inp.focus();}
-  toast('Ny period startad. Ange namn på ställningen.');
+  $('#startPeriodModal').classList.add('hidden');
+  render();toast('Ny period startad.');
 };
+$('#startPeriodModal').addEventListener('click',e=>{if(e.target===$('#startPeriodModal'))$('#startPeriodModal').classList.add('hidden')});
 $('#deleteSeasonModal').addEventListener('click',e=>{if(e.target===$('#deleteSeasonModal'))$('#deleteSeasonModal').classList.add('hidden')});
 
 $('#rankingInfoBtn').onclick=()=>$('#rankingInfo').classList.toggle('hidden');
@@ -1309,6 +1490,22 @@ body.period-closed .history-panel [data-edit-match]{display:none !important}
 }
 .player-card .player-remove-btn:hover{background:#522733;border-color:#a35360}
 body:not(.is-admin) .player-remove-btn{display:none!important}
+
+/* Tidslinje för aktiv/avslutad period */
+.period-duration{margin:-4px 0 12px;padding:0 2px 2px}
+.period-duration-track{display:grid;grid-template-columns:14px 1fr 22px;align-items:center;gap:0;height:18px}
+.period-duration-start-dot{width:12px;height:12px;border-radius:50%;background:#58e5c0;box-shadow:0 0 0 3px rgba(88,229,192,.10)}
+.period-duration-line{height:6px;border-radius:999px;background:linear-gradient(90deg,#58e5c0 0%,#3bcbb1 55%,rgba(88,229,192,.28) 100%);margin:0 -1px}
+.period-duration-end-icon{font-size:15px;line-height:1;text-align:right;filter:saturate(.9)}
+.period-duration-meta{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-top:1px;color:#8fa8bf;font-size:10px;font-weight:800;letter-spacing:.02em}
+.period-duration-meta strong{color:#dce8f4;font-size:10px;padding:0 8px}
+.period-duration-meta span:last-child{text-align:right}
+.period-duration.is-closed .period-duration-line{background:#58e5c0}
+@media(max-width:620px){
+  .period-duration{margin-top:2px}
+  .period-duration-meta{font-size:9px}
+  .period-duration-meta strong{font-size:9px}
+}
 </style>
 </body>
 </html>
