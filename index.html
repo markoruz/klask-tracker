@@ -765,6 +765,11 @@ function renderLeaderboard(){
   const root=$('#leaderboard');root.innerHTML='';
   if(!state.players.length){root.innerHTML='<div class="empty">Ingen ställning ännu.</div>';return}
   const ranked=rankingOrder(state.players);
+  const header=document.createElement('div');
+  header.className='rank-header';
+  header.innerHTML='<div>#</div><div>Spelare</div><div>Matcher</div><div>Förluster</div><div>Förlust %</div><div>Form</div>'+(isAdmin?'<div>Bayesian score</div>':'');
+  header.classList.toggle('admin-score-visible',isAdmin);
+  root.appendChild(header);
   ranked.forEach(p=>{
     const row=document.createElement('div');row.className='rank-row'+(p.games<MIN_MATCHES?' dnq-row':'')+(selected.has(p.id)?' selected-rank-row':'');
     const qualified=p.games>=MIN_MATCHES;
@@ -781,12 +786,14 @@ function renderLeaderboard(){
       else if(diff<0)changeHtml='<span class="rank-change down">↓</span>';
     }
     const positionHtml=qualified?`<span class="trophy ${cls}">${trophy}</span><b>${position}</b>${changeHtml}`:'<span class="dnq-label">DNQ</span>';
-    const gamesHtml=qualified?`${p.games} matcher`:`${p.games}/${MIN_MATCHES} matcher`;
+    const gamesHtml=qualified?`${p.games}`:`${p.games}/${MIN_MATCHES}`;
     const formDots=(p.form||[]).map(result=>`<span class="form-dot${result==='loss'?' loss':''}" title="${result==='loss'?'Förlust':'Ingen förlust'}"></span>`).join('');
     const missingForm=Math.max(0,6-(p.form||[]).length);
     const emptyDots='<span class="form-dot empty-form"></span>'.repeat(missingForm);
-    const formHtml=`<div class="rank-form"><span class="rank-form-label">Form</span>${emptyDots}${formDots}</div>`;
-    row.innerHTML=`<div class="rank-pos">${positionHtml}</div><div class="rank-name">${esc(p.name)}</div><div class="rank-games">${gamesHtml}</div><div class="rank-losses">${p.losses} förluster</div><div class="rank-pct ${pctClass}">${pct}</div>${formHtml}`;
+    const formHtml=`<div class="rank-form">${emptyDots}${formDots}</div>`;
+    const scoreHtml=isAdmin?`<div class="rank-score">${p.rank_score==null?'–':p.rank_score.toFixed(2).replace('.',',')}</div>`:'';
+    row.classList.toggle('admin-score-visible',isAdmin);
+    row.innerHTML=`<div class="rank-pos">${positionHtml}</div><div class="rank-name">${esc(p.name)}</div><div class="rank-games">${gamesHtml}</div><div class="rank-losses">${p.losses}</div><div class="rank-pct ${pctClass}">${pct}</div>${formHtml}${scoreHtml}`;
     root.appendChild(row);
   });
 }
@@ -1037,6 +1044,163 @@ init();
   color:#ffffff;
 }
 </style>
+
+<style>
+/* Headerceller som egna mörkare rutor */
+.leaderboard-head{
+  display:grid;
+  grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px;
+  gap:8px;
+  margin-bottom:8px;
+}
+.leaderboard-head > div{
+  background:linear-gradient(145deg,#0b1a29,#091521);
+  border:1px solid #22394d;
+  border-radius:10px;
+  padding:10px 8px;
+  color:#ffffff;
+  font-size:11px;
+  font-weight:900;
+  text-align:center;
+  letter-spacing:.01em;
+}
+.leaderboard-head > div:nth-child(2){text-align:left;padding-left:12px}
+@media(max-width:820px){
+  .leaderboard-head{
+    grid-template-columns:44px minmax(90px,1fr) 76px 72px 66px;
+  }
+  .leaderboard-head > div:nth-child(6){display:none}
+}
+@media(max-width:620px){
+  .leaderboard-head{display:none}
+}
+</style>
+
+<style>
+/* === Leaderboard redesign inspired by attached reference === */
+#leaderPanel .leaderboard{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:0 !important;
+  border:1px solid #2d6574 !important;
+  border-radius:12px !important;
+  overflow:hidden !important;
+  background:#0b1b2b !important;
+}
+
+#leaderPanel .rank-header{
+  display:grid !important;
+  grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px !important;
+  align-items:center !important;
+  gap:8px !important;
+  min-height:46px !important;
+  margin:0 !important;
+  padding:0 12px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  border-bottom:1px solid #2d6574 !important;
+  background:#173449 !important;
+  box-shadow:none !important;
+  color:#43d7c4 !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+  letter-spacing:.055em !important;
+  text-transform:uppercase !important;
+}
+#leaderPanel .rank-header>div{
+  color:#43d7c4 !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+  letter-spacing:.055em !important;
+  text-transform:uppercase !important;
+}
+#leaderPanel .rank-header>div:nth-child(1),
+#leaderPanel .rank-header>div:nth-child(2){text-align:left !important}
+#leaderPanel .rank-header>div:nth-child(3),
+#leaderPanel .rank-header>div:nth-child(4),
+#leaderPanel .rank-header>div:nth-child(5){text-align:right !important}
+#leaderPanel .rank-header>div:nth-child(6){text-align:left !important;padding-left:10px !important}
+
+#leaderPanel .rank-row{
+  grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px !important;
+  gap:8px !important;
+  min-height:56px !important;
+  margin:0 !important;
+  padding:0 12px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  border-bottom:1px solid #29475f !important;
+  background:#142a40 !important;
+  box-shadow:none !important;
+}
+#leaderPanel .rank-row:last-child{border-bottom:0 !important}
+#leaderPanel .rank-row:hover{background:#172f47 !important}
+#leaderPanel .rank-row.selected-rank-row{
+  background:#163844 !important;
+  border-color:#2d6574 !important;
+  box-shadow:inset 3px 0 0 #43d7c4 !important;
+}
+#leaderPanel .rank-pos{font-size:15px !important}
+#leaderPanel .rank-name{font-size:15px !important;font-weight:900 !important;color:#fff !important}
+#leaderPanel .rank-games{font-size:12px !important;color:#f4f8fc !important;text-align:right !important}
+#leaderPanel .rank-losses{font-size:12px !important;color:#ff6d63 !important;text-align:right !important}
+#leaderPanel .rank-pct{font-size:12px !important;text-align:right !important;font-weight:950 !important}
+#leaderPanel .rank-form{border-left:0 !important;padding-left:10px !important;min-width:0 !important}
+#leaderPanel .dnq-row{opacity:.65 !important}
+
+@media (min-width:821px) and (max-width:1180px){
+  #leaderPanel .rank-header,
+  #leaderPanel .rank-row{
+    grid-template-columns:50px minmax(110px,1fr) 86px 86px 72px 140px !important;
+  }
+}
+@media(max-width:820px){
+  #leaderPanel .leaderboard{border-radius:10px !important}
+  #leaderPanel .rank-header{display:none !important}
+  #leaderPanel .rank-row{
+    grid-template-columns:44px minmax(90px,1fr) 76px 72px 66px !important;
+    padding:8px 10px !important;
+  }
+  #leaderPanel .rank-form{grid-column:2/-1 !important;padding-left:0 !important;margin-top:2px !important}
+}
+</style>
+
+<style>
+/* Bayesian score: visible only while admin is authenticated */
+@media (min-width:821px){
+  #leaderPanel .rank-header.admin-score-visible,
+  #leaderPanel .rank-row.admin-score-visible{
+    grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px 112px !important;
+  }
+  #leaderPanel .rank-header.admin-score-visible>div:nth-child(7){
+    text-align:right !important;
+    white-space:nowrap !important;
+  }
+  #leaderPanel .rank-score{
+    text-align:right;
+    font-size:12px;
+    font-weight:850;
+    color:#c9d6e3;
+    white-space:nowrap;
+  }
+}
+@media (min-width:821px) and (max-width:1180px){
+  #leaderPanel .rank-header.admin-score-visible,
+  #leaderPanel .rank-row.admin-score-visible{
+    grid-template-columns:50px minmax(110px,1fr) 82px 82px 70px 128px 104px !important;
+  }
+}
+@media(max-width:820px){
+  #leaderPanel .rank-score{
+    grid-column:2/-1;
+    text-align:left;
+    color:#9fb3c9;
+    font-size:11px;
+    font-weight:800;
+  }
+  #leaderPanel .rank-score::before{content:'Bayesian score: ';}
+}
+</style>
 </body>
 </html>
 
@@ -1200,5 +1364,156 @@ init();
     padding-left:12px;
     padding-right:12px;
   }
+}
+</style>
+
+<style>
+/* Kolumnrubriker för leaderboard */
+.rank-header{
+  display:grid;
+  grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px;
+  align-items:end;
+  gap:8px;
+  padding:0 12px 7px;
+  color:#8299ac;
+  font-size:10px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.055em;
+}
+.rank-header>div:nth-child(3),
+.rank-header>div:nth-child(4),
+.rank-header>div:nth-child(5){text-align:right}
+.rank-header>div:nth-child(6){padding-left:10px}
+.rank-form-label{display:none !important}
+@media (min-width:821px) and (max-width:1180px){
+  .rank-header{grid-template-columns:56px minmax(120px,1fr) 92px 92px 78px 145px}
+}
+@media(max-width:820px){
+  .rank-header{display:none}
+}
+</style>
+<style>
+/* Tydligt inrutade kolumnrubriker ovanför leaderboarden */
+.rank-header{
+  display:grid;
+  grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px;
+  align-items:stretch;
+  gap:8px;
+  padding:0 0 8px !important;
+  color:#fff !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+  text-transform:none !important;
+  letter-spacing:0 !important;
+}
+.rank-header > div{
+  min-height:36px;
+  display:flex;
+  align-items:center;
+  padding:8px 10px;
+  border:1px solid #21384d;
+  border-radius:9px;
+  background:linear-gradient(145deg,#0a1827,#0c1b2b);
+  color:#fff !important;
+  font-weight:950 !important;
+  white-space:nowrap;
+}
+.rank-header > div:nth-child(3),
+.rank-header > div:nth-child(4),
+.rank-header > div:nth-child(5){
+  justify-content:flex-end;
+  text-align:right;
+}
+.rank-header > div:nth-child(6){
+  padding-left:10px !important;
+  justify-content:flex-start;
+}
+@media (min-width:821px) and (max-width:1180px){
+  .rank-header{grid-template-columns:56px minmax(120px,1fr) 92px 92px 78px 145px}
+}
+@media(max-width:820px){
+  .rank-header{display:none}
+}
+</style>
+<style>
+/* En gemensam inramad rubrikrad för leaderboarden */
+.rank-header{
+  display:grid;
+  grid-template-columns:56px minmax(125px,1fr) 92px 92px 78px 150px;
+  align-items:center;
+  gap:8px;
+  min-height:46px;
+  margin:0 0 8px;
+  padding:0 12px !important;
+  border:1px solid #21384d;
+  border-radius:11px;
+  background:linear-gradient(145deg,#091725,#0c1b2b);
+  color:#fff !important;
+  font-size:13px !important;
+  font-weight:900 !important;
+  text-transform:none !important;
+  letter-spacing:0 !important;
+  box-sizing:border-box;
+}
+.rank-header > div{
+  min-height:0 !important;
+  display:block !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:none !important;
+  color:#fff !important;
+  font-size:inherit !important;
+  font-weight:900 !important;
+  white-space:nowrap;
+}
+.rank-header > div:nth-child(3),
+.rank-header > div:nth-child(4),
+.rank-header > div:nth-child(5){
+  text-align:right;
+}
+.rank-header > div:nth-child(6){
+  padding-left:10px !important;
+  text-align:left;
+}
+@media (min-width:821px) and (max-width:1180px){
+  .rank-header{grid-template-columns:56px minmax(120px,1fr) 92px 92px 78px 145px}
+}
+@media(max-width:820px){
+  .rank-header{display:none}
+}
+</style>
+
+<style>
+/* Refined leaderboard header: one clean integrated bar */
+.rank-header{
+  min-height:42px !important;
+  margin:0 !important;
+  padding:0 14px !important;
+  border:1px solid rgba(67,215,196,.16) !important;
+  border-radius:10px !important;
+  background:#0b1928 !important;
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.025) !important;
+  color:#f4f8fc !important;
+  font-size:13.5px !important;
+  font-weight:800 !important;
+  letter-spacing:.01em !important;
+}
+.rank-header > div{
+  color:#f4f8fc !important;
+  font-weight:800 !important;
+}
+.rank-header > div:first-child{
+  color:#9fb3c9 !important;
+  font-size:15px !important;
+}
+</style>
+
+<style>
+/* White leaderboard column headers */
+#leaderPanel .rank-header > div,
+#leaderPanel .rank-header > div:first-child {
+  color:#f4f8fc !important;
 }
 </style>
