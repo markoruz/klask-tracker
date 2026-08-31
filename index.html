@@ -79,8 +79,8 @@ h1{margin:0;font-size:clamp(30px,3vw,46px);letter-spacing:-1.2px;line-height:1}.
 
 
 @media (min-width:1181px){
-  #leaderPanel{display:flex;flex-direction:column}
-  #leaderPanel .leaderboard{flex:1;justify-content:space-between}
+  #leaderPanel{display:block}
+  #leaderPanel .leaderboard{display:flex;flex-direction:column;gap:8px}
 }
 
 
@@ -918,40 +918,6 @@ async function init(){
 init();
 </script>
 
-<script>
-(function(){
-  function syncStandingsHeight(){
-    const manage=document.getElementById('managePanel');
-    const round=document.getElementById('roundPanel');
-    const leader=document.getElementById('leaderPanel');
-    const left=document.querySelector('.left-col');
-    if(!manage||!round||!leader||!left)return;
-
-    if(window.innerWidth>=1181 && document.body.classList.contains('is-admin')){
-      const styles=getComputedStyle(left);
-      const gap=parseFloat(styles.rowGap||styles.gap||0)||0;
-      const target=Math.round(manage.getBoundingClientRect().height + round.getBoundingClientRect().height + gap);
-      leader.style.height=target+'px';
-      leader.style.overflow='hidden';
-    }else{
-      leader.style.height='';
-      leader.style.overflow='';
-    }
-  }
-
-  window.addEventListener('load',()=>requestAnimationFrame(syncStandingsHeight));
-  window.addEventListener('resize',()=>requestAnimationFrame(syncStandingsHeight));
-
-  const observer=new MutationObserver(()=>requestAnimationFrame(syncStandingsHeight));
-  window.addEventListener('load',()=>{
-    const manage=document.getElementById('managePanel');
-    const round=document.getElementById('roundPanel');
-    if(manage)observer.observe(manage,{subtree:true,childList:true,characterData:true,attributes:true});
-    if(round)observer.observe(round,{subtree:true,childList:true,characterData:true,attributes:true});
-    observer.observe(document.body,{attributes:true,attributeFilter:['class']});
-  });
-})();
-</script>
 
 
 <script>
