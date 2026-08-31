@@ -15,7 +15,7 @@
 body{margin:0;background:radial-gradient(circle at 70% 0,#0b2135 0,#06111d 48%,#040b12 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}
 button,input{font:inherit}.app{width:min(1550px,calc(100% - 20px));margin:10px auto 24px}
 .panel{background:linear-gradient(145deg,rgba(13,29,47,.98),rgba(10,23,37,.98));border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
-.hero{padding:22px 24px;margin-bottom:10px}.hero-title{display:flex;align-items:center;gap:14px}.logo{width:46px;height:34px;position:relative;flex:0 0 auto}.logo:before,.logo:after{content:"";position:absolute;left:4px;right:4px;border:3px solid #526c84;border-radius:50%}.logo:before{height:11px;bottom:3px}.logo:after{height:7px;bottom:9px;left:10px;right:10px}.logo-dot{position:absolute;left:17px;top:0;width:12px;height:12px;border:3px solid var(--teal);border-radius:50%;background:#0b1726;z-index:2}
+.top-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch;margin-bottom:10px}.hero{padding:22px 24px;margin-bottom:0}.admin-panel{width:300px;padding:18px;display:flex;flex-direction:column;justify-content:center}.admin-panel .auth-box{margin-top:0;flex-direction:column;align-items:stretch}.admin-panel .auth-status{justify-content:center}.admin-panel .btn{width:100%}.admin-panel .auth-form{flex-direction:column;align-items:stretch}.admin-panel .auth-form input{width:100%}.admin-title{text-align:center;font-size:18px;font-weight:950;margin:0 0 10px}.hero-title{display:flex;align-items:center;gap:14px}.logo{width:46px;height:34px;position:relative;flex:0 0 auto}.logo:before,.logo:after{content:"";position:absolute;left:4px;right:4px;border:3px solid #526c84;border-radius:50%}.logo:before{height:11px;bottom:3px}.logo:after{height:7px;bottom:9px;left:10px;right:10px}.logo-dot{position:absolute;left:17px;top:0;width:12px;height:12px;border:3px solid var(--teal);border-radius:50%;background:#0b1726;z-index:2}
 h1{margin:0;font-size:clamp(30px,3vw,46px);letter-spacing:-1.2px;line-height:1}.hero p{margin:8px 0 0;color:#b6c7d8;font-size:14px}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #28526a;background:#10283a;border-radius:999px;padding:8px 13px;color:#dbe7f1;font-size:12px;font-weight:800}.chip-check{display:grid;place-items:center;width:16px;height:16px;border:1px solid var(--teal);border-radius:50%;color:var(--teal);font-size:10px}.chip-button{appearance:none;cursor:pointer;font:inherit}.chip-button.danger-chip{border-color:#7a4352;background:#321d27;color:#ffd9d5}.chip-button.danger-chip:hover{background:#442430;border-color:#a35360}
 .layout{display:grid;grid-template-columns:minmax(0,1.72fr) minmax(390px,.94fr);gap:10px}.left-col,.right-col{display:flex;flex-direction:column;gap:10px}.manage{padding:18px 18px 14px}.section-title{margin:0 0 12px;font-size:22px;letter-spacing:-.3px}.form-row{display:grid;grid-template-columns:190px 1fr auto;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(145deg,#13273c,#102235);border:1px solid #26425a;border-radius:12px;margin-top:8px}.form-label{font-weight:850}.text-input{width:100%;border:1px solid #28435d;border-radius:10px;background:#071524;color:var(--text);padding:12px 14px;outline:none}.text-input:focus{border-color:var(--teal2);box-shadow:0 0 0 2px rgba(67,215,196,.08)}.text-input:disabled{color:#d9e4ed;background:#0d1c2c;cursor:not-allowed}.btn{border:1px solid #36536b;background:#1a3047;color:var(--text);padding:10px 14px;border-radius:10px;font-weight:850;cursor:pointer}.btn:hover{filter:brightness(1.08)}.btn-primary{background:linear-gradient(135deg,#2faaa5,#45c8bd);border-color:#39bdb3;color:white}.btn-danger{background:#4a2835;border-color:#7a4352}.hidden{display:none!important}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.stat{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(145deg,#162a41,#13243a);border:1px solid #26425a;border-radius:12px}.stat-icon{width:34px;height:34px;display:grid;place-items:center;font-size:24px;color:var(--teal)}.stat-icon.gold{color:var(--gold)}.stat small{display:block;color:#a9bed0;font-size:12px}.stat strong{display:block;font-size:21px;line-height:1.05;margin-top:2px}
@@ -27,7 +27,7 @@ h1{margin:0;font-size:clamp(30px,3vw,46px);letter-spacing:-1.2px;line-height:1}.
 .modal{position:fixed;inset:0;background:rgba(2,7,12,.78);display:grid;place-items:center;padding:20px;z-index:20}.modal-card{width:min(620px,100%);background:#0d1d2f;border:1px solid #35526b;border-radius:16px;padding:18px}.modal-card h3{margin-top:0}.modal-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.modal-option{padding:11px;border:1px solid #35526b;border-radius:10px;background:#172b41;cursor:pointer}.modal-option.active{border-color:var(--teal);background:#153a3d}.modal-option.loser.active{border-color:#a35360;background:#4b2834}.match-edit-group{grid-column:1/-1;margin-top:10px}.match-edit-title{color:#fff;font-size:14px;font-weight:900;text-align:center;margin:0 0 8px}.match-edit-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.history-modal-card{width:min(900px,100%);max-height:85vh;display:flex;flex-direction:column}.history-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.history-modal-head h3{margin:0}.history-modal-scroll{overflow-y:auto;padding-right:4px}.history-modal-close{flex:0 0 auto}
 .toast{position:fixed;right:18px;bottom:18px;background:#0c1a2a;border:1px solid #35526b;border-radius:10px;padding:11px 14px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s;z-index:30}.toast.show{opacity:1;transform:none}
 @media(max-width:1180px){.layout{grid-template-columns:1fr}.players-grid{grid-template-columns:repeat(4,1fr)}.right-col{display:grid;grid-template-columns:1.1fr .9fr;align-items:start}.history-panel{margin:0}.slots{grid-template-columns:repeat(4,1fr)}.next-btn{grid-column:1/-1;width:100%}}
-@media(max-width:820px){.players-grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.right-col{display:flex}.slots{grid-template-columns:repeat(2,1fr)}.loser-grid{grid-template-columns:repeat(2,1fr)}.rank-row{grid-template-columns:44px minmax(90px,1fr) 72px 68px 62px}.history-card{grid-template-columns:1fr}.history-card .btn{justify-self:start}}
+@media(max-width:820px){.top-row{grid-template-columns:1fr}.admin-panel{width:auto}.admin-panel .auth-box{align-items:stretch}.players-grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.right-col{display:flex}.slots{grid-template-columns:repeat(2,1fr)}.loser-grid{grid-template-columns:repeat(2,1fr)}.rank-row{grid-template-columns:44px minmax(90px,1fr) 72px 68px 62px}.history-card{grid-template-columns:1fr}.history-card .btn{justify-self:start}}
 @media(max-width:520px){.app{width:calc(100% - 10px)}.hero,.manage,.round-panel,.leader-panel,.history-panel{padding:14px}.players-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.rank-row{grid-template-columns:42px 1fr}.rank-games,.rank-losses,.rank-pct{grid-column:2;text-align:left}.slots{grid-template-columns:1fr}.loser-grid{grid-template-columns:1fr}.chips{gap:6px}.chip{font-size:10px}}
 .slot.loser-selected{border-color:#ff7f98!important;background:linear-gradient(145deg,#5a3040,#3d2c3c)!important;box-shadow:0 0 0 2px rgba(255,127,152,.18) inset}.slot.loser-selected strong{color:#ffdce3}.slot.loser-selected span:first-child{color:#ff9db0;font-weight:900}
 /* Compact desktop overview */
@@ -268,24 +268,75 @@ body.is-admin .admin-only{display:block}
   window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZnJwdmxlbHBvYWJmcGtxanduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDI3OTMsImV4cCI6MjEwMzQ3ODc5M30.GS747AnOYChYZbpvwKMrrEwQcDMaIBIP5apFlhczPi0';
   // =================================================================
 </script>
+<style>
+/* Håll header- och adminpanelen exakt i linje i toppraden. */
+.top-row > .hero,
+.top-row > .admin-panel{
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+  align-self:stretch;
+}
+</style>
+
+<style>
+/* Centrera huvudrubriken och placera anslutningsstatus under admin-knappen. */
+.top-row > .hero{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.top-row > .hero .hero-title{
+  width:100%;
+  justify-content:center;
+  text-align:center;
+}
+.admin-sync-note{
+  width:100%;
+  margin:2px 0 0;
+  text-align:center;
+}
+</style>
+
+<style>
+/* Kompaktare inloggningsfält i Admin-rutan. */
+.admin-panel .auth-form{
+  gap:6px;
+}
+.admin-panel .auth-form .text-input{
+  padding:8px 10px;
+  min-height:34px;
+  border-radius:8px;
+  font-size:12px;
+}
+.admin-panel #authSubmitBtn{
+  padding:7px 10px;
+  min-height:34px;
+  border-radius:8px;
+  font-size:12px;
+}
+</style>
 </head>
 <body>
 <main class="app">
-  <section class="panel hero">
-    <div class="hero-title"><div class="logo"><span class="logo-dot"></span></div><h1>Klask Multiplayer Tracker</h1></div>
-    <p>Lägg till spelare, välj exakt fyra deltagare och registrera en hel omgång med tre matcher direkt.</p>
-    <div class="auth-box">
-      <span id="authStatus" class="auth-status"><span class="dot"></span><span id="authStatusText">Visningsläge (publikt)</span></span>
-      <button id="authToggleBtn" type="button" class="btn">Logga in som admin</button>
-      <button id="authLogoutBtn" type="button" class="btn admin-only">Logga ut</button>
-      <div id="authForm" class="auth-form">
-        <input id="authEmail" class="text-input" type="email" placeholder="E-post" autocomplete="username">
-        <input id="authPassword" class="text-input" type="password" placeholder="Lösenord" autocomplete="current-password">
-        <button id="authSubmitBtn" type="button" class="btn btn-primary">Logga in</button>
+  <div class="top-row">
+    <section class="panel hero">
+      <div class="hero-title"><div class="logo"><span class="logo-dot"></span></div><h1>Klask Multiplayer Tracker</h1></div>
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="admin-title">Admin</div>
+      <div class="auth-box">
+        <span id="authStatus" class="auth-status"><span class="dot"></span><span id="authStatusText">Visningsläge (publikt)</span></span>
+        <button id="authLogoutBtn" type="button" class="btn admin-only">Logga ut</button>
+        <div id="authForm" class="auth-form open">
+          <input id="authEmail" class="text-input" type="email" placeholder="E-post" autocomplete="username">
+          <input id="authPassword" class="text-input" type="password" placeholder="Lösenord" autocomplete="current-password">
+          <button id="authSubmitBtn" type="button" class="btn btn-primary">Logga in</button>
+        </div>
+        <div id="syncNote" class="sync-note admin-sync-note">Ansluter…</div>
       </div>
-    </div>
-    <div id="syncNote" class="sync-note">Ansluter…</div>
-  </section>
+    </section>
+  </div>
 
   <section class="layout">
     <div class="left-col">
@@ -435,11 +486,9 @@ function setAdminUI(active){
   document.body.classList.toggle('is-admin',active);
   $('#authStatus').classList.toggle('on',active);
   $('#authStatusText').textContent=active?'Adminläge (du kan registrera resultat)':'Visningsläge (publikt)';
-  $('#authToggleBtn').classList.toggle('hidden',active);
-  $('#authForm').classList.remove('open');
+  $('#authForm').classList.toggle('open',!active);
   render();
 }
-$('#authToggleBtn').onclick=()=>{$('#authForm').classList.toggle('open')};
 $('#authSubmitBtn').onclick=async()=>{
   const email=$('#authEmail').value.trim(),password=$('#authPassword').value;
   if(!email||!password)return toast('Fyll i e-post och lösenord.');
@@ -983,7 +1032,7 @@ init();
   padding-left:10px !important;
   border-left:1px solid rgba(255,255,255,.10) !important;
 }
-@media(max-width:820px){
+@media(max-width:820px){.top-row{grid-template-columns:1fr}.admin-panel{width:auto}.admin-panel .auth-box{align-items:stretch}
   .rank-row{
     grid-template-columns:44px minmax(90px,1fr) 76px 72px 66px 104px !important;
   }
@@ -1070,7 +1119,7 @@ init();
   .rank-pct{grid-column:5 !important}
   .rank-form{grid-column:6 !important}
 }
-@media(max-width:820px){
+@media(max-width:820px){.top-row{grid-template-columns:1fr}.admin-panel{width:auto}.admin-panel .auth-box{align-items:stretch}
   .rank-row{
     grid-template-columns:44px minmax(90px,1fr) 76px 72px 66px !important;
   }
