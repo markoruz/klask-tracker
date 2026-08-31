@@ -632,10 +632,13 @@ function renderArchive(){
     const top3=qualified.slice(0,3);
     const medals=['🥇','🥈','🥉'];
     const podiumHtml=top3.length
-      ?top3.map((p,i)=>`<div class="archive-podium-player"><span>${medals[i]}</span><strong>${esc(p.name)}</strong></div>`).join('')
+      ?top3.map((p,i)=>{
+        const pct=p.loss_pct==null?'–':p.loss_pct.toFixed(1).replace('.',',')+'%';
+        return `<div class="archive-podium-player"><div class="archive-podium-name"><span>${medals[i]}</span><strong>${esc(p.name)}</strong></div><div class="archive-podium-stats"><span>${p.games} matcher</span><span>${p.losses} förluster</span><strong>${pct}</strong></div></div>`;
+      }).join('')
       :'<span>Ingen spelare kvalificerade sig.</span>';
     const saved=fmtDate(item.saved_at);
-    box.innerHTML=`<div class="archive-head"><div><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div></div><div class="archive-head-right"><span>Sparad ${esc(saved)}</span><button type="button" class="btn archive-toggle">Visa hela tabellen</button></div></div>`;
+    box.innerHTML=`<div class="archive-head"><div><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div></div><div class="archive-head-right"><span>Sparad ${esc(saved)}</span><button type="button" class="btn archive-toggle">Visa slutställning →</button></div></div>`;
     box.querySelector('.archive-toggle').onclick=()=>openArchiveModal(item);
     root.appendChild(box);
   });
@@ -1435,16 +1438,22 @@ body:not(.is-admin) .player-remove-btn{display:none!important}
 
 <style>
 /* Månadskort med topp tre + DNQ i arkivet */
-.archive-podium{display:flex;flex-direction:column;gap:5px;margin-top:7px}
-.archive-podium-player{display:flex;align-items:center;gap:6px;color:#dfe9f2;font-size:12px}
-.archive-podium-player strong{font-size:12px}
+.archive-podium{display:flex;flex-direction:column;gap:6px;margin-top:8px;min-width:360px}
+.archive-podium-player{display:grid;grid-template-columns:minmax(120px,1fr) auto;align-items:center;gap:18px;color:#dfe9f2;font-size:11px;padding:4px 0}
+.archive-podium-name{display:flex;align-items:center;gap:6px;min-width:0}
+.archive-podium-name strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.archive-podium-stats{display:grid;grid-template-columns:74px 78px 52px;gap:10px;align-items:center;text-align:right;color:#b9c9d8;white-space:nowrap}
+.archive-podium-stats span:nth-child(2){color:#ff6b63}
+.archive-podium-stats strong{color:var(--teal);font-size:11px}
 .archive-head-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .archive-toggle{color:var(--teal)!important;font-weight:850}
 .archive-dnq{opacity:.65}
 .archive-dnq .pos{color:#8fa7bb;font-size:10px;letter-spacing:.04em}
 @media(max-width:620px){
   .archive-head{align-items:flex-start}
-  .archive-podium{flex-direction:column;gap:3px}
+  .archive-podium{flex-direction:column;gap:4px;min-width:0;width:100%}
+  .archive-podium-player{grid-template-columns:1fr;gap:3px}
+  .archive-podium-stats{justify-content:start;text-align:left;grid-template-columns:auto auto auto}
   .archive-head-right{align-items:flex-end}
 }
 </style>
@@ -1639,4 +1648,13 @@ body:not(.is-admin) .player-remove-btn{display:none!important}
   font-size:11px !important;
   line-height:1.15 !important;
 }
+</style>
+<style>
+/* Visual hierarchy for archived top 3: winner largest, then 2nd, then 3rd */
+.archive-podium-player:nth-child(1) .archive-podium-name{font-size:20px}
+.archive-podium-player:nth-child(1) .archive-podium-name strong{font-size:16px}
+.archive-podium-player:nth-child(2) .archive-podium-name{font-size:17px}
+.archive-podium-player:nth-child(2) .archive-podium-name strong{font-size:14px}
+.archive-podium-player:nth-child(3) .archive-podium-name{font-size:15px}
+.archive-podium-player:nth-child(3) .archive-podium-name strong{font-size:12px}
 </style>
