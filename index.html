@@ -692,6 +692,12 @@ function subscribeRealtime(){
   }).subscribe();
 }
 
+async function sessionIsKlaskAdmin(session){
+  if(!session)return false;
+  const {data,error}=await sb.rpc('is_klask_admin');
+  if(error){console.error('Kunde inte kontrollera adminroll',error);return false;}
+  return data===true;
+}
 function setAdminUI(active){
   isAdmin=active;
   document.body.classList.toggle('is-admin',active);
@@ -703,9 +709,11 @@ function setAdminUI(active){
 $('#authSubmitBtn').onclick=async()=>{
   const email=$('#authEmail').value.trim(),password=$('#authPassword').value;
   if(!email||!password)return toast('Fyll i e-post och lösenord.');
-  const{error}=await sb.auth.signInWithPassword({email,password});
+  const{data:loginData,error}=await sb.auth.signInWithPassword({email,password});
   if(error)return toast('Kunde inte logga in: '+error.message);
   $('#authPassword').value='';
+  const admin=await sessionIsKlaskAdmin(loginData?.session);
+  if(!admin){setAdminUI(false);return toast('Kontot saknar adminbehörighet.');}
   setAdminUI(true);
   toast('Inloggad som admin.');
 };
@@ -1393,13 +1401,13 @@ function fmt(s){const d=new Date(s);return Number.isNaN(d.getTime())?(s||'Datum 
 async function init(){
   const note=$('#syncNote');
   const{data:sessionData}=await sb.auth.getSession();
-  setAdminUI(!!sessionData?.session);
+  setAdminUI(await sessionIsKlaskAdmin(sessionData?.session));
   const remote=await loadRemoteState();
   data=remote.data;
   archiveCache=remote.archive;
   render();
   subscribeRealtime();
-  sb.auth.onAuthStateChange((_event,session)=>{setAdminUI(!!session)});
+  sb.auth.onAuthStateChange(async(_event,session)=>{setAdminUI(await sessionIsKlaskAdmin(session))});
   if(note)note.textContent='Ansluten – tabellen uppdateras live.';
 }
 init();
