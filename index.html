@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Klask Multiplayer Tracker</title>
+<title>Tabell · Klaskligan</title>
 <style>
 :root{
   --bg:#06111d;--panel:#0e1c2d;--panel2:#132439;--card:#172a40;--card2:#1b3048;
@@ -21,7 +21,7 @@ h1{margin:0;font-size:clamp(30px,3vw,46px);letter-spacing:-1.2px;line-height:1}.
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}.stat{display:flex;align-items:center;gap:12px;padding:14px 16px;background:linear-gradient(145deg,#162a41,#13243a);border:1px solid #26425a;border-radius:12px}.stat-icon{width:34px;height:34px;display:grid;place-items:center;font-size:24px;color:var(--teal)}.stat-icon.gold{color:var(--gold)}.stat small{display:block;color:#a9bed0;font-size:12px}.stat strong{display:block;font-size:21px;line-height:1.05;margin-top:2px}
 .players-head{display:flex;align-items:end;justify-content:space-between;margin:16px 0 10px}.players-head h2{margin:0;font-size:22px}.players-head span{color:var(--muted);font-size:12px}.players-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.player-card{position:relative;min-height:142px;padding:13px;border:1px solid #2a465f;border-radius:12px;background:linear-gradient(145deg,#162a40,#13263a);cursor:pointer;transition:.16s transform,.16s border-color,.16s background}.player-card:hover{transform:translateY(-1px);border-color:#3f617a}.player-card.selected{border-color:var(--teal);background:linear-gradient(145deg,#143b3d,#163644);box-shadow:0 0 0 2px rgba(67,215,196,.08) inset}.player-card.locked{opacity:.55;cursor:not-allowed}.player-name{font-size:16px;font-weight:900;padding-right:26px}.select-ring{position:absolute;right:12px;top:12px;width:20px;height:20px;border:2px solid #607b91;border-radius:50%}.selected .select-ring{border-color:var(--teal);box-shadow:inset 0 0 0 5px #153842;background:var(--teal)}.player-meta{display:grid;gap:4px;margin-top:11px;font-size:11px;color:#a9bdd0}.player-meta b{color:#e8f0f7;font-weight:700}.last-loss-date{font-size:12px;color:#e8f0f7;font-weight:800}.last-loss-players{font-size:10px;line-height:1.35;color:#9fb4c8}.selected-note{color:var(--teal)!important;font-weight:850;margin-top:3px}
 .round-panel{padding:18px}.round-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.round-head h2{margin:0;font-size:24px}.round-step{margin:4px 0 0;color:#d3e1ed;font-size:13px;font-weight:800}.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;align-items:stretch}.slot{min-height:112px;border:1px dashed #4b6b83;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:#0e1f31;color:#9eb3c7}.slot strong{font-size:16px;color:#eff6fb}.slot-num{font-size:21px;color:var(--teal)}.loser-stage{margin-top:16px}.loser-title{font-size:14px;color:#d7e3ed;font-weight:850;margin-bottom:10px}.loser-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.loser-choice{padding:14px;border:1px solid #38566f;border-radius:10px;background:#172b41;color:var(--text);font-weight:900;cursor:pointer}.loser-choice.active{background:#4b2834;border-color:#a35360;color:#ffd3d0}.save-round{width:100%;margin-top:10px;padding:13px}
-.leader-panel{padding:18px}.standings-title{margin:0 0 14px;font-size:24px}.leaderboard{display:flex;flex-direction:column;gap:7px}.rank-row{display:grid;grid-template-columns:56px minmax(90px,1fr) 82px 76px 66px;align-items:center;gap:8px;padding:10px 12px;min-height:55px;background:linear-gradient(145deg,#162a40,#13263a);border:1px solid #29475f;border-radius:11px}.rank-pos{display:flex;align-items:center;gap:8px;font-size:17px;color:#dce6ef}.trophy{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center}.trophy svg{width:18px;height:18px;display:block;fill:currentColor}.gold{color:#f4c542}.silver{color:#c4ccd6}.bronze{color:#cd7f32}.rank-name{font-size:15px;font-weight:900}.rank-games{color:#c1d0dc;font-size:12px;text-align:right}.rank-losses{color:var(--red);font-size:12px;text-align:right}.rank-pct{font-size:12px;text-align:right;font-weight:900}.rank-score{font-size:12px;text-align:right;font-weight:950;color:#8fd8ff}.rank-score small{display:block;font-size:9px;line-height:1;color:#7697ad;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}.rank-pct.pct-green{color:#54e0a6}.rank-pct.pct-orange{color:#f5a742}.rank-pct.pct-red{color:#ff6b6b}.rank-pct.pct-neutral{color:#9fb1c4}
+.leader-panel{padding:18px}.standings-title{margin:0 0 14px;font-size:24px}.leaderboard{display:flex;flex-direction:column;gap:7px}.rank-row{display:grid;grid-template-columns:56px minmax(90px,1fr) 82px 76px 66px;align-items:center;gap:8px;padding:10px 12px;min-height:55px;background:linear-gradient(145deg,#162a40,#13263a);border:1px solid #29475f;border-radius:11px}.rank-pos{display:flex;align-items:center;gap:8px;font-size:17px;color:#dce6ef}.trophy{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center}.trophy svg{width:18px;height:18px;display:block;fill:currentColor}.gold{color:#f4c542}.silver{color:#c4ccd6}.bronze{color:#cd7f32}.rank-name{font-size:15px;font-weight:900}.rank-name a{color:inherit;text-decoration:none}.rank-name a:hover{color:var(--teal);text-decoration:underline;text-underline-offset:3px}.rank-games{color:#c1d0dc;font-size:12px;text-align:right}.rank-losses{color:var(--red);font-size:12px;text-align:right}.rank-pct{font-size:12px;text-align:right;font-weight:900}.rank-score{font-size:12px;text-align:right;font-weight:950;color:#8fd8ff}.rank-score small{display:block;font-size:9px;line-height:1;color:#7697ad;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}.rank-pct.pct-green{color:#54e0a6}.rank-pct.pct-orange{color:#f5a742}.rank-pct.pct-red{color:#ff6b6b}.rank-pct.pct-neutral{color:#9fb1c4}
 .dnq-row{opacity:.72}.dnq-label{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:4px 7px;border:1px solid #53697d;border-radius:999px;color:#aebdca;font-size:10px;font-weight:950;letter-spacing:.06em}.dnq-row .rank-name{color:#c8d4df}
 .history-panel{padding:14px}.history-panel h2{font-size:22px;margin:0 0 12px}.history-list{display:flex;flex-direction:column;gap:7px}.history-card{display:grid;grid-template-columns:115px 1fr auto;gap:12px;align-items:center;padding:11px 12px;background:linear-gradient(145deg,#162a40,#13263a);border:1px solid #29475f;border-radius:11px}.history-date{font-size:11px;color:#b0c2d1}.history-main strong{display:block;color:#fff;font-size:13px}.history-main span{display:block;color:#c0cfdb;font-size:11px;margin-top:3px}.history-card .btn{padding:8px 12px;font-size:11px}.history-more{width:100%;margin-top:8px;background:#162a40}.history-delete{width:100%;margin:0;min-height:44px}.history-rounds{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.history-round{padding:4px 7px;border:1px solid #35536b;border-radius:7px;background:#10243a;color:#c9d7e2;font-size:10px}.history-round b{color:var(--red)}.reset-list-panel{padding:14px}.history-placeholder{min-height:58px;border:1px dashed #29475f;border-radius:11px;background:rgba(12,30,47,.38);display:flex;align-items:center;justify-content:center;color:#617d93;font-size:11px}.empty{padding:18px;text-align:center;color:#8da5b8;border:1px dashed #3a5870;border-radius:12px}
 .modal{position:fixed;inset:0;background:rgba(2,7,12,.78);display:grid;place-items:center;padding:20px;z-index:20}.modal-card{width:min(620px,100%);background:#0d1d2f;border:1px solid #35526b;border-radius:16px;padding:18px}.modal-card h3{margin-top:0}.modal-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.modal-option{padding:11px;border:1px solid #35526b;border-radius:10px;background:#172b41;cursor:pointer}.modal-option.active{border-color:var(--teal);background:#153a3d}.modal-option.loser.active{border-color:#a35360;background:#4b2834}.match-edit-group{grid-column:1/-1;margin-top:10px}.match-edit-title{color:#fff;font-size:14px;font-weight:900;text-align:center;margin:0 0 8px}.match-edit-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.history-modal-card{width:min(900px,100%);max-height:85vh;display:flex;flex-direction:column}.history-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.history-modal-head h3{margin:0}.history-modal-scroll{overflow-y:auto;padding-right:4px}.history-modal-close{flex:0 0 auto}
@@ -277,6 +277,25 @@ body.is-admin .admin-only{display:block}
 .archive-admin-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}
 .archive-admin-actions .btn{padding:5px 8px;min-height:28px;font-size:10px}
 @media(max-width:620px){.period-date-grid{grid-template-columns:1fr}}
+
+/* Periodväljare: samma leaderboard, olika perioder */
+.period-view-head{align-items:flex-start!important;gap:16px}
+.period-selector-wrap{display:flex;align-items:center;gap:9px;margin-top:8px}
+.period-selector-wrap label{font-size:12px;font-weight:800;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
+.period-select{min-width:220px;max-width:330px;background:#0b1d2e;color:#fff;border:1px solid #2a4963;border-radius:9px;padding:8px 34px 8px 11px;font:inherit;font-weight:800;outline:none}
+.period-select:focus{border-color:#58e5c0;box-shadow:0 0 0 2px rgba(88,229,192,.12)}
+.period-history-view #managePanel,.period-history-view #roundPanel{display:none!important}
+@media(max-width:720px){.period-view-head{flex-direction:column}.period-select{min-width:0;width:100%}.period-selector-wrap{align-items:flex-start;flex-direction:column}}
+
+/* ===== Global site header ===== */
+.site-header{position:sticky;top:0;z-index:30;margin-bottom:10px;background:rgba(6,17,29,.94);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.site-header-inner{min-height:68px;display:flex;align-items:center;gap:28px;padding:10px 16px}
+.site-brand{display:inline-flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-size:20px;font-weight:950;letter-spacing:-.5px;white-space:nowrap}
+.site-brand-mark{width:30px;height:24px;position:relative;display:inline-block}.site-brand-mark:before,.site-brand-mark:after{content:"";position:absolute;left:2px;right:2px;border:2px solid #526c84;border-radius:50%}.site-brand-mark:before{height:8px;bottom:2px}.site-brand-mark:after{height:5px;bottom:7px;left:7px;right:7px}.site-brand-mark i{position:absolute;left:11px;top:0;width:8px;height:8px;border:2px solid var(--teal);border-radius:50%;background:#0b1726}
+.site-nav{display:flex;align-items:center;gap:6px;flex:1}.site-nav a{color:#aebfd0;text-decoration:none;padding:9px 13px;border-radius:9px;font-size:13px;font-weight:850}.site-nav a:hover{color:#fff;background:#11263a}.site-nav a.active{color:#fff;background:#173047;box-shadow:inset 0 -2px 0 var(--teal)}
+.site-admin-btn{margin-left:auto;white-space:nowrap}.top-row{display:block;margin-bottom:10px}.top-row>.hero{display:none}.admin-panel{display:none;width:min(360px,100%);margin:0 0 10px auto}.admin-panel.header-open{display:flex}.admin-title{font-size:15px}
+@media(max-width:680px){.site-header-inner{gap:10px;flex-wrap:wrap}.site-brand{font-size:17px}.site-nav{order:3;width:100%;flex-basis:100%;border-top:1px solid rgba(53,82,107,.45);padding-top:7px}.site-nav a{flex:1;text-align:center;padding:8px 6px}.site-admin-btn{padding:8px 10px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -332,16 +351,30 @@ body.is-admin .admin-only{display:block}
   border-radius:8px;
   font-size:12px;
 }
+
+.hall-of-fame-panel{margin-top:8px;padding:16px}
+.hall-of-fame-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.hall-of-fame-head h2{margin:0 0 4px;font-size:20px}
+.hall-of-fame-head p{margin:0;color:var(--soft);font-size:11px}
+.hall-of-fame-panel .archive-head{align-items:flex-start}
+.hall-of-fame-panel .archive-podium{margin-top:10px}
+
 </style>
 </head>
 <body>
 <main class="app">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a class="site-brand" href="index.html" aria-label="Klaskligan startsida"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a>
+      <nav class="site-nav" aria-label="Huvudmeny">
+        <a class="active" href="index.html">Tabell</a>
+        <a href="players.html">Spelarprofiler</a>
+      </nav>
+      <button id="adminMenuBtn" type="button" class="btn site-admin-btn">Admin</button>
+    </div>
+  </header>
   <div class="top-row">
-    <section class="panel hero">
-      <div class="hero-title"><div class="logo"><span class="logo-dot"></span></div><h1>Klask Multiplayer Tracker</h1></div>
-    </section>
-
-    <section class="panel admin-panel">
+    <section id="headerAdminPanel" class="panel admin-panel">
       <div class="admin-title">Admin</div>
       <div class="auth-box">
         <span id="authStatus" class="auth-status"><span class="dot"></span><span id="authStatusText">Visningsläge (publikt)</span></span>
@@ -380,23 +413,25 @@ body.is-admin .admin-only{display:block}
         <div id="roundSlots" class="slots"></div>
         <div id="loserStage" class="loser-stage hidden"><div id="matchRounds" class="match-rounds"></div><button id="saveRound" class="btn btn-primary save-round" disabled>Spara omgång (3 matcher)</button></div>
       </section>
-<div style="height:8px"></div>
-<section class="panel archive-panel">
-    <h2>Tidigare månader</h2>
-    <p>Här sparas slutställningen när du avslutar en lista. Klicka på en månad för att visa hela slutrankingen.</p>
-    <div id="archiveList" class="archive-list"></div>
-  </section>
+
     </div>
 
     <aside class="right-col">
       <section id="leaderPanel" class="panel leader-panel">
-<div class="standings-head-row">
-  <h2 class="standings-title"><span id="standingsTitle">Ställning</span> <button id="rankingInfoBtn" class="info-btn" type="button" aria-label="Så fungerar ställningen" title="Så fungerar ställningen">ⓘ</button></h2>
+<div class="standings-head-row period-view-head">
+  <div>
+    <h2 class="standings-title"><span id="standingsTitle">Ställning</span> <button id="rankingInfoBtn" class="info-btn" type="button" aria-label="Så fungerar ställningen" title="Så fungerar ställningen">ⓘ</button></h2>
+    <div class="period-selector-wrap">
+      <select id="periodSelect" class="period-select" aria-label="Välj period"></select>
+    </div>
+  </div>
   <div id="periodControls" class="period-controls-inline admin-only hidden">
     <div id="periodStatus" class="period-status"></div>
     <button id="editPeriodDates" type="button" class="btn period-btn">Redigera datum</button>
     <button id="deleteSeason" type="button" class="btn btn-danger period-btn">Avsluta period</button>
     <button id="startNewPeriod" type="button" class="btn btn-primary period-btn hidden">Starta ny period</button>
+    <button id="editSelectedArchive" type="button" class="btn period-btn hidden">Redigera period</button>
+    <button id="deleteSelectedArchive" type="button" class="btn btn-danger period-btn hidden">Ta bort period</button>
   </div>
 </div>
 <div id="periodDuration" class="period-duration" aria-label="Periodens längd">
@@ -414,9 +449,20 @@ body.is-admin .admin-only{display:block}
 <div id="rankingInfo" class="info-popover hidden"><strong>Hur bestäms ställningen?</strong><br>Ställningen använder en Bayesian-ranking med m = 18 och 25 % som utgångspunkt, eftersom en av fyra spelare förlorar varje match. Minst 18 spelade matcher krävs för en officiell placering. Spelare med färre än 18 matcher visas längst ner som <strong>DNQ</strong> (Did Not Qualify) tills de når 18 matcher. Vid 18 matcher väger spelarens egna resultat och ligans utgångsvärde lika mycket; därefter får de egna resultaten allt större betydelse.</div>
 <div id="leaderboard" class="leaderboard"></div>
 </section>
+      <section class="panel archive-panel hall-of-fame-panel">
+    <div class="hall-of-fame-head">
+      <div>
+        <h2>Hall of Fame</h2>
+        <p>Topp 3 från varje avslutad period.</p>
+      </div>
+    </div>
+    <div id="archiveList" class="archive-list"></div>
+      </section>
       <section class="panel history-panel"><h2>Matchhistorik</h2><div id="history" class="history-list"></div></section>
     </aside>
   </section>
+
+
 </main>
 
 
@@ -435,7 +481,7 @@ body.is-admin .admin-only{display:block}
 <div id="deleteSeasonModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="deleteSeasonTitle">
   <div class="modal-card">
     <h3 id="deleteSeasonTitle">Avsluta pågående period?</h3>
-    <p style="color:var(--soft);line-height:1.5;margin:0">Den aktuella slutställningen, spelarna och hela matchhistoriken sparas under Tidigare månader. Perioden låses därefter för redigering tills du väljer Starta ny period. Spelarna följer med till nästa period.</p>
+    <p style="color:var(--soft);line-height:1.5;margin:0">Den aktuella slutställningen, spelarna och hela matchhistoriken sparas i Hall of Fame. Perioden låses därefter för redigering tills du väljer Starta ny period. Spelarna följer med till nästa period.</p>
     <div class="modal-actions">
       <button id="cancelDeleteSeason" type="button" class="btn">Nej</button>
       <button id="confirmDeleteSeason" type="button" class="btn btn-danger">Ja, avsluta perioden</button>
@@ -571,6 +617,48 @@ function saveData(){persistState()}
 function loadArchive(){return archiveCache}
 function saveArchive(items){archiveCache=items;persistState()}
 
+// Vilken period som visas i huvudvyn. "current" betyder den aktiva/pågående perioden.
+let selectedPeriodKey='current';
+function selectedArchiveItem(){
+  if(!String(selectedPeriodKey).startsWith('archive:'))return null;
+  const id=Number(String(selectedPeriodKey).slice(8));
+  return archiveCache.find(item=>Number(item.id)===id)||null;
+}
+function getViewedPeriod(){
+  const archived=selectedArchiveItem();
+  if(!archived)return{
+    key:'current',isCurrent:true,name:(data.listName||'').trim()||'Pågående period',
+    players:Array.isArray(data.players)?data.players:[],rounds:Array.isArray(data.rounds)?data.rounds:[],
+    inactivePlayerIds:Array.isArray(data.inactivePlayerIds)?data.inactivePlayerIds:[],
+    periodStartedAt:data.periodStartedAt||null,periodEndedAt:data.periodEndedAt||null,
+    periodPlannedEndAt:data.periodPlannedEndAt||null,periodClosed:data.periodClosed===true
+  };
+  return{
+    key:selectedPeriodKey,isCurrent:false,name:(archived.name||'').trim()||'Tidigare period',
+    players:Array.isArray(archived.players)?archived.players:[],rounds:Array.isArray(archived.rounds)?archived.rounds:[],
+    inactivePlayerIds:[],periodStartedAt:archived.period_started_at||null,
+    periodEndedAt:archived.period_ended_at||archived.saved_at||null,
+    periodPlannedEndAt:archived.period_planned_end_at||null,periodClosed:true,archiveItem:archived
+  };
+}
+function renderPeriodSelector(){
+  const select=$('#periodSelect');if(!select)return;
+  const previous=selectedPeriodKey;
+  select.innerHTML='';
+  const currentOpt=document.createElement('option');
+  currentOpt.value='current';
+  currentOpt.textContent=`${(data.listName||'').trim()||'Pågående period'}${data.periodClosed?' · avslutad':' · aktuell'}`;
+  select.appendChild(currentOpt);
+  archiveCache.forEach(item=>{
+    const opt=document.createElement('option');
+    opt.value=`archive:${item.id}`;
+    opt.textContent=item.name||'Tidigare period';
+    select.appendChild(opt);
+  });
+  if([...select.options].some(o=>o.value===previous))select.value=previous;
+  else{selectedPeriodKey='current';select.value='current'}
+}
+
 // Hjälpfunktioner för framtida statistikvyer.
 // Äldre arkivposter som saknar rounds fungerar fortfarande och ger bara en tom lista.
 function getArchivedRounds(item){
@@ -650,7 +738,7 @@ function snapshotCurrentStandings(){
     ranking,
     // Spara även spelare och alla matcher för perioden.
     // Det gör att vi senare kan räkna månadsstatistik, H2H och all-time-statistik.
-    players:data.players.map(p=>({id:p.id,name:p.name})),
+    players:data.players.map(p=>({id:p.id,name:p.name,motto:p.motto||'',image_url:p.image_url||''})),
     rounds:data.rounds.map(r=>({
       id:r.id,
       player_ids:Array.isArray(r.player_ids)?[...r.player_ids]:[],
@@ -672,7 +760,7 @@ function openArchiveModal(item){
   const title=$('#archiveModalTitle');
   const root=$('#archiveModalList');
   if(!modal||!title||!root)return;
-  title.textContent=item.name||'Tidigare månad';
+  title.textContent=item.name||'Slutställning';
   root.innerHTML='';
   const fullRanking=item.ranking||[];
   fullRanking.forEach(p=>{
@@ -696,7 +784,7 @@ function renderArchive(){
   const archive=loadArchive();
   root.innerHTML='';
   if(!archive.length){
-    root.innerHTML='<div class="archive-empty">Inga tidigare slutställningar sparade ännu.</div>';
+    root.innerHTML='<div class="archive-empty">Inga avslutade perioder i Hall of Fame ännu.</div>';
     return;
   }
   archive.forEach(item=>{
@@ -723,7 +811,7 @@ function renderArchive(){
     const deleteBtn=box.querySelector('.archive-delete');
     if(deleteBtn)deleteBtn.onclick=async()=>{
       if(!isAdmin)return toast('Du måste vara inloggad som admin.');
-      if(!confirm(`Ta bort ${item.name||'den här tävlingen'} permanent från Tidigare månader?`))return;
+      if(!confirm(`Ta bort ${item.name||'den här tävlingen'} permanent från Hall of Fame?`))return;
       archiveCache=archiveCache.filter(x=>x.id!==item.id);
       await persistState();render();toast('Tävlingen togs bort.');
     };
@@ -819,23 +907,33 @@ function recentForm(playerRounds,pid,count=6){
 }
 
 function computeState(){
-  const chronologicalRounds=[...data.rounds].sort((a,b)=>a.id-b.id);
-  const prevPositions=previousRankingPositions(chronologicalRounds);
-  const inactiveIds=new Set(Array.isArray(data.inactivePlayerIds)?data.inactivePlayerIds:[]);
-  const players=data.players.filter(p=>!inactiveIds.has(p.id)).map(p=>{
-    const rs=chronologicalRounds.filter(r=>Array.isArray(r.player_ids)&&r.player_ids.includes(p.id));
+  const view=getViewedPeriod();
+  const sourceRounds=[...view.rounds].sort((a,b)=>(a.id||0)-(b.id||0));
+  const sourcePlayers=Array.isArray(view.players)?view.players:[];
+  const previousPositionsFor=(chronologicalRounds)=>{
+    if(!chronologicalRounds.length)return new Map();
+    const previousRounds=chronologicalRounds.slice(0,-1);
+    const prevPlayers=sourcePlayers.map(p=>playerStatsFromRounds(p,previousRounds));
+    const ordered=rankingOrder(prevPlayers);
+    return new Map(ordered.map((p,i)=>[p.id,i+1]));
+  };
+  const prevPositions=previousPositionsFor(sourceRounds);
+  const inactiveIds=new Set(view.isCurrent&&Array.isArray(view.inactivePlayerIds)?view.inactivePlayerIds:[]);
+  const players=sourcePlayers.filter(p=>!inactiveIds.has(p.id)).map(p=>{
+    const rs=sourceRounds.filter(r=>Array.isArray(r.player_ids)&&r.player_ids.includes(p.id));
     const games=rs.length,losses=rs.filter(r=>r.loser_id===p.id).length,pct=games?losses/games*100:null;
     const rankScore=bayesianRankingScore(games,losses,0,0.25);
     return{id:p.id,name:p.name,games,losses,loss_pct:pct,rank_score:rankScore,activity_penalty:0,last_loss:lastLoss(p.id,rs),form:recentForm(rs,p.id,6),streak:currentStreak(rs,p.id),previous_position:prevPositions.get(p.id)||null};
   });
   const ordered=rankingOrder(players);
   let qualifiedPosition=0;
-  ordered.forEach(p=>{
-    p.qualified=p.games>=MIN_MATCHES;
-    p.current_position=p.qualified?++qualifiedPosition:null;
-  });
-  const rounds=[...data.rounds].sort((a,b)=>b.id-a.id).map(r=>({id:r.id,played_at:r.played_at,loser_id:r.loser_id,loser_name:(data.players.find(p=>p.id===r.loser_id)||{name:'Okänd'}).name,players:(r.player_ids||[]).map(id=>data.players.find(p=>p.id===id)).filter(Boolean).map(p=>({id:p.id,name:p.name}))}));
-  state={players,rounds};
+  ordered.forEach(p=>{p.qualified=p.games>=MIN_MATCHES;p.current_position=p.qualified?++qualifiedPosition:null});
+  const rounds=[...view.rounds].sort((a,b)=>(b.id||0)-(a.id||0)).map(r=>({
+    id:r.id,played_at:r.played_at,loser_id:r.loser_id,
+    loser_name:(sourcePlayers.find(p=>p.id===r.loser_id)||{name:'Okänd'}).name,
+    players:(r.player_ids||[]).map(id=>sourcePlayers.find(p=>p.id===id)).filter(Boolean).map(p=>({id:p.id,name:p.name}))
+  }));
+  state={players,rounds,view};
 }
 function formatPeriodDate(value){
   const d=new Date(value);
@@ -845,29 +943,54 @@ function formatPeriodDate(value){
 function renderPeriodDuration(){
   const wrap=$('#periodDuration'),startEl=$('#periodStartLabel'),durationEl=$('#periodDurationLabel'),endEl=$('#periodEndLabel'),progressEl=$('#periodDurationProgress');
   if(!wrap||!startEl||!durationEl||!endEl)return;
-  let start=new Date(data.periodStartedAt||'');
+  const view=getViewedPeriod();
+  let start=new Date(view.periodStartedAt||'');
   if(Number.isNaN(start.getTime())){
-    const dated=(data.rounds||[]).map(r=>new Date(r.played_at)).filter(d=>!Number.isNaN(d.getTime())).sort((a,b)=>a-b);
+    const dated=(view.rounds||[]).map(r=>new Date(r.played_at)).filter(d=>!Number.isNaN(d.getTime())).sort((a,b)=>a-b);
     start=dated[0]||new Date();
   }
-  const planned=data.periodPlannedEndAt?new Date(data.periodPlannedEndAt):null;
-  const actualEnd=data.periodClosed&&data.periodEndedAt?new Date(data.periodEndedAt):new Date();
+  const planned=view.periodPlannedEndAt?new Date(view.periodPlannedEndAt):null;
+  const actualEnd=view.periodClosed&&view.periodEndedAt?new Date(view.periodEndedAt):new Date();
   const end=(planned&&!Number.isNaN(planned.getTime()))?planned:actualEnd;
   const dayMs=86400000;
   const totalMs=Math.max(dayMs,end-start);
-  const now=data.periodClosed&&data.periodEndedAt?new Date(data.periodEndedAt):new Date();
+  const now=view.periodClosed&&view.periodEndedAt?new Date(view.periodEndedAt):new Date();
   const progress=Math.max(0,Math.min(1,(now-start)/totalMs));
-  const elapsedDays=Math.max(1,Math.floor((now-start)/dayMs)+1);
+  const elapsedDays=Math.max(1,Math.min(Math.floor((now-start)/dayMs)+1,Math.floor(totalMs/dayMs)+1));
   const totalDays=Math.max(1,Math.floor((end-start)/dayMs)+1);
   startEl.textContent=formatPeriodDate(start);
   durationEl.textContent=(planned&&!Number.isNaN(planned.getTime()))?`${elapsedDays} av ${totalDays} dagar`:(elapsedDays===1?'1 dag':`${elapsedDays} dagar`);
-  endEl.textContent=data.periodClosed&&data.periodEndedAt?formatPeriodDate(new Date(data.periodEndedAt)):(planned&&!Number.isNaN(planned.getTime())?formatPeriodDate(planned):'Idag');
+  endEl.textContent=view.periodClosed&&view.periodEndedAt?formatPeriodDate(new Date(view.periodEndedAt)):(planned&&!Number.isNaN(planned.getTime())?formatPeriodDate(planned):'Idag');
   if(progressEl)progressEl.style.width=`${progress*100}%`;
-  wrap.classList.toggle('is-closed',data.periodClosed===true);
+  wrap.classList.toggle('is-closed',view.periodClosed===true);
 }
 
 
-function render(){computeState();const closed=data.periodClosed===true;document.body.classList.toggle('period-closed',closed);const roundNumber=$('#currentRoundNumber');if(roundNumber)roundNumber.textContent=`#${Math.floor(data.rounds.length/3)+1}`;renderPlayers();renderSlots();renderLeaderboard();renderHistory();renderArchive();const name=(data.listName||'').trim();const title=$('#standingsTitle');if(title)title.textContent=name?'Ställning i '+name:'Ställning';renderPeriodDuration();const inp=$('#listName'),saveBtn=$('#saveListName'),editBtn=$('#editListName');if(inp)inp.value=data.listName||'';const hasName=!!name;if(inp)inp.disabled=hasName||closed;if(saveBtn){saveBtn.classList.toggle('hidden',hasName||closed);if(!hasName)saveBtn.textContent='Spara namn'}if(editBtn)editBtn.classList.toggle('hidden',!hasName||closed);const controls=$('#periodControls'),editDatesBtn=$('#editPeriodDates'),endBtn=$('#deleteSeason'),startBtn=$('#startNewPeriod'),status=$('#periodStatus');if(controls)controls.classList.toggle('hidden',!isAdmin);if(editDatesBtn)editDatesBtn.classList.toggle('hidden',!isAdmin||closed);if(endBtn)endBtn.classList.toggle('hidden',!isAdmin||closed);if(startBtn)startBtn.classList.toggle('hidden',!isAdmin||!closed);if(status)status.textContent=closed?'Perioden är avslutad och sparad i Tidigare månader.':'Pågående period';}
+function render(){
+  renderPeriodSelector();
+  computeState();
+  const view=getViewedPeriod();
+  const currentView=view.isCurrent;
+  const closed=data.periodClosed===true;
+  document.body.classList.toggle('period-closed',currentView&&closed);
+  document.body.classList.toggle('period-history-view',!currentView);
+  const roundNumber=$('#currentRoundNumber');if(roundNumber)roundNumber.textContent=`#${Math.floor(data.rounds.length/3)+1}`;
+  renderPlayers();renderSlots();renderLeaderboard();renderHistory();renderArchive();
+  const title=$('#standingsTitle');if(title)title.textContent='Ställning';
+  renderPeriodDuration();
+  const inp=$('#listName'),saveBtn=$('#saveListName'),editBtn=$('#editListName');
+  const activeName=(data.listName||'').trim();if(inp)inp.value=data.listName||'';const hasName=!!activeName;
+  if(inp)inp.disabled=hasName||closed;if(saveBtn){saveBtn.classList.toggle('hidden',hasName||closed);if(!hasName)saveBtn.textContent='Spara namn'}if(editBtn)editBtn.classList.toggle('hidden',!hasName||closed);
+  const controls=$('#periodControls'),editDatesBtn=$('#editPeriodDates'),endBtn=$('#deleteSeason'),startBtn=$('#startNewPeriod'),status=$('#periodStatus'),editArchiveBtn=$('#editSelectedArchive'),deleteArchiveBtn=$('#deleteSelectedArchive');
+  if(controls)controls.classList.toggle('hidden',!isAdmin);
+  if(editDatesBtn)editDatesBtn.classList.toggle('hidden',!isAdmin||!currentView||closed);
+  if(endBtn)endBtn.classList.toggle('hidden',!isAdmin||!currentView||closed);
+  if(startBtn)startBtn.classList.toggle('hidden',!isAdmin||!currentView||!closed);
+  if(editArchiveBtn)editArchiveBtn.classList.toggle('hidden',!isAdmin||currentView);
+  if(deleteArchiveBtn)deleteArchiveBtn.classList.toggle('hidden',!isAdmin||currentView);
+  if(status)status.textContent=currentView?(closed?'Perioden är avslutad.':'Pågående period'):'Historisk period';
+}
+
 function renderPlayers(){
   const root=$('#playersGrid');root.innerHTML='';
   if(!state.players.length){root.innerHTML='<div class="empty">Inga spelare ännu.</div>';return}
@@ -980,7 +1103,7 @@ function renderLeaderboard(){
   header.classList.toggle('admin-score-visible',isAdmin);
   root.appendChild(header);
   ranked.forEach(p=>{
-    const row=document.createElement('div');row.className='rank-row'+(p.games<MIN_MATCHES?' dnq-row':'')+(selected.has(p.id)?' selected-rank-row':'');
+    const row=document.createElement('div');row.className='rank-row'+(p.games<MIN_MATCHES?' dnq-row':'')+(getViewedPeriod().isCurrent&&selected.has(p.id)?' selected-rank-row':'');
     const qualified=p.games>=MIN_MATCHES;
     const position=p.current_position;
     let trophy='',cls='';
@@ -1002,7 +1125,7 @@ function renderLeaderboard(){
     const formHtml=`<div class="rank-form">${emptyDots}${formDots}</div>`;
     const scoreHtml=isAdmin?`<div class="rank-score">${p.rank_score==null?'–':p.rank_score.toFixed(2).replace('.',',')}</div>`:'';
     row.classList.toggle('admin-score-visible',isAdmin);
-    row.innerHTML=`<div class="rank-pos">${positionHtml}</div><div class="rank-name">${esc(p.name)}</div><div class="rank-games">${gamesHtml}</div><div class="rank-losses">${p.losses}</div><div class="rank-pct ${pctClass}">${pct}</div>${formHtml}${scoreHtml}`;
+    row.innerHTML=`<div class="rank-pos">${positionHtml}</div><div class="rank-name"><a href="player.html?id=${encodeURIComponent(p.id)}" title="Öppna ${esc(p.name)}s spelarprofil">${esc(p.name)}</a></div><div class="rank-games">${gamesHtml}</div><div class="rank-losses">${p.losses}</div><div class="rank-pct ${pctClass}">${pct}</div>${formHtml}${scoreHtml}`;
     root.appendChild(row);
   });
 }
@@ -1025,7 +1148,7 @@ function getHistoryMatches(){
 function buildHistoryCard(m){
   const c=document.createElement('div');
   c.className='history-card';
-  const editBtn=isAdmin?`<button class="btn" data-edit-match="${m.ids.join(',')}">Redigera</button>`:'';
+  const editBtn=isAdmin&&getViewedPeriod().isCurrent&&!data.periodClosed?`<button class="btn" data-edit-match="${m.ids.join(',')}">Redigera</button>`:'';
   const roundHtml=m.rounds.map((r,i)=>`<span class="history-round">Match ${i+1}: <b>${esc(r.loser_name)}</b></span>`).join('');
   c.innerHTML=`<div class="history-date">${fmt(m.played_at)}</div><div class="history-main"><strong>Omgång #${m.roundNumber}</strong><span>${m.players.map(x=>esc(x.name)).join(', ')}</span><div class="history-rounds">${roundHtml}</div></div>${editBtn}`;
   return c;
@@ -1228,7 +1351,7 @@ $('#confirmStartPeriod').onclick=async()=>{
   const startObj=new Date(startDate+'T00:00:00');
   const endObj=new Date(endDate+'T23:59:59');
   if(endObj<startObj)return toast('Slutdatum måste vara efter startdatum.');
-  const existingPlayers=data.players.map(p=>({id:p.id,name:p.name}));
+  const existingPlayers=data.players.map(p=>({id:p.id,name:p.name,motto:p.motto||'',image_url:p.image_url||''}));
   const nextPlayerId=data.nextPlayerId;
   const inactivePlayerIds=Array.isArray(data.inactivePlayerIds)?[...data.inactivePlayerIds]:[];
   data={
@@ -1237,7 +1360,8 @@ $('#confirmStartPeriod').onclick=async()=>{
     periodStartedAt:startObj.toISOString(),periodEndedAt:null,periodPlannedEndAt:endObj.toISOString(),
     inactivePlayerIds
   };
-  selected.clear();matchLosers=[null,null,null];editing=null;showAllHistory=false;
+  selectedPeriodKey='current';
+  selected.clear();matchLosers=[null,null,null];editing=null;showAllHistory=false;selectedPeriodKey='current';
   await persistState();
   $('#startPeriodModal').classList.add('hidden');
   render();toast('Ny period startad.');
@@ -1245,6 +1369,23 @@ $('#confirmStartPeriod').onclick=async()=>{
 $('#startPeriodModal').addEventListener('click',e=>{if(e.target===$('#startPeriodModal'))$('#startPeriodModal').classList.add('hidden')});
 $('#deleteSeasonModal').addEventListener('click',e=>{if(e.target===$('#deleteSeasonModal'))$('#deleteSeasonModal').classList.add('hidden')});
 
+$('#periodSelect').onchange=e=>{
+  selectedPeriodKey=e.target.value||'current';
+  selected.clear();matchLosers=[null,null,null];editing=null;showAllHistory=false;
+  closeHistoryModal();closeArchiveModal();render();
+};
+$('#editSelectedArchive').onclick=()=>{
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  const item=selectedArchiveItem();if(!item)return;openArchiveEdit(item);
+};
+$('#deleteSelectedArchive').onclick=async()=>{
+  if(!isAdmin)return toast('Du måste vara inloggad som admin.');
+  const item=selectedArchiveItem();if(!item)return;
+  if(!confirm(`Ta bort ${item.name||'den här perioden'} permanent?`))return;
+  archiveCache=archiveCache.filter(x=>Number(x.id)!==Number(item.id));
+  selectedPeriodKey='current';
+  await persistState();render();toast('Perioden togs bort.');
+};
 $('#rankingInfoBtn').onclick=()=>$('#rankingInfo').classList.toggle('hidden');
 
 function fmt(s){const d=new Date(s);return Number.isNaN(d.getTime())?(s||'Datum saknas'):new Intl.DateTimeFormat('sv-SE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d)}
@@ -1289,6 +1430,14 @@ init();
     document.getElementById('copyData')?.addEventListener('click',copyCurrentData);
   });
 })();
+
+// Global header admin menu
+const adminMenuBtn=document.getElementById('adminMenuBtn');
+const headerAdminPanel=document.getElementById('headerAdminPanel');
+if(adminMenuBtn&&headerAdminPanel){
+  adminMenuBtn.addEventListener('click',()=>headerAdminPanel.classList.toggle('header-open'));
+  if(location.hash==='#admin')headerAdminPanel.classList.add('header-open');
+}
 </script>
 
 
@@ -1854,4 +2003,28 @@ body:not(.is-admin) .player-remove-btn{display:none!important}
 .archive-podium-player:nth-child(2) .archive-podium-name strong{font-size:14px}
 .archive-podium-player:nth-child(3) .archive-podium-name{font-size:15px}
 .archive-podium-player:nth-child(3) .archive-podium-name strong{font-size:12px}
+</style>
+
+<style>
+/* Layout refinement: full-width public standings + Hall of Fame beside history */
+.period-selector-wrap{margin-top:5px!important;gap:0!important}
+.period-select{min-width:0!important;width:auto!important;max-width:210px!important;padding:6px 30px 6px 10px!important;border-radius:8px!important;font-size:12px!important;line-height:1.2!important}
+
+/* Hall of Fame and match history share the row below standings */
+.right-col{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:10px!important;align-items:start!important}
+.right-col > #leaderPanel{grid-column:1 / -1!important}
+.right-col > .hall-of-fame-panel{grid-column:1!important;margin-top:0!important}
+.right-col > .history-panel{grid-column:2!important;margin-top:0!important}
+
+/* Public mode: remove the empty admin column and let the main content use full width */
+body:not(.is-admin) .layout{grid-template-columns:minmax(0,1fr)!important}
+body:not(.is-admin) .left-col{display:none!important}
+body:not(.is-admin) .right-col{grid-column:1!important;width:100%!important}
+body:not(.is-admin) #leaderPanel{min-width:0!important;width:100%!important}
+
+@media(max-width:820px){
+  .right-col{display:flex!important;flex-direction:column!important}
+  .right-col > #leaderPanel,.right-col > .hall-of-fame-panel,.right-col > .history-panel{width:100%!important}
+  .period-select{max-width:190px!important;width:auto!important}
+}
 </style>
