@@ -9,7 +9,70 @@
 @media(max-width:820px){.players-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.site-header-inner{gap:8px;flex-wrap:wrap}.site-brand{font-size:17px}.site-nav{order:3;flex-basis:100%;border-top:1px solid rgba(53,82,107,.45);padding-top:7px}.site-nav a{flex:1;text-align:center;padding:8px 5px}.players-toolbar{align-items:stretch;flex-direction:column}.search{width:100%}}@media(max-width:500px){.players-grid{grid-template-columns:1fr}.page-head h1{font-size:31px}}
 
 .site-auth-btn{cursor:pointer;font-family:inherit}.auth-modal-backdrop{display:none;position:fixed;inset:0;background:rgba(2,8,14,.72);backdrop-filter:blur(4px);z-index:90}.auth-modal-backdrop.open{display:block}.auth-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,calc(100% - 28px));padding:22px;z-index:91;box-shadow:0 28px 80px rgba(0,0,0,.48)}.auth-modal.open{display:block}.auth-modal h2{margin:0 0 16px;font-size:20px}.auth-modal-close{position:absolute;right:12px;top:10px;border:0;background:transparent;color:#a9bfd0;font-size:24px;cursor:pointer}.auth-modal input{width:100%;padding:11px 12px;margin-top:9px;border:1px solid #35556d;border-radius:10px;background:#081725;color:#fff;outline:none}.auth-modal .auth-submit{width:100%;margin-top:12px;padding:10px 12px;border:1px solid #39bdb3;border-radius:10px;background:linear-gradient(135deg,#2faaa5,#45c8bd);color:#fff;font-weight:850;cursor:pointer}.auth-error{min-height:18px;margin-top:9px;color:#ff9b9b;font-size:12px}
-</style></head><body>
+</style>
+<style>
+/* Shared wide desktop canvas: matches the original index width */
+.app{width:min(1550px,calc(100% - 20px))!important;margin-left:auto!important;margin-right:auto!important}
+.site-header{width:min(1550px,calc(100% - 20px))!important;margin-left:auto!important;margin-right:auto!important}
+@media(max-width:520px){.app,.site-header{width:calc(100% - 10px)!important}}
+</style>
+
+<style id="unified-global-header">
+/* Identisk global header pa alla tre sidor */
+.site-header{
+  background:rgba(7,19,31,.94)!important;
+  border:1px solid #29475f!important;
+  border-radius:16px!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.18)!important;
+  backdrop-filter:blur(14px)!important;
+  position:sticky!important;
+  top:10px!important;
+  z-index:30!important;
+}
+.site-header-inner{
+  min-height:64px!important;
+  height:64px!important;
+  padding:9px 14px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:26px!important;
+}
+.site-brand{
+  display:inline-flex!important;align-items:center!important;gap:10px!important;
+  color:#eef5fb!important;text-decoration:none!important;
+  font-size:19px!important;font-weight:950!important;letter-spacing:-.4px!important;
+  line-height:1!important;white-space:nowrap!important;
+}
+.site-brand-mark{width:30px!important;height:24px!important;flex:0 0 30px!important}
+.site-nav{display:flex!important;align-items:center!important;gap:6px!important;flex:1!important}
+.site-nav a{
+  color:#aebfd0!important;text-decoration:none!important;padding:9px 13px!important;
+  border-radius:9px!important;font-size:13px!important;font-weight:850!important;
+  line-height:18px!important;
+}
+.site-nav a:hover{color:#fff!important;background:#11263a!important}
+.site-nav a.active{color:#fff!important;background:#173047!important;box-shadow:inset 0 -2px 0 #43d7c4!important}
+.site-admin-btn,.site-admin-link{
+  margin-left:auto!important;white-space:nowrap!important;cursor:pointer!important;
+  color:#dce8f2!important;border:1px solid #35556d!important;background:#10273b!important;
+  border-radius:10px!important;padding:8px 11px!important;font-size:12px!important;
+  font-weight:850!important;line-height:18px!important;font-family:inherit!important;
+  min-height:36px!important;height:36px!important;box-shadow:none!important;
+}
+.site-admin-btn:hover,.site-admin-link:hover{border-color:#43d7c4!important;filter:none!important}
+@media(max-width:680px){
+  .site-header-inner{height:auto!important;min-height:64px!important;gap:8px!important;flex-wrap:wrap!important}
+  .site-brand{font-size:17px!important}
+  .site-nav{order:3!important;width:100%!important;flex-basis:100%!important;border-top:1px solid rgba(53,82,107,.45)!important;padding-top:7px!important}
+  .site-nav a{flex:1!important;text-align:center!important;padding:8px 5px!important}
+}
+</style>
+
+<style id="unified-header-placement">
+.site-header{width:min(1550px,calc(100% - 20px))!important;margin:10px auto 0!important}
+@media(max-width:520px){.site-header{width:calc(100% - 10px)!important}}
+</style>
+</head><body>
 <header class="site-header"><div class="site-header-inner"><a class="site-brand" href="index.html"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a><nav class="site-nav"><a href="index.html">Tabell</a><a class="active" href="players.html">Spelarprofiler</a></nav><button id="siteAuthBtn" type="button" class="site-admin-link site-auth-btn">Logga in</button></div></header>
 <main class="app"><section class="panel page-head"><div class="eyebrow">Spelare</div><h1>Spelarprofiler</h1><p>Välj en spelare för att se statistik, periodhistorik, form och H2H.</p></section><div class="players-toolbar"><h2>Alla spelare</h2><input id="playerSearch" class="search" type="search" placeholder="Sök spelare…"></div><div id="playersGrid" class="players-grid"><div class="empty">Laddar spelare…</div></div></main>
 
