@@ -12,13 +12,15 @@
 .site-header-inner{min-height:64px;padding:9px 14px;display:flex;align-items:center;gap:26px}.site-brand{display:inline-flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-size:19px;font-weight:950;letter-spacing:-.4px}.site-brand-mark{width:30px;height:24px;position:relative}.site-brand-mark:before,.site-brand-mark:after{content:"";position:absolute;left:2px;right:2px;border:2px solid #526c84;border-radius:50%}.site-brand-mark:before{height:8px;bottom:2px}.site-brand-mark:after{height:5px;bottom:7px;left:7px;right:7px}.site-brand-mark i{position:absolute;left:11px;top:0;width:8px;height:8px;border:2px solid var(--teal);border-radius:50%;background:#0b1726}.site-nav{display:flex;gap:6px;flex:1}.site-nav a{color:#aebfd0;text-decoration:none;padding:9px 13px;border-radius:9px;font-size:13px;font-weight:850}.site-nav a:hover{color:#fff;background:#11263a}.site-nav a.active{color:#fff;background:#173047;box-shadow:inset 0 -2px 0 var(--teal)}.site-admin-link{margin-left:auto;color:#dce8f2;text-decoration:none;border:1px solid #35556d;background:#10273b;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:850}.site-admin-link:hover{border-color:var(--teal)}
 @media(max-width:680px){.site-header-inner{gap:8px;flex-wrap:wrap}.site-brand{font-size:17px}.site-nav{order:3;flex-basis:100%;border-top:1px solid rgba(53,82,107,.45);padding-top:7px}.site-nav a{flex:1;text-align:center;padding:8px 5px}}
 
+
+.site-auth-btn{cursor:pointer;font-family:inherit}.auth-modal-backdrop{display:none;position:fixed;inset:0;background:rgba(2,8,14,.72);backdrop-filter:blur(4px);z-index:90}.auth-modal-backdrop.open{display:block}.auth-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,calc(100% - 28px));padding:22px;z-index:91;box-shadow:0 28px 80px rgba(0,0,0,.48)}.auth-modal.open{display:block}.auth-modal h2{margin:0 0 16px;font-size:20px}.auth-modal-close{position:absolute;right:12px;top:10px;border:0;background:transparent;color:#a9bfd0;font-size:24px;cursor:pointer}.auth-modal input{width:100%;padding:11px 12px;margin-top:9px;border:1px solid #35556d;border-radius:10px;background:#081725;color:#fff;outline:none}.auth-modal .auth-submit{width:100%;margin-top:12px;padding:10px 12px;border:1px solid #39bdb3;border-radius:10px;background:linear-gradient(135deg,#2faaa5,#45c8bd);color:#fff;font-weight:850;cursor:pointer}.auth-error{min-height:18px;margin-top:9px;color:#ff9b9b;font-size:12px}
 </style>
 </head>
 <body>
 <header class="site-header"><div class="site-header-inner">
   <a class="site-brand" href="index.html"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a>
   <nav class="site-nav" aria-label="Huvudmeny"><a href="index.html">Tabell</a><a class="active" href="players.html">Spelarprofiler</a></nav>
-  <a class="site-admin-link" href="index.html#admin">Admin</a>
+  <button id="siteAuthBtn" type="button" class="site-admin-link site-auth-btn">Logga in</button>
 </div></header>
 <div class="app">
 <a class="back" href="players.html">← Alla spelarprofiler</a>
@@ -28,10 +30,23 @@
 <section class="panel section"><div class="section-head"><h2>Periodhistorik</h2></div><div id="periodHistory" class="period-list"></div></section>
 </div>
 <div id="editModal" class="modal hidden"><div class="modal-card"><h2 style="margin-top:0">Redigera profil</h2><div class="field"><label>Motto / slogan</label><input id="editMotto" maxlength="120"></div><div class="field"><label>Profilbild</label><input id="editImageFile" type="file" accept="image/jpeg,image/png,image/webp"><small style="display:block;margin-top:7px;color:var(--muted)">JPG, PNG eller WebP. Bilden laddas upp till Supabase Storage.</small><div id="currentImageNote" style="margin-top:7px;color:var(--muted);font-size:12px"></div><button id="removeImageBtn" type="button" class="btn" style="margin-top:9px;display:none">Ta bort profilbild</button></div><div class="actions"><button id="cancelEdit" class="btn">Avbryt</button><button id="saveEdit" class="btn">Spara</button></div></div></div>
+
+<div id="authModalBackdrop" class="auth-modal-backdrop"></div><div id="authModal" class="panel auth-modal"><button id="authModalClose" class="auth-modal-close" type="button" aria-label="Stäng">×</button><h2>Logga in</h2><input id="siteAuthEmail" type="email" placeholder="E-post" autocomplete="username"><input id="siteAuthPassword" type="password" placeholder="Lösenord" autocomplete="current-password"><button id="siteAuthSubmit" class="auth-submit" type="button">Logga in</button><div id="siteAuthError" class="auth-error"></div></div>
 <script>
 const SUPABASE_URL='https://kqfrpvlelpoabfpkqjwn.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZnJwdmxlbHBvYWJmcGtxanduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDI3OTMsImV4cCI6MjEwMzQ3ODc5M30.GS747AnOYChYZbpvwKMrrEwQcDMaIBIP5apFlhczPi0';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); const M=18,C=.25,MIN=18;
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let siteSignedIn=false;
+function setSiteAuthButton(){const b=document.getElementById('siteAuthBtn');if(b)b.textContent=siteSignedIn?'Logga ut':'Logga in'}
+function openSiteAuth(){document.getElementById('authModal')?.classList.add('open');document.getElementById('authModalBackdrop')?.classList.add('open');setTimeout(()=>document.getElementById('siteAuthEmail')?.focus(),40)}
+function closeSiteAuth(){document.getElementById('authModal')?.classList.remove('open');document.getElementById('authModalBackdrop')?.classList.remove('open');}
+async function initSiteAuth(){const {data:{session}}=await sb.auth.getSession();siteSignedIn=!!session;setSiteAuthButton();sb.auth.onAuthStateChange((_e,s)=>{siteSignedIn=!!s;setSiteAuthButton();if(!s)closeSiteAuth()});}
+document.getElementById('siteAuthBtn')?.addEventListener('click',async()=>{if(siteSignedIn){await sb.auth.signOut();}else openSiteAuth()});
+document.getElementById('authModalClose')?.addEventListener('click',closeSiteAuth);document.getElementById('authModalBackdrop')?.addEventListener('click',closeSiteAuth);
+document.getElementById('siteAuthSubmit')?.addEventListener('click',async()=>{const email=document.getElementById('siteAuthEmail').value.trim(),password=document.getElementById('siteAuthPassword').value,err=document.getElementById('siteAuthError');err.textContent='';if(!email||!password){err.textContent='Fyll i e-post och lösenord.';return}const {error}=await sb.auth.signInWithPassword({email,password});if(error){err.textContent='Kunde inte logga in: '+error.message;return}document.getElementById('siteAuthPassword').value='';closeSiteAuth();location.reload()});
+document.getElementById('siteAuthPassword')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('siteAuthSubmit')?.click()});
+initSiteAuth();
+ const M=18,C=.25,MIN=18;
 let row=null,current=null,archive=[],playerId=Number(new URLSearchParams(location.search).get('id')),profilePlayer=null,isAdmin=false,canEditProfile=false,removeImageRequested=false;
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function allPlayers(){const map=new Map();[...(current?.players||[]),...archive.flatMap(a=>a.players||[])].forEach(p=>{if(!map.has(Number(p.id)))map.set(Number(p.id),p)});return [...map.values()]}
