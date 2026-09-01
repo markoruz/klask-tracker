@@ -360,6 +360,198 @@ body.is-admin .admin-only{display:block}
 .hall-of-fame-panel .archive-podium{margin-top:10px}
 
 </style>
+
+<style>
+/* Shared wide desktop canvas: matches the original index width */
+.app{width:min(1550px,calc(100% - 20px))!important;margin-left:auto!important;margin-right:auto!important}
+.site-header{width:min(1550px,calc(100% - 20px))!important;margin-left:auto!important;margin-right:auto!important}
+@media (min-width:1181px){
+  body.is-admin .layout{grid-template-columns:minmax(0,1.72fr) minmax(390px,.94fr)!important;gap:10px!important}
+  body.is-admin .players-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+@media(max-width:520px){.app,.site-header{width:calc(100% - 10px)!important}}
+</style>
+
+<style>
+/* ===== Admin dashboard layout =====
+   Logged-in admin: standings + round registration on top, players below.
+   Public mode keeps the existing full-width standings layout. */
+@media (min-width:1050px){
+  body.is-admin .layout{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.38fr) minmax(390px,1fr)!important;
+    gap:10px!important;
+    align-items:start!important;
+  }
+  body.is-admin .left-col,
+  body.is-admin .right-col{
+    display:contents!important;
+  }
+  body.is-admin #leaderPanel{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+  body.is-admin #roundPanel{
+    grid-column:2!important;
+    grid-row:1!important;
+    width:auto!important;
+    min-width:0!important;
+    align-self:stretch!important;
+  }
+  body.is-admin #managePanel{
+    grid-column:1 / -1!important;
+    grid-row:2!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+  body.is-admin .hall-of-fame-panel{
+    grid-column:1!important;
+    grid-row:3!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+  body.is-admin .history-panel{
+    grid-column:2!important;
+    grid-row:3!important;
+    width:auto!important;
+    min-width:0!important;
+    margin-top:0!important;
+  }
+
+  /* Give the player section the horizontal space it needs. */
+  body.is-admin #managePanel .players-grid{
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  body.is-admin #managePanel .player-card{
+    min-height:132px!important;
+  }
+
+  /* Keep the administrative fields useful without dominating the player area. */
+  body.is-admin #managePanel{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    column-gap:10px!important;
+    align-items:start!important;
+  }
+  body.is-admin #managePanel > .section-title,
+  body.is-admin #managePanel > .players-head,
+  body.is-admin #managePanel > #playersGrid{
+    grid-column:1 / -1!important;
+  }
+  body.is-admin #managePanel > .form-row{
+    margin-top:0!important;
+    grid-template-columns:minmax(130px,180px) minmax(0,1fr) auto!important;
+  }
+  body.is-admin #managePanel > .players-head{
+    margin-top:14px!important;
+  }
+
+  /* The top cards should feel like a single admin dashboard row. */
+  body.is-admin #leaderPanel,
+  body.is-admin #roundPanel{
+    min-height:100%!important;
+  }
+  body.is-admin #roundPanel .slots{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  body.is-admin #roundPanel .loser-grid,
+  body.is-admin #roundPanel .match-round-block .loser-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+}
+
+@media (min-width:1050px) and (max-width:1280px){
+  body.is-admin .layout{grid-template-columns:minmax(0,1.25fr) minmax(360px,.95fr)!important}
+  body.is-admin #managePanel .players-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  body.is-admin #managePanel > .form-row{grid-template-columns:1fr!important}
+}
+</style>
+
+<style>
+/* ===== Compact admin dashboard v2 =====
+   Give the standings more room, keep registration compact, and reduce vertical density. */
+@media (min-width:1050px){
+  body.is-admin .layout{
+    grid-template-columns:minmax(0,1.72fr) minmax(360px,.88fr)!important;
+    gap:10px!important;
+  }
+
+  /* Standings: compact 7-column admin table so FORM + Bayesian score fit. */
+  body.is-admin #leaderPanel{padding:14px!important}
+  body.is-admin #leaderPanel .standings-head-row{margin-bottom:7px!important}
+  body.is-admin #leaderPanel .standings-title{font-size:20px!important;margin-bottom:0!important}
+  body.is-admin #leaderPanel .period-select{font-size:11px!important;padding:5px 27px 5px 9px!important;max-width:190px!important}
+  body.is-admin #leaderPanel .period-duration{margin:6px 0 9px!important}
+  body.is-admin #leaderPanel .rank-header,
+  body.is-admin #leaderPanel .rank-row{
+    grid-template-columns:42px minmax(95px,1fr) 62px 66px 62px 108px!important;
+    column-gap:6px!important;
+  }
+  body.is-admin #leaderPanel .rank-header.admin-score-visible,
+  body.is-admin #leaderPanel .rank-row.admin-score-visible{
+    grid-template-columns:42px minmax(95px,1fr) 62px 66px 62px 104px 86px!important;
+    column-gap:6px!important;
+  }
+  body.is-admin #leaderPanel .rank-header{min-height:35px!important;padding:0 9px!important;font-size:10.5px!important}
+  body.is-admin #leaderPanel .rank-row{min-height:43px!important;padding:7px 9px!important}
+  body.is-admin #leaderPanel .rank-pos{font-size:13px!important;gap:5px!important}
+  body.is-admin #leaderPanel .rank-name{font-size:12px!important}
+  body.is-admin #leaderPanel .rank-games,
+  body.is-admin #leaderPanel .rank-losses,
+  body.is-admin #leaderPanel .rank-pct,
+  body.is-admin #leaderPanel .rank-score{font-size:10.5px!important}
+  body.is-admin #leaderPanel .rank-form{gap:3px!important;padding-left:6px!important;min-width:0!important}
+  body.is-admin #leaderPanel .form-dot{width:8px!important;height:8px!important}
+  body.is-admin #leaderPanel .dnq-label{min-width:34px!important;padding:3px 5px!important;font-size:8px!important}
+
+  /* Round registration: smaller controls and less empty space. */
+  body.is-admin #roundPanel{padding:14px!important}
+  body.is-admin #roundPanel .round-head h2{font-size:19px!important}
+  body.is-admin #roundPanel .round-step{font-size:11px!important}
+  body.is-admin #roundPanel .slots{gap:7px!important;margin-top:9px!important}
+  body.is-admin #roundPanel .slot{min-height:72px!important;padding:7px!important;gap:4px!important}
+  body.is-admin #roundPanel .slot strong{font-size:12px!important}
+  body.is-admin #roundPanel .slot-num{font-size:15px!important}
+  body.is-admin #roundPanel .loser-stage{margin-top:10px!important}
+  body.is-admin #roundPanel .loser-title{font-size:12px!important;margin-bottom:7px!important}
+  body.is-admin #roundPanel .loser-grid{gap:7px!important}
+  body.is-admin #roundPanel .loser-choice{padding:9px 6px!important;font-size:11px!important}
+  body.is-admin #roundPanel .save-round{padding:9px!important;margin-top:8px!important;font-size:11px!important}
+  body.is-admin #roundPanel .match-round-block{padding:9px!important;margin-top:7px!important}
+
+  /* Player management: preserve full width but make cards denser. */
+  body.is-admin #managePanel{padding:14px!important}
+  body.is-admin #managePanel .section-title,
+  body.is-admin #managePanel .players-head h2{font-size:18px!important}
+  body.is-admin #managePanel .form-row{padding:8px 10px!important;gap:8px!important}
+  body.is-admin #managePanel .text-input{padding:9px 10px!important}
+  body.is-admin #managePanel .btn{padding:8px 10px!important;font-size:11px!important}
+  body.is-admin #managePanel .players-head{margin:10px 0 7px!important}
+  body.is-admin #managePanel .players-grid{gap:7px!important}
+  body.is-admin #managePanel .player-card{min-height:100px!important;padding:10px!important}
+  body.is-admin #managePanel .player-name{font-size:13px!important;padding-right:22px!important}
+  body.is-admin #managePanel .select-ring{width:17px!important;height:17px!important;right:9px!important;top:9px!important}
+  body.is-admin #managePanel .player-meta{margin-top:7px!important;gap:2px!important;font-size:9.5px!important}
+  body.is-admin #managePanel .last-loss-date{font-size:10px!important}
+  body.is-admin #managePanel .last-loss-players{font-size:9px!important}
+  body.is-admin #managePanel .remove-player-btn{transform:scale(.88);transform-origin:bottom right}
+}
+
+/* Below this width the leaderboard needs the whole row rather than breaking columns. */
+@media (min-width:1050px) and (max-width:1240px){
+  body.is-admin .layout{grid-template-columns:minmax(0,1.6fr) minmax(330px,.82fr)!important}
+  body.is-admin #leaderPanel .rank-header.admin-score-visible,
+  body.is-admin #leaderPanel .rank-row.admin-score-visible{
+    grid-template-columns:38px minmax(82px,1fr) 54px 58px 56px 90px 74px!important;
+    column-gap:4px!important;
+  }
+  body.is-admin #leaderPanel .rank-header{font-size:9.5px!important}
+}
+</style>
+
 </head>
 <body>
 <main class="app">
@@ -2102,5 +2294,75 @@ body:not(.is-admin) #leaderPanel{min-width:0!important;width:100%!important}
   .right-col{display:flex!important;flex-direction:column!important}
   .right-col > #leaderPanel,.right-col > .hall-of-fame-panel,.right-col > .history-panel{width:100%!important}
   .period-select{max-width:190px!important;width:auto!important}
+}
+</style>
+
+<style>
+/* Admin v3: prioritize the standings table and shrink round registration */
+@media (min-width:1050px){
+  body.is-admin .layout{
+    grid-template-columns:minmax(0,1fr) 330px!important;
+    gap:8px!important;
+  }
+  body.is-admin #leaderPanel{
+    min-width:760px!important;
+    padding:12px!important;
+  }
+  body.is-admin #roundPanel{
+    width:330px!important;
+    max-width:330px!important;
+    padding:12px!important;
+  }
+
+  /* Force all admin leaderboard columns to remain visible. */
+  body.is-admin #leaderPanel .rank-header.admin-score-visible,
+  body.is-admin #leaderPanel .rank-row.admin-score-visible{
+    grid-template-columns:46px minmax(125px,1fr) 70px 72px 68px 116px 92px!important;
+    gap:6px!important;
+  }
+  body.is-admin #leaderPanel .rank-header,
+  body.is-admin #leaderPanel .rank-row{
+    grid-template-columns:46px minmax(125px,1fr) 70px 72px 68px 116px!important;
+    gap:6px!important;
+  }
+  body.is-admin #leaderPanel .rank-row{padding:7px 9px!important;min-height:43px!important}
+  body.is-admin #leaderPanel .rank-header{padding:0 9px!important;min-height:34px!important;font-size:10px!important}
+  body.is-admin #leaderPanel .rank-name{font-size:13px!important}
+  body.is-admin #leaderPanel .rank-games,
+  body.is-admin #leaderPanel .rank-losses,
+  body.is-admin #leaderPanel .rank-pct,
+  body.is-admin #leaderPanel .rank-score{font-size:10.5px!important}
+  body.is-admin #leaderPanel .rank-form{gap:3px!important;padding-left:6px!important;min-width:0!important}
+  body.is-admin #leaderPanel .form-dot{width:8px!important;height:8px!important}
+
+  /* Make the round-registration card intentionally narrow and dense. */
+  body.is-admin #roundPanel .round-head h2{font-size:17px!important}
+  body.is-admin #roundPanel .round-step{font-size:10px!important}
+  body.is-admin #roundPanel .slots{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;margin-top:8px!important}
+  body.is-admin #roundPanel .slot{min-height:58px!important;padding:6px!important;gap:3px!important}
+  body.is-admin #roundPanel .slot strong{font-size:11px!important}
+  body.is-admin #roundPanel .slot-num{font-size:13px!important}
+  body.is-admin #roundPanel .loser-stage{margin-top:9px!important}
+  body.is-admin #roundPanel .loser-title{font-size:11px!important;margin-bottom:6px!important}
+  body.is-admin #roundPanel .loser-grid,
+  body.is-admin #roundPanel .match-round-block .loser-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  body.is-admin #roundPanel .loser-choice{padding:7px 6px!important;font-size:10px!important;border-radius:8px!important}
+  body.is-admin #roundPanel .match-rounds{gap:6px!important;margin-bottom:6px!important}
+  body.is-admin #roundPanel .match-round-block{padding:8px!important;border-radius:9px!important}
+  body.is-admin #roundPanel .save-round{margin-top:7px!important;padding:8px!important;font-size:11px!important}
+  body.is-admin #roundPanel .btn{padding:7px 9px!important;font-size:10px!important}
+}
+
+/* If the viewport is not wide enough for side-by-side admin cards, stack them instead of hiding table columns. */
+@media (min-width:1050px) and (max-width:1220px){
+  body.is-admin .layout{grid-template-columns:1fr!important}
+  body.is-admin #leaderPanel{grid-column:1!important;grid-row:1!important;min-width:0!important;width:100%!important}
+  body.is-admin #roundPanel{grid-column:1!important;grid-row:2!important;width:100%!important;max-width:none!important}
+  body.is-admin #managePanel{grid-row:3!important}
+  body.is-admin .hall-of-fame-panel{grid-row:4!important}
+  body.is-admin .history-panel{grid-row:4!important}
+  body.is-admin #roundPanel .slots{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  body.is-admin #roundPanel .loser-grid,
+  body.is-admin #roundPanel .match-round-block .loser-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
 </style>
