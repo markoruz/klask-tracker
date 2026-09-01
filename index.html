@@ -634,7 +634,7 @@ body.is-admin #leaderPanel .rank-name a{gap:7px}
         <a class="active" href="index.html">Tabell</a>
         <a href="players.html">Spelarprofiler</a>
       </nav>
-      <button id="adminMenuBtn" type="button" class="btn site-admin-btn">Logga in</button>
+      <button id="adminMenuBtn" type="button" class="btn site-admin-btn">Admin</button>
     </div>
   </header>
   <div class="top-row">
@@ -989,7 +989,7 @@ async function sessionIsKlaskAdmin(session){
 }
 function syncHeaderAuth(){
   const btn=$('#adminMenuBtn');
-  if(btn)btn.textContent=isSignedIn?'Logga ut':'Logga in';
+  if(btn)btn.textContent=isSignedIn?'Logga ut':'Admin';
 }
 function closeLoginModal(){
   $('#headerAdminPanel')?.classList.remove('header-open');
@@ -1023,7 +1023,7 @@ $('#authSubmitBtn').onclick=async()=>{
   closeLoginModal();
   toast(admin?'Inloggad som admin.':'Inloggad.');
 };
-$('#authLogoutBtn').onclick=async()=>{await sb.auth.signOut();isSignedIn=false;setAdminUI(false);closeLoginModal();toast('Utloggad.')};
+$('#authLogoutBtn').onclick=async()=>{await sb.auth.signOut();isSignedIn=false;setAdminUI(false);closeLoginModal();location.href='index.html'};
 $('#authPassword')?.addEventListener('keydown',e=>{if(e.key==='Enter')$('#authSubmitBtn').click()});
 function snapshotCurrentStandings(){
   computeState();
@@ -1758,7 +1758,7 @@ if(adminMenuBtn&&headerAdminPanel){
       isSignedIn=false;
       setAdminUI(false);
       closeLoginModal();
-      toast('Utloggad.');
+      location.href='index.html';
     }else openLoginModal();
   });
   document.getElementById('loginModalClose')?.addEventListener('click',closeLoginModal);
