@@ -14,6 +14,104 @@
 
 
 .site-auth-btn{cursor:pointer;font-family:inherit}.auth-modal-backdrop{display:none;position:fixed;inset:0;background:rgba(2,8,14,.72);backdrop-filter:blur(4px);z-index:90}.auth-modal-backdrop.open{display:block}.auth-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,calc(100% - 28px));padding:22px;z-index:91;box-shadow:0 28px 80px rgba(0,0,0,.48)}.auth-modal.open{display:block}.auth-modal h2{margin:0 0 16px;font-size:20px}.auth-modal-close{position:absolute;right:12px;top:10px;border:0;background:transparent;color:#a9bfd0;font-size:24px;cursor:pointer}.auth-modal input{width:100%;padding:11px 12px;margin-top:9px;border:1px solid #35556d;border-radius:10px;background:#081725;color:#fff;outline:none}.auth-modal .auth-submit{width:100%;margin-top:12px;padding:10px 12px;border:1px solid #39bdb3;border-radius:10px;background:linear-gradient(135deg,#2faaa5,#45c8bd);color:#fff;font-weight:850;cursor:pointer}.auth-error{min-height:18px;margin-top:9px;color:#ff9b9b;font-size:12px}
+
+/* ===== Utbyggd spelarprofil ===== */
+.profile-badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.profile-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid #35556d;border-radius:999px;background:#10263a;color:#dbe7f1;font-size:11px;font-weight:850}.profile-badge strong{color:var(--teal)}
+.highlights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.highlight-card{background:linear-gradient(145deg,#102a40,#0e2235);border:1px solid #294b64;border-radius:13px;padding:15px;min-height:92px}.highlight-icon{font-size:20px;line-height:1;margin-bottom:9px}.highlight-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:850}.highlight-value{font-size:20px;font-weight:950;margin-top:4px}.highlight-sub{color:#9db0c0;font-size:10px;margin-top:3px;line-height:1.35}
+.rivalry-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}.rivalry-card{background:#10263a;border:1px solid #27465e;border-radius:13px;padding:14px}.rivalry-card span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:850}.rivalry-card b{display:block;font-size:17px;margin-top:5px}.rivalry-card small{display:block;color:#91a7ba;margin-top:3px}.h2h-recent{grid-column:1/-1;background:#0c2032;border:1px solid #27465e;border-radius:13px;padding:14px}.h2h-recent-title{font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px}.h2h-recent-dots{display:flex;gap:7px;align-items:center}.h2h-result{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:950;border:1px solid #35556d;background:#183047;color:#dbe7f1}.h2h-result.me-loss{background:#4b2834;border-color:#a35360;color:#ffd3d0}.h2h-result.opp-loss{background:#153a3d;border-color:#43d7c4;color:#bff9ef}.h2h-result.other-loss{background:#182c41;color:#aebfd0}
+.chart-wrap{background:#0b1d2d;border:1px solid #27465e;border-radius:14px;padding:14px;overflow:hidden}.ranking-chart{width:100%;height:auto;display:block}.chart-empty{color:var(--muted);padding:26px;text-align:center}.chart-caption{display:flex;justify-content:space-between;gap:12px;color:#8199ad;font-size:10px;margin-top:8px}.chart-legend{display:flex;gap:12px;align-items:center}.legend-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;margin-right:4px}
+.career-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:13px}.career-summary-text{color:#9eb2c3;font-size:12px}.career-summary-text strong{color:#eef5fb}
+@media(max-width:820px){.highlights{grid-template-columns:repeat(2,1fr)}.rivalry-summary{grid-template-columns:1fr 1fr}.rivalry-summary .rivalry-card:last-child{grid-column:1/-1}}
+@media(max-width:500px){.highlights,.rivalry-summary{grid-template-columns:1fr}.rivalry-summary .rivalry-card:last-child{grid-column:auto}.highlight-card{min-height:0}}
+
+</style>
+
+<style id="profile-dashboard-redesign">
+.profile-dashboard{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.75fr);gap:18px;align-items:start}.profile-main,.profile-side{min-width:0}.profile-main .section:first-child,.profile-side .section:first-child{margin-top:18px}.profile-side{position:sticky;top:82px}.section-head>div>.eyebrow{margin-bottom:4px}.stats-panel{overflow:hidden}.stats-panel .stats{grid-template-columns:repeat(5,minmax(0,1fr))}.stats-panel .stat{background:transparent;border:0;border-right:1px solid var(--line);border-radius:0;padding:10px 14px}.stats-panel .stat:last-child{border-right:0}.form-strip{margin-top:18px;padding:14px 16px;border:1px solid #27465e;border-radius:13px;background:#0a1b2b;display:flex;justify-content:space-between;align-items:center;gap:18px}.form-strip .eyebrow{margin-bottom:3px}.form-note{font-size:10px;color:var(--muted)}.highlights-panel{background:linear-gradient(155deg,#10283d,#0b1928 62%)}.highlights-panel .highlights{grid-template-columns:1fr 1fr}.highlights-panel .highlight-card{min-height:118px;padding:16px;display:flex;flex-direction:column}.highlights-panel .highlight-icon{font-size:25px}.highlights-panel .highlight-value{font-size:28px;margin-top:auto;padding-top:9px}.highlights-panel .career-summary{border-top:1px solid var(--line);padding-top:14px}.ranking-panel .chart-wrap{border:0;background:transparent;padding:4px 0 0}.rivalry-panel{margin-top:18px;background:linear-gradient(145deg,#0e2033,#0a1928)}.rivalry-layout{display:grid;grid-template-columns:minmax(250px,.7fr) minmax(0,1.3fr);gap:14px;align-items:start}.rivalry-layout .rivalry-summary{grid-template-columns:1fr;margin:0}.rivalry-layout .h2h-grid{grid-template-columns:repeat(3,1fr)}.rivalry-layout .h2h-recent{grid-column:1/-1}.period-panel .period-list{position:relative;padding-left:20px}.period-panel .period-list:before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:#35526b}.period-panel .period-row{position:relative;border-radius:10px;background:#0c2032}.period-panel .period-row:before{content:"";position:absolute;left:-20px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--teal);border:3px solid #07131f;transform:translateY(-50%)}
+@media(max-width:900px){.profile-dashboard{grid-template-columns:1fr}.profile-side{position:static}.highlights-panel .highlights{grid-template-columns:repeat(4,minmax(0,1fr))}.rivalry-layout{grid-template-columns:1fr}.rivalry-layout .rivalry-summary{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:650px){.stats-panel .stats{grid-template-columns:repeat(2,1fr)}.stats-panel .stat{border:1px solid #27465e;border-radius:12px;background:#10263a}.form-strip{align-items:flex-start;flex-direction:column}.highlights-panel .highlights{grid-template-columns:1fr 1fr}.rivalry-layout .rivalry-summary{grid-template-columns:1fr}.rivalry-layout .h2h-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.highlights-panel .highlights,.rivalry-layout .h2h-grid{grid-template-columns:1fr}.profile-dashboard{gap:0}}
+</style>
+<style id="profile-layout-v2">
+.profile-top-row{display:grid;grid-template-columns:minmax(0,.9fr) minmax(430px,1.1fr);gap:18px;align-items:stretch}.profile-top-row .hero{grid-template-columns:118px minmax(0,1fr);gap:18px;padding:18px}.profile-top-row .hero .avatar{width:118px;height:118px;border-radius:18px}.profile-top-row .hero h1{font-size:34px}.profile-top-row .hero .admin-btn{grid-column:1/-1;justify-self:start}.profile-top-row .highlights-panel{min-width:0}.profile-top-row .highlights-panel .highlights{grid-template-columns:repeat(4,minmax(0,1fr))}.profile-top-row .highlights-panel .highlight-card{min-height:96px;padding:12px}.profile-top-row .highlights-panel .highlight-icon{font-size:20px}.profile-top-row .highlights-panel .highlight-value{font-size:22px}.profile-top-row .highlights-panel .career-summary{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+@media(max-width:900px){.profile-top-row{grid-template-columns:1fr}.profile-top-row .hero{grid-template-columns:118px 1fr}.profile-top-row .highlights-panel .highlights{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.profile-top-row .hero{grid-template-columns:86px 1fr}.profile-top-row .hero .avatar{width:86px;height:86px}.profile-top-row .hero h1{font-size:28px}.profile-top-row .highlights-panel .highlights{grid-template-columns:1fr 1fr}}
+</style>
+
+
+<style id="profile-layout-v4">
+/* Left column: profile with statistics directly below. Highlights remains beside both. */
+.profile-top-row{align-items:start}
+.profile-top-left{min-width:0;display:flex;flex-direction:column;gap:18px}
+.profile-top-left .stats-panel{margin-top:0}
+/* Keep the three rivalry summary cards horizontal on desktop. */
+.rivalry-layout{grid-template-columns:1fr}
+.rivalry-layout .rivalry-summary{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
+@media(max-width:900px){
+  .profile-top-left{gap:18px}
+  .rivalry-layout .rivalry-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .rivalry-layout .rivalry-summary{grid-template-columns:1fr}
+}
+</style>
+
+<style id="rivalry-h2h-layout-v2">
+/* Rivalitet & H2H: tre rivalitetskort överst, H2H-statistik + senaste matcher under */
+.rivalry-layout{display:block!important}
+.rivalry-layout .rivalry-summary{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin:0 0 10px!important}
+.rivalry-layout .rivalry-card{min-width:0!important}
+.rivalry-layout #h2h.h2h-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(245px,1.15fr)!important;gap:10px!important;align-items:stretch!important}
+.rivalry-layout #h2h .h2h-card{min-width:0!important;padding:12px 13px!important}
+.rivalry-layout #h2h .h2h-card span{font-size:10px!important}
+.rivalry-layout #h2h .h2h-card b{font-size:20px!important}
+.rivalry-layout #h2h .h2h-recent{grid-column:5!important;grid-row:1!important;padding:12px 14px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+@media(max-width:980px){
+  .rivalry-layout .rivalry-summary{grid-template-columns:1fr!important}
+  .rivalry-layout #h2h.h2h-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .rivalry-layout #h2h .h2h-recent{grid-column:1/-1!important;grid-row:auto!important}
+}
+</style>
+
+<style id="rivalry-h2h-layout-v3">
+.rivalry-feature .rivalry-person-copy small{font-size:10.5px!important;line-height:1.35!important}
+.rivalry-layout #h2h.h2h-grid{display:grid!important;grid-template-columns:minmax(175px,1.15fr) repeat(3,minmax(120px,.75fr)) minmax(245px,1.3fr)!important;gap:10px!important;align-items:stretch!important}
+.h2h-selector-card{background:#0c2032;border:1px solid #27465e;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.h2h-selector-title{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.h2h-selector-card .select{width:100%;min-width:0;font-size:11px;padding:7px 28px 7px 9px}
+.rivalry-layout #h2h .h2h-recent{grid-column:5!important;grid-row:1!important}
+@media(max-width:900px){.rivalry-layout #h2h.h2h-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.rivalry-layout #h2h .h2h-recent{grid-column:1/-1!important;grid-row:auto!important}.h2h-selector-card{grid-column:1/-1}}
+@media(max-width:520px){.rivalry-layout #h2h.h2h-grid{grid-template-columns:1fr!important}.h2h-selector-card{grid-column:auto}}
+</style>
+
+<style id="rivalry-h2h-layout-v4">
+/* Larger rivalry cards and reliable SVG icons */
+.rivalry-feature{min-height:132px!important;padding:17px 18px!important}
+.rivalry-feature .rivalry-label{font-size:10px!important;margin-bottom:14px!important}
+.rival-avatar{width:46px!important;height:46px!important;flex-basis:46px!important}
+.rivalry-feature .rivalry-person-copy b{font-size:16px!important}
+.rivalry-feature .rivalry-person-copy small{font-size:11px!important;line-height:1.45!important}
+.rivalry-icon{right:17px!important;top:47px!important;width:36px!important;height:36px!important;font-size:0!important}
+.rivalry-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* H2H heading, selector and all three metrics are one card */
+.rivalry-layout #h2h.h2h-grid{grid-template-columns:minmax(0,1.55fr) minmax(245px,.85fr)!important;gap:10px!important}
+.h2h-combined-card{background:#0c2032;border:1px solid #27465e;border-radius:13px;padding:14px;display:grid;grid-template-columns:minmax(160px,.8fr) minmax(0,1.6fr);gap:16px;align-items:center;min-width:0}
+.h2h-combined-card .h2h-selector-card{background:transparent;border:0;border-radius:0;padding:0;min-width:0}
+.h2h-combined-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;align-items:stretch}
+.h2h-metric{padding:5px 14px;border-left:1px solid #27465e;min-width:0}
+.h2h-metric span{display:block;color:var(--muted);font-size:10px;line-height:1.25}
+.h2h-metric b{display:block;font-size:22px;margin-top:5px;color:var(--text)}
+.rivalry-layout #h2h .h2h-recent{grid-column:2!important;grid-row:1!important}
+@media(max-width:900px){.rivalry-layout #h2h.h2h-grid{grid-template-columns:1fr!important}.rivalry-layout #h2h .h2h-recent{grid-column:1!important;grid-row:auto!important}}
+@media(max-width:650px){.rivalry-feature{min-height:116px!important}.h2h-combined-card{grid-template-columns:1fr}.h2h-combined-metrics{border-top:1px solid #27465e;padding-top:10px}.h2h-metric:first-child{border-left:0;padding-left:0}}
+@media(max-width:480px){.h2h-combined-metrics{grid-template-columns:1fr}.h2h-metric{border-left:0;border-top:1px solid #27465e;padding:10px 0}.h2h-metric:first-child{border-top:0}}
+</style>
+
+<style id="rivalry-text-tweaks-v5">
+.rivalry-feature .rivalry-label{font-weight:950!important;color:#d8e4ed!important}
+.rivalry-feature .rivalry-person-copy b{font-size:18px!important}
+.h2h-recent-title{margin-bottom:9px!important}
+.h2h-recent-legend{margin-top:8px;color:#7f97aa;font-size:9px;line-height:1.3}
 </style>
 </head>
 <body>
@@ -24,14 +122,20 @@
 </div></header>
 <div class="app">
 <a class="back" href="players.html">← Alla spelarprofiler</a>
-<div id="profileHero" class="panel hero"><div class="empty">Laddar spelarprofil…</div></div>
-<section class="panel section"><div class="section-head"><h2>Statistik</h2><select id="periodSelect" class="select"></select></div><div id="stats" class="stats"></div><div style="margin-top:15px"><div class="eyebrow" style="margin-bottom:8px">Form · senaste 6</div><div id="form" class="form"></div></div></section>
-<section class="panel section"><div class="section-head"><h2>H2H</h2><select id="opponentSelect" class="select"></select></div><div id="h2h" class="h2h-grid"></div></section>
-<section class="panel section"><div class="section-head"><h2>Periodhistorik</h2></div><div id="periodHistory" class="period-list"></div></section>
+<div class="profile-top-row">
+  <div class="profile-top-left">
+    <div id="profileHero" class="panel hero"><div class="empty">Laddar spelarprofil…</div></div>
+    <section class="panel section stats-panel"><div class="section-head"><div><div class="eyebrow">Prestation</div><h2>Statistik</h2></div><select id="periodSelect" class="select"></select></div><div id="stats" class="stats"></div><div class="form-strip"><div><div class="eyebrow">Form · senaste 6</div><div class="form-note">Senaste matchen visas först</div></div><div id="form" class="form"></div></div></section>
+  </div>
+  <section class="panel highlights-panel"><div class="section-head"><div><div class="eyebrow">Karriär</div><h2>Highlights</h2></div></div><div id="highlights" class="highlights"></div><div id="careerSummary" class="career-summary"></div></section>
+</div>
+<section class="panel section rivalry-panel"><div class="section-head"><div><div class="eyebrow">Dueller</div><h2>Rivalitet & H2H</h2></div></div><div class="rivalry-layout"><div id="rivalrySummary" class="rivalry-summary"></div><div id="h2h" class="h2h-grid"></div></div></section>
+<section class="panel section ranking-panel"><div class="section-head"><div><div class="eyebrow">Karriärkurva</div><h2>Rankinghistorik</h2></div></div><div id="rankingHistory" class="chart-wrap"></div></section>
+<section class="panel section period-panel"><div class="section-head"><div><div class="eyebrow">Arkiv</div><h2>Periodhistorik</h2></div></div><div id="periodHistory" class="period-list"></div></section>
 </div>
 <div id="editModal" class="modal hidden"><div class="modal-card"><h2 style="margin-top:0">Redigera profil</h2><div class="field"><label>Motto / slogan</label><input id="editMotto" maxlength="120"></div><div class="field"><label>Profilbild</label><input id="editImageFile" type="file" accept="image/jpeg,image/png,image/webp"><small style="display:block;margin-top:7px;color:var(--muted)">JPG, PNG eller WebP. Bilden laddas upp till Supabase Storage.</small><div id="currentImageNote" style="margin-top:7px;color:var(--muted);font-size:12px"></div><button id="removeImageBtn" type="button" class="btn" style="margin-top:9px;display:none">Ta bort profilbild</button></div><div class="actions"><button id="cancelEdit" class="btn">Avbryt</button><button id="saveEdit" class="btn">Spara</button></div></div></div>
 
-<div id="authModalBackdrop" class="auth-modal-backdrop"></div><div id="authModal" class="panel auth-modal"><button id="authModalClose" class="auth-modal-close" type="button" aria-label="Stäng">×</button><h2>Logga in</h2><input id="siteAuthEmail" type="email" placeholder="E-post" autocomplete="username"><input id="siteAuthPassword" type="password" placeholder="Lösenord" autocomplete="current-password"><button id="siteAuthSubmit" class="auth-submit" type="button">Logga in</button><div id="siteAuthError" class="auth-error"></div></div>
+<div id="authModalBackdrop" class="auth-modal-backdrop"></div><div id="authModal" class="panel auth-modal"><button id="authModalClose" class="auth-modal-close" type="button" aria-label="Stäng">×</button><h2>Logga in</h2><input id="siteAuthEmail" type="email" placeholder="E-post" autocomplete="username"><input id="siteAuthPassword" type="password" placeholder="Lösenord" autocomplete="current-password"><button id="siteAuthSubmit" class="auth-submit" type="button">Admin</button><div id="siteAuthError" class="auth-error"></div></div>
 <script>
 const SUPABASE_URL='https://kqfrpvlelpoabfpkqjwn.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZnJwdmxlbHBvYWJmcGtxanduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDI3OTMsImV4cCI6MjEwMzQ3ODc5M30.GS747AnOYChYZbpvwKMrrEwQcDMaIBIP5apFlhczPi0';
@@ -47,21 +151,41 @@ document.getElementById('siteAuthSubmit')?.addEventListener('click',async()=>{co
 document.getElementById('siteAuthPassword')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('siteAuthSubmit')?.click()});
 initSiteAuth();
  const M=18,C=.25,MIN=18;
-let row=null,current=null,archive=[],playerId=Number(new URLSearchParams(location.search).get('id')),profilePlayer=null,isAdmin=false,canEditProfile=false,removeImageRequested=false;
+let row=null,current=null,archive=[],playerId=Number(new URLSearchParams(location.search).get('id'))||5,profilePlayer=null,isAdmin=false,canEditProfile=false,removeImageRequested=false,playerProfileImages=new Map();
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 function allPlayers(){const map=new Map();[...(current?.players||[]),...archive.flatMap(a=>a.players||[])].forEach(p=>{if(!map.has(Number(p.id)))map.set(Number(p.id),p)});return [...map.values()]}
 function periods(){return [{key:'current',name:(current.listName||'Pågående period'),rounds:current.rounds||[],players:current.players||[],current:true},...archive.map(a=>({key:'a:'+a.id,name:a.name||'Tidigare period',rounds:a.rounds||[],players:a.players||[],current:false}))]}
 function statsFor(pid,rounds){const mine=rounds.filter(r=>(r.player_ids||[]).map(Number).includes(pid));const losses=mine.filter(r=>Number(r.loser_id)===pid).length;const games=mine.length,pct=games?losses/games*100:null,score=games?100*((games/(games+M))*(losses/games)+(M/(games+M))*C):null;const form=[...mine].sort((a,b)=>new Date(b.played_at)-new Date(a.played_at)).slice(0,6).map(r=>Number(r.loser_id)===pid?'loss':'ok');return{games,losses,pct,score,form}}
 function selectedPeriod(){const k=$('#periodSelect').value;if(k==='all')return{name:'Totalt',rounds:periods().flatMap(p=>p.rounds)};return periods().find(p=>p.key===k)||periods()[0]}
 function rankInPeriod(pid,p){const stats=(p.players||allPlayers()).map(pl=>({id:Number(pl.id),...statsFor(Number(pl.id),p.rounds)})).filter(x=>x.games>=MIN).sort((a,b)=>a.score-b.score);const i=stats.findIndex(x=>x.id===pid);return i>=0?i+1:null}
-function renderHero(){const initials=(profilePlayer.name||'?').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();const img=profilePlayer.image_url?`<img src="${esc(profilePlayer.image_url)}" alt="${esc(profilePlayer.name)}">`:esc(initials);$('#profileHero').innerHTML=`<div class="avatar">${img}</div><div><div class="eyebrow">Spelarprofil</div><h1>${esc(profilePlayer.name)}</h1><p class="motto">${profilePlayer.motto?esc(profilePlayer.motto):'Ingen slogan ännu.'}</p></div><button id="editProfileBtn" class="btn admin-btn">Redigera profil</button>`;$('#editProfileBtn')?.addEventListener('click',()=>{$('#editMotto').value=profilePlayer.motto||'';$('#editImageFile').value='';removeImageRequested=false;$('#currentImageNote').textContent=profilePlayer.image_url?'Nuvarande profilbild finns sparad. Välj en ny fil för att ersätta den.':'Ingen profilbild uppladdad ännu.';$('#removeImageBtn').style.display=profilePlayer.image_url?'inline-flex':'none';$('#editModal').classList.remove('hidden')})}
-function renderSelectors(){const ps=$('#periodSelect');ps.innerHTML='<option value="all">Totalt · alla perioder</option>'+periods().map(p=>`<option value="${p.key}">${esc(p.name)}${p.current?' · aktuell':''}</option>`).join('');ps.value='all';const opp=$('#opponentSelect');opp.innerHTML=allPlayers().filter(p=>Number(p.id)!==playerId).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}
-function renderStats(){const p=selectedPeriod(),s=statsFor(playerId,p.rounds);const position=p.key?rankInPeriod(playerId,p):null;$('#stats').innerHTML=`<div class="stat"><span>Matcher</span><b>${s.games}</b></div><div class="stat"><span>Förluster</span><b>${s.losses}</b></div><div class="stat"><span>Förlust %</span><b>${s.pct==null?'–':s.pct.toFixed(1).replace('.',',')+'%'}</b></div><div class="stat"><span>Bayesian score</span><b>${s.score==null?'–':s.score.toFixed(2).replace('.',',')}</b></div><div class="stat"><span>Placering</span><b>${position?position+'.':'–'}</b></div>`;$('#form').innerHTML=s.form.length?s.form.map(x=>`<span class="dot ${x==='loss'?'loss':''}"></span>`).join(''):'<span style="color:var(--muted)">Ingen formdata</span>';renderH2H()}
-function renderH2H(){const oppId=Number($('#opponentSelect').value);const opp=allPlayers().find(p=>Number(p.id)===oppId);if(!opp){$('#h2h').innerHTML='<div class="empty">Ingen motspelare.</div>';return}const rounds=selectedPeriod().rounds.filter(r=>{const ids=(r.player_ids||[]).map(Number);return ids.includes(playerId)&&ids.includes(oppId)});const mine=rounds.filter(r=>Number(r.loser_id)===playerId).length,theirs=rounds.filter(r=>Number(r.loser_id)===oppId).length,other=rounds.length-mine-theirs;$('#h2h').innerHTML=`<div class="h2h-card"><span>Matcher tillsammans</span><b>${rounds.length}</b></div><div class="h2h-card"><span>${esc(profilePlayer.name)} förlorade</span><b>${mine}</b></div><div class="h2h-card"><span>${esc(opp.name)} förlorade</span><b>${theirs}</b></div><div class="h2h-card"><span>Övriga förlorade</span><b>${other}</b></div>`}
+function renderHero(){const initials=(profilePlayer.name||'?').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();const img=profilePlayer.image_url?`<img src="${esc(profilePlayer.image_url)}" alt="${esc(profilePlayer.name)}">`:esc(initials);const badges=careerMetrics().badges;const badgesHtml=badges.length?`<div class="profile-badges">${badges.map(b=>`<span class="profile-badge">${b.icon} <strong>${esc(b.label)}</strong></span>`).join('')}</div>`:'';$('#profileHero').innerHTML=`<div class="avatar">${img}</div><div><div class="eyebrow">Spelarprofil</div><h1>${esc(profilePlayer.name)}</h1><p class="motto">${profilePlayer.motto?esc(profilePlayer.motto):'Ingen slogan ännu.'}</p>${badgesHtml}</div><button id="editProfileBtn" class="btn admin-btn">Redigera profil</button>`;$('#editProfileBtn')?.addEventListener('click',()=>{$('#editMotto').value=profilePlayer.motto||'';$('#editImageFile').value='';removeImageRequested=false;$('#currentImageNote').textContent=profilePlayer.image_url?'Nuvarande profilbild finns sparad. Välj en ny fil för att ersätta den.':'Ingen profilbild uppladdad ännu.';$('#removeImageBtn').style.display=profilePlayer.image_url?'inline-flex':'none';$('#editModal').classList.remove('hidden')})}
+function allTimeRounds(){return periods().flatMap(p=>p.rounds||[])}
+function longestSafeStreak(rounds,pid){const mine=[...rounds].filter(r=>(r.player_ids||[]).map(Number).includes(pid)).sort((a,b)=>new Date(a.played_at)-new Date(b.played_at));let best=0,run=0;mine.forEach(r=>{if(Number(r.loser_id)===pid)run=0;else{run++;best=Math.max(best,run)}});return best}
+function currentSafeStreak(rounds,pid){const mine=[...rounds].filter(r=>(r.player_ids||[]).map(Number).includes(pid)).sort((a,b)=>new Date(a.played_at)-new Date(b.played_at));let run=0;for(let i=mine.length-1;i>=0;i--){if(Number(mine[i].loser_id)===pid)break;run++}return run}
+function careerMetrics(){const ps=periods().map(p=>({p,s:statsFor(playerId,p.rounds),pos:rankInPeriod(playerId,p)})).filter(x=>x.s.games>0);const archived=ps.filter(x=>!x.p.current);const all=statsFor(playerId,allTimeRounds());const wins=archived.filter(x=>x.pos===1).length;const podiums=archived.filter(x=>x.pos&&x.pos<=3).length;const bestPositions=ps.map(x=>x.pos).filter(Boolean);const bestPosition=bestPositions.length?Math.min(...bestPositions):null;const bestScore=ps.map(x=>x.s.score).filter(Number.isFinite).sort((a,b)=>a-b)[0]??null;const longest=longestSafeStreak(allTimeRounds(),playerId);const currentStreak=currentSafeStreak(allTimeRounds(),playerId);const badges=[];if(wins)badges.push({icon:'🏆',label:wins>1?'Flerfaldig vinnare':'Periodvinnare'});if(podiums>=3)badges.push({icon:'🥇',label:'Pallräv'});if(all.games>=75)badges.push({icon:'🎮',label:'Veteran'});else if(all.games>=40)badges.push({icon:'⚡',label:'Rutinerad'});if(longest>=12)badges.push({icon:'🔥',label:'Streak master'});else if(currentStreak>=6)badges.push({icon:'🔥',label:'Formstark'});if(bestPosition===1&&!wins)badges.push({icon:'📈',label:'Topprankad'});return{ps,archived,all,wins,podiums,bestPosition,bestScore,longest,currentStreak,badges}}
+function rivalryMetrics(){const rounds=allTimeRounds();const others=allPlayers().filter(p=>Number(p.id)!==playerId);const rows=others.map(opp=>{const oid=Number(opp.id);const together=rounds.filter(r=>{const ids=(r.player_ids||[]).map(Number);return ids.includes(playerId)&&ids.includes(oid)});const myLoss=together.filter(r=>Number(r.loser_id)===playerId).length;const oppLoss=together.filter(r=>Number(r.loser_id)===oid).length;return{opp,together:together.length,myLoss,oppLoss}}).filter(x=>x.together>0);rows.sort((a,b)=>b.together-a.together||b.myLoss-a.myLoss);const rival=rows[0]||null;const danger=[...rows].sort((a,b)=>b.myLoss-a.myLoss||b.together-a.together)[0]||null;const victim=[...rows].sort((a,b)=>b.oppLoss-a.oppLoss||b.together-a.together)[0]||null;return{rival,danger,victim}}
+function renderHighlights(){const m=careerMetrics();const bestPos=m.bestPosition?`#${m.bestPosition}`:'–';const bestScore=m.bestScore==null?'–':m.bestScore.toFixed(2).replace('.',',');$('#highlights').innerHTML=`<div class="highlight-card"><div class="highlight-icon">🏆</div><div class="highlight-label">Periodvinster</div><div class="highlight-value">${m.wins}</div><div class="highlight-sub">${m.podiums} pallplacering${m.podiums===1?'':'ar'}</div></div><div class="highlight-card"><div class="highlight-icon">📈</div><div class="highlight-label">Bästa placering</div><div class="highlight-value">${bestPos}</div><div class="highlight-sub">Bästa Bayesian: ${bestScore}</div></div><div class="highlight-card"><div class="highlight-icon">🔥</div><div class="highlight-label">Längsta svit</div><div class="highlight-value">${m.longest}</div><div class="highlight-sub">matcher utan förlust</div></div><div class="highlight-card"><div class="highlight-icon">🎮</div><div class="highlight-label">Karriärmatcher</div><div class="highlight-value">${m.all.games}</div><div class="highlight-sub">${m.all.losses} registrerade förluster</div></div>`;const first=m.ps.length?m.ps[m.ps.length-1].p.name:null;$('#careerSummary').innerHTML=`<div class="career-summary-text">Aktuell svit: <strong>${m.currentStreak} matcher utan förlust</strong>${first?` · Statistik finns från <strong>${esc(first)}</strong>`:''}</div>`}
+function renderRivalrySummary(){
+  const m=rivalryMetrics();
+  const avatar=row=>{const name=row.opp.name||'?';const url=playerProfileImages.get(Number(row.opp.id))||row.opp.image_url||'';const initials=name.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();return url?`<span class="rival-avatar"><img src="${esc(url)}" alt="${esc(name)}"></span>`:`<span class="rival-avatar rival-avatar-fallback">${esc(initials)}</span>`};
+  const card=(label,row,icon,iconClass,details)=>row?`<div class="rivalry-card rivalry-feature"><span class="rivalry-label">${label}</span><span class="rivalry-icon ${iconClass}">${icon}</span><div class="rivalry-person">${avatar(row)}<div class="rivalry-person-copy"><b>${esc(row.opp.name)}</b>${details(row)}</div></div></div>`:`<div class="rivalry-card rivalry-feature"><span class="rivalry-label">${label}</span><div class="rivalry-person"><div class="rivalry-person-copy"><b>–</b><small>Ingen data ännu</small></div></div></div>`;
+  $('#rivalrySummary').innerHTML=
+    card('Största rival',m.rival,'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 18.5 1.5l1 1-4 4M9.5 14.5l-4 4-3 1 1-3 4-4M5.5 5.5l13 13M3.5 2.5l17 17"/></svg>','rivalry-icon-rival',x=>`<small>${x.together} matcher tillsammans</small><small>Förlustprocent: <strong class="metric-good">${x.together?(x.myLoss/x.together*100).toFixed(0):0}%</strong></small>`)+
+    card('Tuffaste sällskap',m.danger,'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 19 5v6c0 5-3 8.5-7 11-4-2.5-7-6-7-11V5l7-3Z"/><path d="M12 6v11M9 9h6"/></svg>','rivalry-icon-danger',x=>`<small>${x.together} matcher tillsammans</small><small>Förlustprocent: <strong class="metric-bad">${x.together?(x.myLoss/x.together*100).toFixed(0):0}%</strong></small>`)+
+    card('Mest utsatt motspelare',m.victim,'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>','rivalry-icon-victim',x=>`<small>${x.together} matcher tillsammans</small><small>Förlustprocent: <strong class="metric-bad">${x.together?(x.oppLoss/x.together*100).toFixed(0):0}%</strong></small>`);
+}
+function renderRankingHistory(){const points=periods().map((p,i)=>({name:p.name,pos:rankInPeriod(playerId,p),current:p.current,index:i})).filter(x=>x.pos);const root=$('#rankingHistory');if(!points.length){root.innerHTML='<div class="chart-empty">Ingen kvalificerad rankinghistorik ännu.</div>';return}const maxPos=Math.max(3,...points.map(x=>x.pos));const w=900,h=260,padL=45,padR=24,padT=24,padB=48;const x=i=>points.length===1?w/2:padL+i*((w-padL-padR)/(points.length-1));const y=pos=>padT+(pos-1)*((h-padT-padB)/Math.max(1,maxPos-1));const path=points.map((p,i)=>`${i?'L':'M'} ${x(i).toFixed(1)} ${y(p.pos).toFixed(1)}`).join(' ');const grid=Array.from({length:maxPos},(_,i)=>i+1).map(pos=>`<line x1="${padL}" y1="${y(pos)}" x2="${w-padR}" y2="${y(pos)}" stroke="#203e55" stroke-width="1"/><text x="${padL-12}" y="${y(pos)+4}" text-anchor="end" fill="#7992a7" font-size="11">${pos}</text>`).join('');const dots=points.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.pos)}" r="5" fill="#43d7c4" stroke="#07131f" stroke-width="3"><title>${esc(p.name)}: #${p.pos}</title></circle><text x="${x(i)}" y="${h-18}" text-anchor="middle" fill="#8199ad" font-size="10">${esc(p.name.length>14?p.name.slice(0,12)+'…':p.name)}</text>`).join('');root.innerHTML=`<svg class="ranking-chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Placering över tid">${grid}<path d="${path}" fill="none" stroke="#43d7c4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg><div class="chart-caption"><span>Lägre placering är bättre</span><span class="chart-legend"><span><i class="legend-dot"></i>Placering per period</span></span></div>`}
+function renderSelectors(){const ps=$('#periodSelect');ps.innerHTML='<option value="all">Totalt · alla perioder</option>'+periods().map(p=>`<option value="${p.key}">${esc(p.name)}${p.current?' · aktuell':''}</option>`).join('');ps.value='all';let opp=$('#opponentSelect');if(!opp){opp=document.createElement('select');opp.id='opponentSelect';opp.className='hidden';document.body.appendChild(opp)}opp.innerHTML=allPlayers().filter(p=>Number(p.id)!==playerId).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');const rival=rivalryMetrics().rival;if(rival&&[...opp.options].some(o=>Number(o.value)===Number(rival.opp.id)))opp.value=String(rival.opp.id)}
+function renderStats(){const p=selectedPeriod(),s=statsFor(playerId,p.rounds);const position=p.key?rankInPeriod(playerId,p):null;$('#stats').innerHTML=`<div class="stat"><span>Matcher</span><b>${s.games}</b></div><div class="stat"><span>Förluster</span><b>${s.losses}</b></div><div class="stat"><span>Förlust %</span><b>${s.pct==null?'–':s.pct.toFixed(1).replace('.',',')+'%'}</b></div><div class="stat"><span>Bayesian score</span><b>${s.score==null?'–':s.score.toFixed(2).replace('.',',')}</b></div><div class="stat"><span>Placering</span><b>${position?position+'.':'–'}</b></div>`;$('#form').innerHTML=s.form.length?s.form.map(x=>`<span class="dot ${x==='loss'?'loss':''}"></span>`).join(''):'<span style="color:var(--muted)">Ingen formdata</span>';renderH2H();renderRivalrySummary()}
+function renderH2H(){const oppId=Number($('#opponentSelect').value);const opp=allPlayers().find(p=>Number(p.id)===oppId);if(!opp){$('#h2h').innerHTML='<div class="empty">Ingen motspelare.</div>';return}const rounds=selectedPeriod().rounds.filter(r=>{const ids=(r.player_ids||[]).map(Number);return ids.includes(playerId)&&ids.includes(oppId)});const mine=rounds.filter(r=>Number(r.loser_id)===playerId).length,theirs=rounds.filter(r=>Number(r.loser_id)===oppId).length;const recent=[...rounds].sort((a,b)=>new Date(b.played_at)-new Date(a.played_at)).slice(0,5);const recentHtml=recent.length?recent.map((r,i)=>{const loser=Number(r.loser_id),cls=loser===playerId?'me-loss':(loser===oppId?'opp-loss':'other-loss'),txt=loser===playerId?'F':(loser===oppId?'M':'Ö');return `<span class="h2h-result ${cls}" title="${loser===playerId?profilePlayer.name+' förlorade':(loser===oppId?opp.name+' förlorade':'Annan spelare förlorade')}">${txt}</span>`}).join(''):'<span style="color:var(--muted);font-size:11px">Ingen gemensam historik</span>';const selectHtml=`<div class="h2h-selector-card"><div class="h2h-selector-title">H2H mot vald spelare</div><select id="opponentSelectInner" class="select">${allPlayers().filter(p=>Number(p.id)!==playerId).map(p=>`<option value="${p.id}"${Number(p.id)===oppId?' selected':''}>${esc(p.name)}</option>`).join('')}</select></div>`;$('#h2h').innerHTML=`<div class="h2h-combined-card">${selectHtml}<div class="h2h-combined-metrics"><div class="h2h-metric"><span>Matcher tillsammans</span><b>${rounds.length}</b></div><div class="h2h-metric"><span>${esc(profilePlayer.name)} förlorade</span><b>${mine}</b></div><div class="h2h-metric"><span>${esc(opp.name)} förlorade</span><b>${theirs}</b></div></div></div><div class="h2h-recent"><div class="h2h-recent-title">Senaste 5 gemensamma matcher</div><div class="h2h-recent-dots">${recentHtml}</div><div class="h2h-recent-legend">F = ${esc(profilePlayer.name)} förlorade · M = motståndaren · Ö = övrig</div></div>`;const inner=$('#opponentSelectInner');if(inner)inner.onchange=()=>{const outer=$('#opponentSelect');if(outer)outer.value=inner.value;renderH2H()}}
 function renderHistory(){const root=$('#periodHistory');const items=periods().map(p=>{const s=statsFor(playerId,p.rounds),pos=rankInPeriod(playerId,p);return{s,p,pos}}).filter(x=>x.s.games>0);root.innerHTML=items.length?items.map(({s,p,pos})=>`<div class="period-row"><div class="name">${esc(p.name)}</div><div class="num">${s.games} matcher</div><div class="num">${s.losses} förl.</div><div class="num hide-mobile">${s.pct==null?'–':s.pct.toFixed(1).replace('.',',')+'%'}</div><div class="num hide-mobile">${pos?pos+'.':'DNQ'}</div></div>`).join(''):'<div class="empty">Ingen periodhistorik ännu.</div>'}
 async function loadProfileMeta(){
-  const {data,error}=await sb.from('klask_player_profiles').select('player_id,motto,image_url,image_path').eq('player_id',playerId).maybeSingle();
-  if(!error&&data)profilePlayer={...profilePlayer,motto:data.motto||'',image_url:data.image_url||'',image_path:data.image_path||''};
+  const {data,error}=await sb.from('klask_player_profiles').select('player_id,motto,image_url,image_path');
+  if(!error&&Array.isArray(data)){
+    data.forEach(p=>{if(p.image_url)playerProfileImages.set(Number(p.player_id),p.image_url)});
+    const mine=data.find(p=>Number(p.player_id)===playerId);
+    if(mine)profilePlayer={...profilePlayer,motto:mine.motto||'',image_url:mine.image_url||'',image_path:mine.image_path||''};
+  }
 }
 async function resolvePermissions(){
   const {data:{session}}=await sb.auth.getSession();
@@ -119,9 +243,54 @@ async function init(){
   await Promise.all([loadProfileMeta(),resolvePermissions()]);
   document.body.classList.toggle('is-admin',isAdmin);
   document.body.classList.toggle('can-edit-profile',canEditProfile);
-  renderHero();renderSelectors();renderStats();renderHistory();
+  renderHero();renderSelectors();renderStats();renderHighlights();renderRankingHistory();renderHistory();
   $('#periodSelect').onchange=renderStats;$('#opponentSelect').onchange=renderH2H;
   $('#cancelEdit').onclick=()=>$('#editModal').classList.add('hidden');$('#removeImageBtn').onclick=()=>{removeImageRequested=true;$('#editImageFile').value='';$('#currentImageNote').textContent='Profilbilden tas bort när du sparar.';$('#removeImageBtn').style.display='none';};$('#saveEdit').onclick=saveProfile;
 }
 init();
-</script></body></html>
+</script>
+<style id="rivalry-visual-cards">
+/* Visual rivalry cards inspired by the compact player-card layout */
+.rivalry-layout .rivalry-summary{gap:10px}
+.rivalry-feature{position:relative;min-height:106px;padding:13px 14px!important;background:linear-gradient(145deg,#10263a,#0c1f31)!important;overflow:hidden}
+.rivalry-feature .rivalry-label{display:block;color:#b9cad8;font-size:9px;font-weight:900;letter-spacing:.045em;text-transform:uppercase;margin-bottom:10px}
+.rivalry-person{display:flex;align-items:center;gap:10px;min-width:0}
+.rival-avatar{width:38px;height:38px;border-radius:50%;flex:0 0 38px;display:grid;place-items:center;overflow:hidden;background:#17334a;border:1px solid #35526b;color:#dce8f2;font-size:11px;font-weight:900}
+.rival-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.rivalry-person-copy{min-width:0;padding-right:36px}
+.rivalry-feature .rivalry-person-copy b{display:block;font-size:14px;line-height:1.15;margin:0 0 4px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rivalry-feature .rivalry-person-copy small{display:block;margin:2px 0 0;color:#91a7ba;font-size:9px;line-height:1.25}
+.rivalry-icon{position:absolute;right:14px;top:39px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:900;background:#13283c}
+.rivalry-icon-rival{color:#ff5362;background:#261c2c}.rivalry-icon-danger{color:#ff5362;background:#251c2b}.rivalry-icon-victim{color:#45df76;background:#112e2c}
+.metric-good{color:#48d87d}.metric-bad{color:#ff5d72}
+@media(max-width:650px){.rivalry-feature{min-height:98px}}
+</style>
+</body></html>
+<style id="profile-layout-v3-correction">
+/* Keep Karriär Highlights at its original dashboard size; only move it up beside the profile */
+@media (min-width:901px){
+  .profile-top-row{
+    grid-template-columns:minmax(0,1.65fr) minmax(280px,.75fr);
+    align-items:start;
+  }
+  .profile-top-row .highlights-panel .highlights{
+    grid-template-columns:1fr 1fr;
+  }
+  .profile-top-row .highlights-panel .highlight-card{
+    min-height:118px;
+    padding:16px;
+  }
+  .profile-top-row .highlights-panel .highlight-icon{
+    font-size:25px;
+  }
+  .profile-top-row .highlights-panel .highlight-value{
+    font-size:28px;
+    margin-top:auto;
+    padding-top:9px;
+  }
+  .profile-top-row .highlights-panel .career-summary{
+    margin-top:13px;
+    padding-top:14px;
+  }
+}
+</style>
