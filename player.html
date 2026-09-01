@@ -57,10 +57,10 @@ async function saveProfile(){
     let imageUrl=p.image_url||'';
     if(file){
       const ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'');
-      const path=`players/${playerId}/profile.${ext||'jpg'}`;
-      const {error:uploadError}=await sb.storage.from('player-images').upload(path,file,{upsert:true,contentType:file.type,cacheControl:'3600'});
+      const path=`player-images/${playerId}/profile.${ext||'jpg'}`;
+      const {error:uploadError}=await sb.storage.from('klask-images').upload(path,file,{upsert:true,contentType:file.type,cacheControl:'3600'});
       if(uploadError)throw uploadError;
-      const {data:publicData}=sb.storage.from('player-images').getPublicUrl(path);
+      const {data:publicData}=sb.storage.from('klask-images').getPublicUrl(path);
       imageUrl=`${publicData.publicUrl}?v=${Date.now()}`;
     }
     p.motto=$('#editMotto').value.trim();
