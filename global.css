@@ -1,6 +1,6 @@
 /* KLASKLIGAN - shared global header */
 .site-header{
-  width:min(1550px,calc(100% - 20px))!important;
+  width:min(11200px,calc(100% - 20px))!important;
   margin:10px auto 10px!important;
   position:sticky!important;
   top:10px!important;
