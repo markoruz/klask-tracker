@@ -117,7 +117,7 @@
 <body>
 <header class="site-header"><div class="site-header-inner">
   <a class="site-brand" href="index.html"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a>
-  <nav class="site-nav" aria-label="Huvudmeny"><a href="index.html">Tabell</a><a class="active" href="players.html">Spelarprofiler</a></nav>
+  <nav class="site-nav" aria-label="Huvudmeny"><a href="index.html">Tabell</a><a class="active" href="players.html">Spelarprofiler</a><a id="lotteryNavLink" href="lottning.html" style="display:none">Lottning</a></nav>
   <button id="siteAuthBtn" type="button" class="site-admin-link site-auth-btn">Admin</button>
 </div></header>
 <div class="app">
@@ -140,11 +140,11 @@
 const SUPABASE_URL='https://kqfrpvlelpoabfpkqjwn.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZnJwdmxlbHBvYWJmcGtxanduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDI3OTMsImV4cCI6MjEwMzQ3ODc5M30.GS747AnOYChYZbpvwKMrrEwQcDMaIBIP5apFlhczPi0';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-let siteSignedIn=false;
-function setSiteAuthButton(){const b=document.getElementById('siteAuthBtn');if(b)b.textContent=siteSignedIn?'Logga ut':'Admin'}
+let siteSignedIn=false,siteIsAdmin=false;
+function setSiteAuthButton(){const b=document.getElementById('siteAuthBtn');if(b)b.textContent=siteSignedIn?'Logga ut':'Admin';const l=document.getElementById('lotteryNavLink');if(l)l.style.display=siteIsAdmin?'inline-flex':'none'}
 function openSiteAuth(){document.getElementById('authModal')?.classList.add('open');document.getElementById('authModalBackdrop')?.classList.add('open');setTimeout(()=>document.getElementById('siteAuthEmail')?.focus(),40)}
 function closeSiteAuth(){document.getElementById('authModal')?.classList.remove('open');document.getElementById('authModalBackdrop')?.classList.remove('open');}
-async function initSiteAuth(){const {data:{session}}=await sb.auth.getSession();siteSignedIn=!!session;setSiteAuthButton();sb.auth.onAuthStateChange((_e,s)=>{siteSignedIn=!!s;setSiteAuthButton();if(!s)closeSiteAuth()});}
+async function initSiteAuth(){const {data:{session}}=await sb.auth.getSession();siteSignedIn=!!session;siteIsAdmin=false;if(session){const {data:adminData}=await sb.rpc('is_klask_admin');siteIsAdmin=adminData===true;}setSiteAuthButton();sb.auth.onAuthStateChange(async(_e,s)=>{siteSignedIn=!!s;siteIsAdmin=false;if(s){const {data:adminData}=await sb.rpc('is_klask_admin');siteIsAdmin=adminData===true;}setSiteAuthButton();if(!s)closeSiteAuth()});}
 document.getElementById('siteAuthBtn')?.addEventListener('click',async()=>{if(siteSignedIn){await sb.auth.signOut();location.href='index.html';}else openSiteAuth()});
 document.getElementById('authModalClose')?.addEventListener('click',closeSiteAuth);document.getElementById('authModalBackdrop')?.addEventListener('click',closeSiteAuth);
 document.getElementById('siteAuthSubmit')?.addEventListener('click',async()=>{const email=document.getElementById('siteAuthEmail').value.trim(),password=document.getElementById('siteAuthPassword').value,err=document.getElementById('siteAuthError');err.textContent='';if(!email||!password){err.textContent='Fyll i e-post och lösenord.';return}const {error}=await sb.auth.signInWithPassword({email,password});if(error){err.textContent='Kunde inte logga in: '+error.message;return}document.getElementById('siteAuthPassword').value='';closeSiteAuth();location.reload()});
