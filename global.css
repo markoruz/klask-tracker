@@ -1,0 +1,105 @@
+/* KLASKLIGAN - shared global header */
+.site-header{
+  width:min(1550px,calc(100% - 20px))!important;
+  margin:10px auto 10px!important;
+  position:sticky!important;
+  top:10px!important;
+  z-index:30!important;
+  background:rgba(6,17,29,.94)!important;
+  backdrop-filter:blur(14px)!important;
+  border:1px solid #29475f!important;
+  border-radius:16px!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.18)!important;
+}
+.site-header-inner{
+  min-height:68px!important;
+  height:68px!important;
+  padding:10px 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:28px!important;
+}
+.site-brand{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  color:#eef5fb!important;
+  text-decoration:none!important;
+  font-size:20px!important;
+  font-weight:950!important;
+  letter-spacing:-.5px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+.site-brand-mark{
+  width:30px!important;
+  height:24px!important;
+  flex:0 0 30px!important;
+  position:relative!important;
+  display:inline-block!important;
+}
+.site-brand-mark:before,.site-brand-mark:after{
+  content:""!important;
+  position:absolute!important;
+  left:2px!important;
+  right:2px!important;
+  border:2px solid #526c84!important;
+  border-radius:50%!important;
+}
+.site-brand-mark:before{height:8px!important;bottom:2px!important}
+.site-brand-mark:after{height:5px!important;bottom:7px!important;left:7px!important;right:7px!important}
+.site-brand-mark i{
+  position:absolute!important;
+  left:11px!important;
+  top:0!important;
+  width:8px!important;
+  height:8px!important;
+  border:2px solid #43d7c4!important;
+  border-radius:50%!important;
+  background:#0b1726!important;
+}
+.site-nav{
+  display:flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  flex:1!important;
+}
+.site-nav a{
+  color:#aebfd0!important;
+  text-decoration:none!important;
+  padding:9px 13px!important;
+  border-radius:9px!important;
+  font-size:13px!important;
+  font-weight:850!important;
+  line-height:18px!important;
+}
+.site-nav a:hover{color:#fff!important;background:#11263a!important}
+.site-nav a.active{color:#fff!important;background:#173047!important;box-shadow:inset 0 -2px 0 #43d7c4!important}
+.site-admin-btn,.site-admin-link{
+  margin-left:auto!important;
+  white-space:nowrap!important;
+  cursor:pointer!important;
+  color:#dce8f2!important;
+  border:1px solid #35556d!important;
+  background:#10273b!important;
+  border-radius:10px!important;
+  padding:8px 11px!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  line-height:18px!important;
+  font-family:inherit!important;
+  min-height:36px!important;
+  height:36px!important;
+  box-shadow:none!important;
+}
+.site-admin-btn:hover,.site-admin-link:hover{border-color:#43d7c4!important;filter:none!important}
+.admin-only-nav{display:none!important}
+body.is-admin .admin-only-nav{display:inline-flex!important}
+@media(max-width:680px){
+  .site-header{width:calc(100% - 10px)!important}
+  .site-header-inner{height:auto!important;min-height:68px!important;gap:10px!important;flex-wrap:wrap!important}
+  .site-brand{font-size:17px!important}
+  .site-nav{order:3!important;width:100%!important;flex-basis:100%!important;border-top:1px solid rgba(53,82,107,.45)!important;padding-top:7px!important}
+  .site-nav a{flex:1!important;text-align:center!important;padding:8px 6px!important}
+  .site-admin-btn,.site-admin-link{padding:8px 10px!important}
+}
