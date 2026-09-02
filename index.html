@@ -13,7 +13,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(circle at 70% 0,#0b2135 0,#06111d 48%,#040b12 100%);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh}
-button,input{font:inherit}.app{width:min(1550px,calc(100% - 20px));margin:10px auto 24px}
+button,input{font:inherit}.app{width:min(1550px,calc(100vw - 20px));margin:10px auto 24px}
 .panel{background:linear-gradient(145deg,rgba(13,29,47,.98),rgba(10,23,37,.98));border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
 .top-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch;margin-bottom:10px}.hero{padding:22px 24px;margin-bottom:0}.admin-panel{width:300px;padding:18px;display:flex;flex-direction:column;justify-content:center}.admin-panel .auth-box{margin-top:0;flex-direction:column;align-items:stretch}.admin-panel .auth-status{justify-content:center}.admin-panel .btn{width:100%}.admin-panel .auth-form{flex-direction:column;align-items:stretch}.admin-panel .auth-form input{width:100%}.admin-title{text-align:center;font-size:18px;font-weight:950;margin:0 0 10px}.hero-title{display:flex;align-items:center;gap:14px}.logo{width:46px;height:34px;position:relative;flex:0 0 auto}.logo:before,.logo:after{content:"";position:absolute;left:4px;right:4px;border:3px solid #526c84;border-radius:50%}.logo:before{height:11px;bottom:3px}.logo:after{height:7px;bottom:9px;left:10px;right:10px}.logo-dot{position:absolute;left:17px;top:0;width:12px;height:12px;border:3px solid var(--teal);border-radius:50%;background:#0b1726;z-index:2}
 h1{margin:0;font-size:clamp(30px,3vw,46px);letter-spacing:-1.2px;line-height:1}.hero p{margin:8px 0 0;color:#b6c7d8;font-size:14px}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #28526a;background:#10283a;border-radius:999px;padding:8px 13px;color:#dbe7f1;font-size:12px;font-weight:800}.chip-check{display:grid;place-items:center;width:16px;height:16px;border:1px solid var(--teal);border-radius:50%;color:var(--teal);font-size:10px}.chip-button{appearance:none;cursor:pointer;font:inherit}.chip-button.danger-chip{border-color:#7a4352;background:#321d27;color:#ffd9d5}.chip-button.danger-chip:hover{background:#442430;border-color:#a35360}
@@ -572,11 +572,10 @@ body.is-admin #leaderPanel .rank-avatar{width:26px;height:26px;flex-basis:26px;f
 body.is-admin #leaderPanel .rank-name a{gap:7px}
 @media(max-width:760px){.rank-avatar{width:28px;height:28px;flex-basis:28px}.rank-name a{gap:7px}}
 </style>
-
+<link rel="stylesheet" href="global.css">
 </head>
 <body>
-<main class="app">
-  <header class="site-header">
+<header class="site-header">
     <div class="site-header-inner">
       <a class="site-brand" href="index.html" aria-label="Klaskligan startsida"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a>
       <nav class="site-nav" aria-label="Huvudmeny">
@@ -587,6 +586,7 @@ body.is-admin #leaderPanel .rank-name a{gap:7px}
       <button id="adminMenuBtn" type="button" class="btn site-admin-btn">Admin</button>
     </div>
   </header>
+<main class="app">
   <div class="top-row">
     <div id="loginBackdrop" class="login-backdrop"></div>
     <section id="headerAdminPanel" class="panel admin-panel login-modal">
