@@ -633,6 +633,7 @@ body.is-admin #leaderPanel .rank-name a{gap:7px}
       <nav class="site-nav" aria-label="Huvudmeny">
         <a class="active" href="index.html">Tabell</a>
         <a href="players.html">Spelarprofiler</a>
+        <a id="lotteryNavLink" class="admin-only" href="lottning.html">Lottning</a>
       </nav>
       <button id="adminMenuBtn" type="button" class="btn site-admin-btn">Admin</button>
     </div>
@@ -868,7 +869,8 @@ function emptyData(){
     periodStartedAt:new Date().toISOString(),
     periodEndedAt:null,
     periodPlannedEndAt:null,
-    inactivePlayerIds:[]
+    inactivePlayerIds:[],
+    pendingDraw:null
   };
 }
 function cloneImportedData(){return JSON.parse(JSON.stringify(IMPORTED_INITIAL_DATA))}
@@ -894,7 +896,8 @@ function normalizeLoaded(x){
     })(),
     periodEndedAt:typeof x.periodEndedAt==='string'&&x.periodEndedAt?x.periodEndedAt:null,
     periodPlannedEndAt:typeof x.periodPlannedEndAt==='string'&&x.periodPlannedEndAt?x.periodPlannedEndAt:null,
-    inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[]
+    inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[],
+    pendingDraw:(x.pendingDraw&&Array.isArray(x.pendingDraw.player_ids))?{player_ids:x.pendingDraw.player_ids.map(Number).filter(Number.isFinite),created_at:x.pendingDraw.created_at||null}:null
   };
 }
 async function fetchRemoteRow(){const{data:row,error}=await sb.from('klask_state').select('data,archive').eq('id',1).maybeSingle();if(error)throw error;return row}
@@ -902,6 +905,24 @@ async function ensureRemoteRow(){const imported=cloneImportedData();const{error}
 async function loadRemoteState(){try{let row=await fetchRemoteRow();if(!row)row=await ensureRemoteRow();return{data:normalizeLoaded(row.data||{}),archive:Array.isArray(row.archive)?row.archive:[]}}catch(e){console.error('Kunde inte hämta data från Supabase',e);toast('Kunde inte ansluta till databasen.');return{data:cloneImportedData(),archive:[]}}}
 function loadData(){return data}
 async function persistState(){try{const{error}=await sb.from('klask_state').update({data,archive:archiveCache,updated_at:new Date().toISOString()}).eq('id',1);if(error)throw error}catch(e){console.error('Kunde inte spara',e);toast('Kunde inte spara ändringen (inte inloggad som admin?).')}}
+
+let pendingDrawApplied=false;
+function applyPendingDrawFromData(){
+  if(pendingDrawApplied)return;
+  const draw=data&&data.pendingDraw;
+  const ids=Array.isArray(draw?.player_ids)?draw.player_ids.map(Number).filter(Number.isFinite):[];
+  if(ids.length!==4)return;
+  const activeIds=new Set((data.players||[]).filter(p=>!(data.inactivePlayerIds||[]).includes(p.id)).map(p=>Number(p.id)));
+  if(!ids.every(id=>activeIds.has(id)))return;
+  selected=new Set(ids);
+  matchLosers=[null,null,null];
+  pendingDrawApplied=true;
+}
+async function clearPendingDraw(){
+  if(!data||!data.pendingDraw)return;
+  delete data.pendingDraw;
+  await persistState();
+}
 function saveData(){persistState()}
 function loadArchive(){return archiveCache}
 function saveArchive(items){archiveCache=items;persistState()}
@@ -1281,6 +1302,7 @@ function renderPeriodDuration(){
 
 
 function render(){
+  if(isAdmin&&selectedPeriodKey==='current')applyPendingDrawFromData();
   renderPeriodSelector();
   computeState();
   const view=getViewedPeriod();
@@ -1520,7 +1542,7 @@ $('#addPlayer').onclick=addPlayer;$('#playerName').addEventListener('keydown',e=
 $('#saveListName').onclick=()=>{if(data.periodClosed)return toast('Perioden är avslutad. Starta en ny period först.');const inp=$('#listName');const v=inp.value.trim();if(!v){toast('Ange ett namn på ställningen.');inp.focus();return}data.listName=v;saveData();render();toast('Namnet på ställningen sparades.')};
 $('#editListName').onclick=()=>{const inp=$('#listName'),saveBtn=$('#saveListName');inp.disabled=false;$('#editListName').classList.add('hidden');saveBtn.classList.remove('hidden');saveBtn.textContent='Spara ändring';inp.focus();inp.select()};
 $('#listName').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('#saveListName').classList.contains('hidden'))$('#saveListName').click()});
-$('#resetForm').onclick=()=>{selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render()};
+$('#resetForm').onclick=async()=>{selected.clear();matchLosers=[null,null,null];pendingDrawApplied=true;data.pendingDraw=null;await persistState();$('#loserStage').classList.add('hidden');render()};
 $('#saveRound').onclick=()=>{
   if(data.periodClosed)return toast('Perioden är avslutad. Starta en ny period först.');
   if(selected.size!==4)return toast('Välj exakt 4 spelare.');
@@ -1530,7 +1552,7 @@ $('#saveRound').onclick=()=>{
   matchLosers.forEach(loserId=>{
     data.rounds.push({id:data.nextRoundId++,player_ids:playerIds,loser_id:loserId,played_at:playedAt});
   });
-  saveData();selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render();toast('Omgång sparad – 3 matcher registrerade.');
+  data.pendingDraw=null;pendingDrawApplied=true;saveData();selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render();toast('Omgång sparad – 3 matcher registrerade.');
 };
 function openEditMatch(ids){
   if(data.periodClosed)return toast('Perioden är avslutad och kan inte redigeras.');
