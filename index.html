@@ -287,15 +287,8 @@ body.is-admin .admin-only{display:block}
 .period-history-view #managePanel,.period-history-view #roundPanel{display:none!important}
 @media(max-width:720px){.period-view-head{flex-direction:column}.period-select{min-width:0;width:100%}.period-selector-wrap{align-items:flex-start;flex-direction:column}}
 
-/* ===== Global site header ===== */
-.site-header{position:sticky;top:10px;z-index:30;margin:10px 0 10px;background:rgba(6,17,29,.94);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
-.site-header-inner{min-height:68px;display:flex;align-items:center;gap:28px;padding:10px 16px}
-.site-brand{display:inline-flex;align-items:center;gap:10px;color:var(--text);text-decoration:none;font-size:20px;font-weight:950;letter-spacing:-.5px;white-space:nowrap}
-.site-brand-mark{width:30px;height:24px;position:relative;display:inline-block}.site-brand-mark:before,.site-brand-mark:after{content:"";position:absolute;left:2px;right:2px;border:2px solid #526c84;border-radius:50%}.site-brand-mark:before{height:8px;bottom:2px}.site-brand-mark:after{height:5px;bottom:7px;left:7px;right:7px}.site-brand-mark i{position:absolute;left:11px;top:0;width:8px;height:8px;border:2px solid var(--teal);border-radius:50%;background:#0b1726}
-.site-nav{display:flex;align-items:center;gap:6px;flex:1}.site-nav a{color:#aebfd0;text-decoration:none;padding:9px 13px;border-radius:9px;font-size:13px;font-weight:850}.site-nav a:hover{color:#fff;background:#11263a}.site-nav a.active{color:#fff;background:#173047;box-shadow:inset 0 -2px 0 var(--teal)}
-.site-admin-btn{margin-left:auto;white-space:nowrap}.top-row{display:block;margin-bottom:10px}.top-row>.hero{display:none}.admin-panel{display:none;width:min(360px,100%);margin:0 0 10px auto}.admin-panel.header-open{display:flex}.admin-title{font-size:15px}
-@media(max-width:680px){.site-header-inner{gap:10px;flex-wrap:wrap}.site-brand{font-size:17px}.site-nav{order:3;width:100%;flex-basis:100%;border-top:1px solid rgba(53,82,107,.45);padding-top:7px}.site-nav a{flex:1;text-align:center;padding:8px 6px}.site-admin-btn{padding:8px 10px}}
-
+/* Header styling comes from global.css. */
+.top-row{display:block;margin-bottom:10px}.top-row>.hero{display:none}.admin-panel{display:none;width:min(360px,100%);margin:0 0 10px auto}.admin-panel.header-open{display:flex}.admin-title{font-size:15px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -364,12 +357,11 @@ body.is-admin .admin-only{display:block}
 <style>
 /* Shared wide desktop canvas: matches the original index width */
 .app{width:min(1550px,calc(100% - 20px))!important;margin-left:auto!important;margin-right:auto!important}
-.site-header{width:100%!important;margin-left:0!important;margin-right:0!important}
 @media (min-width:1181px){
   body.is-admin .layout{grid-template-columns:minmax(0,1.72fr) minmax(390px,.94fr)!important;gap:10px!important}
   body.is-admin .players-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 }
-@media(max-width:520px){.app{width:calc(100% - 10px)!important}.site-header{width:100%!important}}
+@media(max-width:520px){.app{width:calc(100% - 10px)!important}}
 </style>
 
 <style>
@@ -572,20 +564,44 @@ body.is-admin #leaderPanel .rank-avatar{width:26px;height:26px;flex-basis:26px;f
 body.is-admin #leaderPanel .rank-name a{gap:7px}
 @media(max-width:760px){.rank-avatar{width:28px;height:28px;flex-basis:28px}.rank-name a{gap:7px}}
 </style>
+
+<style id="klask-social-feed-styles">
+.social-feed-panel{margin-top:18px;padding:18px}
+.social-feed-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+.social-feed-head h2{margin:0;font-size:22px}.social-feed-head p{margin:4px 0 0;color:var(--soft);font-size:11px}
+.social-feed-list{display:grid;gap:10px}
+.feed-item{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:start;padding:13px 14px;border:1px solid #29475f;border-radius:13px;background:linear-gradient(145deg,#10263a,#0b1d2d)}
+.feed-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#142e45;border:1px solid #35556d;font-size:20px}
+.feed-copy{min-width:0}.feed-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:950;color:var(--teal);margin-bottom:3px}.feed-title{font-weight:950;font-size:14px;line-height:1.25}.feed-body{margin-top:4px;color:#b8cad8;font-size:11px;line-height:1.5}.feed-time{color:#7891a5;font-size:9px;white-space:nowrap;padding-top:2px}
+.feed-item.roast{border-color:#513445;background:linear-gradient(145deg,#251927,#111c2a)}.feed-item.roast .feed-kicker{color:#ff7b87}.feed-item.roast .feed-icon{background:#321c29;border-color:#69384a}
+.feed-item.achievement{border-color:#5a512c;background:linear-gradient(145deg,#252317,#111d29)}.feed-item.achievement .feed-kicker{color:#f4c542}.feed-item.achievement .feed-icon{background:#312d17;border-color:#6d6129}
+.feed-item.rivalry{border-color:#315065}.feed-item.rivalry .feed-kicker{color:#8fd8ff}
+.feed-empty{padding:22px;border:1px dashed #35526b;border-radius:12px;text-align:center;color:#8fa6b8;font-size:11px}
+@media(max-width:650px){.feed-item{grid-template-columns:36px 1fr}.feed-icon{width:36px;height:36px}.feed-time{grid-column:2}.social-feed-head{align-items:flex-start;flex-direction:column}}
+</style>
 <link rel="stylesheet" href="global.css">
+
+<style id="index-wide-feed-layout">
+/* Huvudkolumnen: ställning till vänster, socialt flöde till höger. */
+.right-col{display:grid!important;grid-template-columns:minmax(0,1.55fr) minmax(390px,.85fr)!important;gap:12px!important;align-items:start!important}
+.right-col > #leaderPanel{grid-column:1!important;grid-row:1!important}
+.right-col > .social-feed-panel{grid-column:2!important;grid-row:1!important;margin-top:0!important;min-width:0}
+.right-col > .hof-history-row{grid-column:1 / -1!important;grid-row:2!important}
+@media(max-width:1180px){.right-col{grid-template-columns:1fr!important}.right-col > #leaderPanel,.right-col > .social-feed-panel,.right-col > .hof-history-row{grid-column:1!important;grid-row:auto!important}}
+</style>
 </head>
 <body>
 <header class="site-header">
-    <div class="site-header-inner">
-      <a class="site-brand" href="index.html" aria-label="Klaskligan startsida"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a>
-      <nav class="site-nav" aria-label="Huvudmeny">
-        <a class="active" href="index.html">Tabell</a>
-        <a href="players.html">Spelarprofiler</a>
-        <a id="lotteryNavLink" class="admin-only" href="lottning.html">Lottning</a>
-      </nav>
-      <button id="adminMenuBtn" type="button" class="btn site-admin-btn">Admin</button>
-    </div>
-  </header>
+  <div class="site-header-inner">
+    <a class="site-brand" href="index.html" aria-label="Klaskligan startsida"><span class="site-brand-mark"><i></i></span><span>KLASKLIGAN</span></a>
+    <nav class="site-nav" aria-label="Huvudmeny">
+      <a class="active" href="index.html">Tabell</a>
+      <a href="players.html">Spelarprofiler</a>
+      <a id="lotteryNavLink" class="admin-only-nav" href="lottning.html">Lottning</a>
+    </nav>
+    <button id="adminMenuBtn" type="button" class="site-admin-link site-auth-btn">Admin</button>
+  </div>
+</header>
 <main class="app">
   <div class="top-row">
     <div id="loginBackdrop" class="login-backdrop"></div>
@@ -665,6 +681,13 @@ body.is-admin #leaderPanel .rank-name a{gap:7px}
 <div id="rankingInfo" class="info-popover hidden"><strong>Hur bestäms ställningen?</strong><br>Ställningen använder en Bayesian-ranking med m = 18 och 25 % som utgångspunkt, eftersom en av fyra spelare förlorar varje match. Minst 18 spelade matcher krävs för en officiell placering. Spelare med färre än 18 matcher visas längst ner som <strong>DNQ</strong> (Did Not Qualify) tills de når 18 matcher. Vid 18 matcher väger spelarens egna resultat och ligans utgångsvärde lika mycket; därefter får de egna resultaten allt större betydelse.</div>
 <div id="leaderboard" class="leaderboard"></div>
 </section>
+  <section class="panel social-feed-panel">
+    <div class="social-feed-head">
+      <div><div class="eyebrow">Ligan lever</div><h2>Klaskflödet</h2><p>Achievements, rivaliteter och obarmhärtig matchanalys.</p></div>
+    </div>
+    <div id="socialFeed" class="social-feed-list"></div>
+  </section>
+
       <div class="hof-history-row">
         <section class="panel archive-panel hall-of-fame-panel">
           <div class="hall-of-fame-head">
@@ -844,7 +867,10 @@ function normalizeLoaded(x){
     })(),
     periodEndedAt:typeof x.periodEndedAt==='string'&&x.periodEndedAt?x.periodEndedAt:null,
     periodPlannedEndAt:typeof x.periodPlannedEndAt==='string'&&x.periodPlannedEndAt?x.periodPlannedEndAt:null,
-    inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[]
+    inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[],
+    feedEvents:Array.isArray(x.feedEvents)?x.feedEvents:[],
+    achievements:Array.isArray(x.achievements)?x.achievements:[],
+    achievementProgress:(x.achievementProgress&&typeof x.achievementProgress==='object')?x.achievementProgress:{backFromDead:{},rivalryMilestones:{}}
   };
 }
 async function fetchRemoteRow(){const{data:row,error}=await sb.from('klask_state').select('data,archive').eq('id',1).maybeSingle();if(error)throw error;return row}
@@ -918,6 +944,139 @@ function getAllTimeRounds(){
     if(Number.isFinite(ad)&&Number.isFinite(bd)&&ad!==bd)return ad-bd;
     return (a.id||0)-(b.id||0);
   });
+}
+
+
+// ===== Klaskflöde, achievements, rivaliteter & roast-motor =====
+const ACHIEVEMENTS={
+  debut:{title:'Debutanten',icon:'🎟️',description:'Spelat sin första omgång.'},
+  veteran:{title:'Veteranen',icon:'🎮',description:'Spelat 500 matcher.'},
+  immortal:{title:'Odödlig',icon:'♾️',description:'10 matcher i rad utan förlust.'},
+  double:{title:'Dubbeltrubbel',icon:'💥',description:'Förlorat 2 av 3 matcher i en omgång.'},
+  collapse:{title:'Total kollaps',icon:'☠️',description:'Förlorat alla 3 matcher i en omgång.'},
+  clean:{title:'Clean Sheet',icon:'🧼',description:'Klarat en hel omgång utan förlust.'},
+  nemesis:{title:'Nemesis',icon:'⚔️',description:'Hittat spelaren som konsekvent gör livet surt.'},
+  king:{title:'Kung på tronen',icon:'👑',description:'Avslutat en period som #1.'},
+  comeback:{title:'Back from the dead',icon:'🧟',description:'Gått från sist till topp 3 under samma period.'},
+  bottom:{title:'Bottenrekordet',icon:'🕳️',description:'Haft högst förlustprocent bland kvalificerade spelare.'}
+};
+function ensureSocialState(){
+  if(!Array.isArray(data.feedEvents))data.feedEvents=[];
+  if(!Array.isArray(data.achievements))data.achievements=[];
+  if(!data.achievementProgress||typeof data.achievementProgress!=='object')data.achievementProgress={};
+  if(!data.achievementProgress.backFromDead||typeof data.achievementProgress.backFromDead!=='object')data.achievementProgress.backFromDead={};
+  if(!data.achievementProgress.rivalryMilestones||typeof data.achievementProgress.rivalryMilestones!=='object')data.achievementProgress.rivalryMilestones={};
+}
+function playerNameById(id){return (data.players.find(p=>Number(p.id)===Number(id))||{}).name||'Okänd'}
+function addFeedEvent(type,icon,title,body,playerIds=[],extra={}){
+  ensureSocialState();
+  const event={id:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,type,icon,title,body,player_ids:playerIds.map(Number),created_at:new Date().toISOString(),...extra};
+  data.feedEvents.unshift(event);
+  data.feedEvents=data.feedEvents.slice(0,100);
+  return event;
+}
+function hasAchievement(pid,key){ensureSocialState();return data.achievements.some(a=>Number(a.player_id)===Number(pid)&&a.key===key)}
+function unlockAchievement(pid,key,meta={}){
+  ensureSocialState();
+  if(hasAchievement(pid,key))return false;
+  const def=ACHIEVEMENTS[key];if(!def)return false;
+  const name=playerNameById(pid);
+  const item={key,player_id:Number(pid),title:def.title,description:def.description,icon:def.icon,unlocked_at:new Date().toISOString(),meta};
+  data.achievements.push(item);
+  let detail=def.description;
+  if(key==='nemesis'&&meta.opponent_name)detail=`${meta.opponent_name} är officiellt utsedd till nemesis efter ${meta.losses} förluster på ${meta.together} gemensamma matcher.`;
+  if(key==='immortal'&&meta.streak)detail=`${meta.streak} matcher i rad utan förlust. Någon borde kontrollera om bordet är riggat.`;
+  addFeedEvent('achievement',def.icon,`${name} låser upp ${def.title}`,detail,[pid],{achievement_key:key});
+  return true;
+}
+function chronological(rounds){return [...rounds].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0))}
+function careerRoundsFor(pid,rounds=getAllTimeRounds()){return chronological(rounds).filter(r=>Array.isArray(r.player_ids)&&r.player_ids.map(Number).includes(Number(pid)))}
+function safeStreakAllTime(pid){
+  const rs=careerRoundsFor(pid);let streak=0;
+  for(let i=rs.length-1;i>=0;i--){if(Number(rs[i].loser_id)===Number(pid))break;streak++}return streak;
+}
+function currentPeriodRanking(rounds=data.rounds){
+  const rows=data.players.filter(p=>!(data.inactivePlayerIds||[]).includes(Number(p.id))).map(p=>playerStatsFromRounds(p,rounds));
+  const ordered=rankingOrder(rows);let pos=0;
+  return ordered.map(x=>({...x,position:x.games>=MIN_MATCHES?++pos:null,qualified:x.games>=MIN_MATCHES}));
+}
+function pairStats(pid,oid,rounds=getAllTimeRounds()){
+  const together=rounds.filter(r=>{const ids=(r.player_ids||[]).map(Number);return ids.includes(Number(pid))&&ids.includes(Number(oid))});
+  return{together:together.length,myLoss:together.filter(r=>Number(r.loser_id)===Number(pid)).length,oppLoss:together.filter(r=>Number(r.loser_id)===Number(oid)).length};
+}
+function nemesisFor(pid){
+  const others=data.players.filter(p=>Number(p.id)!==Number(pid));
+  return others.map(o=>({opp:o,...pairStats(pid,o.id)})).filter(x=>x.together>=15&&x.myLoss>=8).sort((a,b)=>b.myLoss-a.myLoss||b.together-a.together)[0]||null;
+}
+function seededPick(arr,seed){if(!arr.length)return'';let n=0;for(const ch of String(seed))n=(n*31+ch.charCodeAt(0))>>>0;return arr[n%arr.length]}
+const ROASTS={
+  collapse:[
+    n=>`Tre matcher. Tre förluster. ${n} lyckades göra en hel omgång till ett långt argument för att införa kvalspel.`,
+    n=>`${n} gick 0–3. Det där var inte en omgång – det var en offentlig nedmontering med protokollföring.`,
+    n=>`Fullständig katastrof för ${n}: 3 av 3 förluster. Till och med bordet såg ut att skämmas.`,
+    n=>`${n} levererade hattrick i förluster. Imponerande konsekvens, fullständigt fel riktning.`,
+    n=>`0–3 för ${n}. Om planen var att ge de andra självförtroende så var insatsen världsklass.`
+  ],
+  double:[
+    n=>`${n} förlorade 2 av 3. Den enda matchen som överlevdes var tydligen när någon annan hann sabotera först.`,
+    n=>`Två förluster för ${n}. En till och vi hade behövt sätta varningstriangel på spelarprofilen.`,
+    n=>`${n} gick 1–2 i fel kolumn. Vid det här laget är “otur” mest ett juridiskt försvar.`,
+    n=>`2 av 3 förluster för ${n}. Det är svårt att kalla det en svacka när svackan börjar få egen postadress.`,
+    n=>`${n} bjöd på två förluster. Generöst. Ingen hade bett om det, men generöst.`
+  ],
+  split:[
+    n=>`${n} tog kvällens enda dubbla smäll. Resten av bordet tackar för statistikhjälpen.`,
+    n=>`Ingen total kollaps den här gången. Ribban ligger alltså numera under golvnivå.`,
+    n=>`Tre matcher registrerade. Någon förlorade, någon överlevde och självbilden är återigen föremål för intern utredning.`
+  ]
+};
+function addRoundRoast(playerIds,losers,batchId){
+  const counts=new Map(playerIds.map(id=>[Number(id),0]));losers.forEach(id=>counts.set(Number(id),(counts.get(Number(id))||0)+1));
+  const worst=[...counts.entries()].sort((a,b)=>b[1]-a[1])[0];if(!worst)return;
+  const [pid,count]=worst,name=playerNameById(pid);
+  const key=count===3?'collapse':count===2?'double':'split';
+  const fn=seededPick(ROASTS[key],`${batchId}-${pid}-${count}`);
+  addFeedEvent('roast',count===3?'☠️':'🔥',count===3?`TOTAL KOLLAPS: ${name}`:count===2?`${name} åt två förluster`:'Omgången är bokförd',fn(name),playerIds,{round_batch_id:batchId});
+}
+function maybeAddRivalryEvent(playerIds,batchId){
+  ensureSocialState();const ids=playerIds.map(Number),all=getAllTimeRounds();let best=null;
+  for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){const st=pairStats(ids[i],ids[j],all);if(!best||st.together>best.together)best={a:ids[i],b:ids[j],...st}}
+  if(!best||best.together<10)return;
+  const milestone=Math.floor(best.together/10)*10;const pairKey=[best.a,best.b].sort((a,b)=>a-b).join('-');
+  if((Number(data.achievementProgress.rivalryMilestones[pairKey])||0)>=milestone)return;
+  data.achievementProgress.rivalryMilestones[pairKey]=milestone;
+  const a=playerNameById(best.a),b=playerNameById(best.b);
+  const body=`${a} och ${b} har nu delat bord i ${best.together} matcher. ${a} har förlorat ${best.myLoss}, ${b} har förlorat ${best.oppLoss}. Det här är inte längre statistik – det är ett pågående gräl med poängräkning.`;
+  addFeedEvent('rivalry','⚔️',`Rivaliteten hårdnar: ${a} vs ${b}`,body,[best.a,best.b],{round_batch_id:batchId,milestone});
+}
+function evaluateRoundAchievements(playerIds,losers,beforeRounds,batchId){
+  ensureSocialState();const ids=playerIds.map(Number),lossCounts=new Map(ids.map(id=>[id,0]));losers.forEach(id=>lossCounts.set(Number(id),(lossCounts.get(Number(id))||0)+1));
+  const beforeRanking=currentPeriodRanking(beforeRounds),afterRanking=currentPeriodRanking(data.rounds);
+  const beforeQualified=beforeRanking.filter(x=>x.qualified);
+  if(beforeQualified.length){const last=beforeQualified[beforeQualified.length-1];data.achievementProgress.backFromDead[String(last.id)]=true}
+  ids.forEach(pid=>{
+    const allBefore=[...archiveCache.flatMap(item=>getArchivedRounds(item)),...beforeRounds];
+    const beforeAppearances=allBefore.filter(r=>(r.player_ids||[]).map(Number).includes(pid)).length;
+    if(beforeAppearances===0)unlockAchievement(pid,'debut');
+    const cnt=lossCounts.get(pid)||0;if(cnt===3)unlockAchievement(pid,'collapse');else if(cnt===2)unlockAchievement(pid,'double');else if(cnt===0)unlockAchievement(pid,'clean');
+    const careerGames=careerRoundsFor(pid).length;if(careerGames>=500)unlockAchievement(pid,'veteran',{games:careerGames});
+    const streak=safeStreakAllTime(pid);if(streak>=10)unlockAchievement(pid,'immortal',{streak});
+    const nem=nemesisFor(pid);if(nem)unlockAchievement(pid,'nemesis',{opponent_id:nem.opp.id,opponent_name:nem.opp.name,losses:nem.myLoss,together:nem.together});
+    const after=afterRanking.find(x=>Number(x.id)===pid);if(after?.qualified&&after.position<=3&&data.achievementProgress.backFromDead[String(pid)])unlockAchievement(pid,'comeback',{position:after.position});
+  });
+  const qualified=afterRanking.filter(x=>x.qualified&&Number.isFinite(x.loss_pct));
+  if(qualified.length){const worst=[...qualified].sort((a,b)=>b.loss_pct-a.loss_pct||b.losses-a.losses)[0];if(worst)unlockAchievement(worst.id,'bottom',{loss_pct:worst.loss_pct});}
+  addRoundRoast(ids,losers,batchId);maybeAddRivalryEvent(ids,batchId);
+}
+function evaluatePeriodEndAchievements(){
+  const ranking=currentPeriodRanking(data.rounds).filter(x=>x.qualified);
+  if(ranking.length&&ranking[0].position===1)unlockAchievement(ranking[0].id,'king',{period:data.listName||data.seasonKey});
+}
+function renderSocialFeed(){
+  const root=$('#socialFeed');if(!root)return;ensureSocialState();
+  const items=[...data.feedEvents].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,18);
+  if(!items.length){root.innerHTML='<div class="feed-empty">Inga händelser i Klaskflödet ännu.</div>';return;}
+  root.innerHTML=items.map(e=>{const d=new Date(e.created_at),time=Number.isNaN(d.getTime())?'':d.toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});const kind=e.type==='achievement'?'Achievement':e.type==='rivalry'?'Rivalitet':'Matchrapport';return `<article class="feed-item ${esc(e.type||'')}"><div class="feed-icon">${e.icon||'•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title||'')}</div><div class="feed-body">${esc(e.body||'')}</div></div><time class="feed-time">${esc(time)}</time></article>`}).join('');
 }
 
 let realtimeChannel=null;
@@ -1233,6 +1392,7 @@ function renderPeriodDuration(){
 function render(){
   renderPeriodSelector();
   computeState();
+  renderSocialFeed();
   const view=getViewedPeriod();
   const currentView=view.isCurrent;
   const closed=data.periodClosed===true;
@@ -1471,16 +1631,20 @@ $('#saveListName').onclick=()=>{if(data.periodClosed)return toast('Perioden är 
 $('#editListName').onclick=()=>{const inp=$('#listName'),saveBtn=$('#saveListName');inp.disabled=false;$('#editListName').classList.add('hidden');saveBtn.classList.remove('hidden');saveBtn.textContent='Spara ändring';inp.focus();inp.select()};
 $('#listName').addEventListener('keydown',e=>{if(e.key==='Enter'&&!$('#saveListName').classList.contains('hidden'))$('#saveListName').click()});
 $('#resetForm').onclick=()=>{selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render()};
-$('#saveRound').onclick=()=>{
+$('#saveRound').onclick=async()=>{
   if(data.periodClosed)return toast('Perioden är avslutad. Starta en ny period först.');
   if(selected.size!==4)return toast('Välj exakt 4 spelare.');
   if(matchLosers.some(id=>!id))return toast('Välj en förlorare i alla tre matcher.');
+  ensureSocialState();
   const playerIds=[...selected];
+  const losers=[...matchLosers];
+  const beforeRounds=data.rounds.map(r=>({...r,player_ids:[...(r.player_ids||[])]}));
+  const batchId=`round-${data.nextRoundId}`;
   const playedAt=new Date().toISOString();
-  matchLosers.forEach(loserId=>{
-    data.rounds.push({id:data.nextRoundId++,player_ids:playerIds,loser_id:loserId,played_at:playedAt});
-  });
-  saveData();selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render();toast('Omgång sparad – 3 matcher registrerade.');
+  losers.forEach(loserId=>{data.rounds.push({id:data.nextRoundId++,player_ids:playerIds,loser_id:loserId,played_at:playedAt});});
+  evaluateRoundAchievements(playerIds,losers,beforeRounds,batchId);
+  await persistState();
+  selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render();toast('Omgång sparad – 3 matcher registrerade.');
 };
 function openEditMatch(ids){
   if(data.periodClosed)return toast('Perioden är avslutad och kan inte redigeras.');
@@ -1577,6 +1741,7 @@ $('#confirmDeleteSeason').onclick=async()=>{
   if(!isAdmin)return toast('Du måste vara inloggad som admin.');
   if(data.periodClosed)return;
   data.periodEndedAt=new Date().toISOString();
+  evaluatePeriodEndAchievements();
   const snap=snapshotCurrentStandings();
   if(!snap){data.periodEndedAt=null;return toast('Det finns ingen ställning att arkivera.');}
   archiveCache.unshift(snap);
@@ -1618,11 +1783,14 @@ $('#confirmStartPeriod').onclick=async()=>{
   const existingPlayers=data.players.map(p=>({id:p.id,name:p.name,motto:p.motto||'',image_url:p.image_url||''}));
   const nextPlayerId=data.nextPlayerId;
   const inactivePlayerIds=Array.isArray(data.inactivePlayerIds)?[...data.inactivePlayerIds]:[];
+  ensureSocialState();
+  const feedEvents=[...data.feedEvents],achievements=[...data.achievements];
+  const achievementProgress={...data.achievementProgress,backFromDead:{},rivalryMilestones:{...(data.achievementProgress.rivalryMilestones||{})}};
   data={
     players:existingPlayers,rounds:[],nextPlayerId,nextRoundId:1,
     listName:name,seasonKey:currentSeasonKey(startObj),periodClosed:false,
     periodStartedAt:startObj.toISOString(),periodEndedAt:null,periodPlannedEndAt:endObj.toISOString(),
-    inactivePlayerIds
+    inactivePlayerIds,feedEvents,achievements,achievementProgress
   };
   selectedPeriodKey='current';
   selected.clear();matchLosers=[null,null,null];editing=null;showAllHistory=false;selectedPeriodKey='current';
@@ -1934,16 +2102,7 @@ body:not(.is-admin) .player-remove-btn{display:none!important}
 }
 </style>
 
-<style>
-/* Shared site sizing: match players.html / player.html */
-.app{width:min(1120px,calc(100% - 28px))!important;margin:24px auto 60px!important}
-.site-header-inner{min-height:64px!important;padding:9px 14px!important;gap:26px!important}
-.site-brand{font-size:19px!important;letter-spacing:-.4px!important}
-.site-nav a{font-size:13px!important;padding:9px 12px!important}
-.site-admin-btn{font-size:13px!important;padding:8px 12px!important;border-radius:9px!important}
-@media(max-width:680px){.site-header-inner{gap:8px!important}.site-brand{font-size:17px!important}.site-nav a{padding:8px 5px!important}}
-@media(max-width:520px){.app{width:calc(100% - 28px)!important}}
-</style>
+
 
 <style>
 /* Admin workspace: keep the public 1120px site width, but give controls usable room */
@@ -2011,6 +2170,63 @@ body:not(.is-admin) .right-col > .hof-history-row{grid-column:1 / -1!important}
 }
 </style>
 
+
+<style id="index-feed-layout-v2">
+/* Klaskflodet: smalare kolumn, samma nederkant som stallningen och egen scroll. */
+@media (min-width:1181px){
+  body:not(.is-admin) .right-col{
+    grid-template-columns:minmax(0,1.42fr) minmax(340px,.58fr)!important;
+    align-items:start!important;
+  }
+  body:not(.is-admin) .right-col > .social-feed-panel{
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  body:not(.is-admin) .social-feed-head{
+    flex:0 0 auto!important;
+  }
+  body:not(.is-admin) .social-feed-list{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-right:5px!important;
+    scrollbar-gutter:stable;
+  }
+  body:not(.is-admin) .social-feed-list::-webkit-scrollbar{width:8px}
+  body:not(.is-admin) .social-feed-list::-webkit-scrollbar-track{background:#091827;border-radius:999px}
+  body:not(.is-admin) .social-feed-list::-webkit-scrollbar-thumb{background:#29475f;border-radius:999px}
+  body:not(.is-admin) .social-feed-list::-webkit-scrollbar-thumb:hover{background:#355f7d}
+}
+</style>
+<script id="index-feed-height-sync">
+(function(){
+  function syncKlaskFeedHeight(){
+    if(window.innerWidth<=1180 || document.body.classList.contains('is-admin')){
+      const feed=document.querySelector('.social-feed-panel');
+      if(feed) feed.style.height='';
+      return;
+    }
+    const leader=document.getElementById('leaderPanel');
+    const feed=document.querySelector('.social-feed-panel');
+    if(!leader||!feed)return;
+    feed.style.height=Math.round(leader.getBoundingClientRect().height)+'px';
+  }
+  window.syncKlaskFeedHeight=syncKlaskFeedHeight;
+  window.addEventListener('resize',syncKlaskFeedHeight);
+  window.addEventListener('load',()=>requestAnimationFrame(syncKlaskFeedHeight));
+  const leader=document.getElementById('leaderPanel');
+  if(leader && 'ResizeObserver' in window){
+    new ResizeObserver(()=>requestAnimationFrame(syncKlaskFeedHeight)).observe(leader);
+  }
+  const feed=document.getElementById('socialFeed');
+  if(feed && 'MutationObserver' in window){
+    new MutationObserver(()=>requestAnimationFrame(syncKlaskFeedHeight)).observe(feed,{childList:true,subtree:true});
+  }
+  setTimeout(syncKlaskFeedHeight,250);
+})();
+</script>
 </body>
 </html>
 
@@ -2481,5 +2697,164 @@ body.is-admin .player-card .player-remove-btn{top:8px!important;right:8px!import
   body:not(.is-admin) .hof-history-row{
     grid-template-columns:minmax(0,2fr) minmax(0,3fr)!important;
   }
+}
+</style>
+
+
+<style id="index-feed-layout-user-latest-final">
+/* Index-specific content layout only. Header and global page width are controlled by global.css. */
+@media (min-width:1181px){
+  body:not(.is-admin) .right-col{
+    display:grid!important;
+    grid-template-columns:minmax(0,2.6fr) minmax(320px,1fr)!important;
+    gap:14px!important;
+    align-items:start!important;
+    width:100%!important;
+  }
+  body:not(.is-admin) .right-col > #leaderPanel{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  body:not(.is-admin) .right-col > .social-feed-panel{
+    grid-column:2!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  body:not(.is-admin) .social-feed-head{flex:0 0 auto!important}
+  body:not(.is-admin) .social-feed-list{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-right:5px!important;
+    scrollbar-gutter:stable;
+  }
+  body:not(.is-admin) .right-col > .hof-history-row{
+    grid-column:1 / -1!important;
+    grid-row:2!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+}
+@media (max-width:1180px){
+  body:not(.is-admin) .right-col{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+  }
+  body:not(.is-admin) .right-col > #leaderPanel,
+  body:not(.is-admin) .right-col > .social-feed-panel,
+  body:not(.is-admin) .right-col > .hof-history-row{
+    width:100%!important;
+    min-width:0!important;
+    margin-top:0!important;
+  }
+  body:not(.is-admin) .social-feed-panel{height:auto!important}
+  body:not(.is-admin) .social-feed-list{max-height:none!important;overflow:visible!important}
+}
+</style>
+
+<style id="admin-feed-option-a-final">
+/* Definitiv adminlayout: tre riktiga kolumner med exakt 10 px mellan panelerna. */
+@media (min-width:1450px){
+  body.is-admin .layout{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 330px 300px!important;
+    column-gap:10px!important;
+    row-gap:10px!important;
+    align-items:start!important;
+  }
+
+  /* Wrapper-elementen ska inte skapa egna kolumner eller extra tomrum. */
+  body.is-admin .left-col,
+  body.is-admin .right-col{
+    display:contents!important;
+  }
+
+  body.is-admin #leaderPanel{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  body.is-admin #roundPanel{
+    grid-column:2!important;
+    grid-row:1!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+
+  body.is-admin .social-feed-panel{
+    grid-column:3!important;
+    grid-row:1!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    align-self:stretch!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+
+  body.is-admin .social-feed-head{
+    flex:0 0 auto!important;
+    margin-bottom:10px!important;
+  }
+  body.is-admin .social-feed-list{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-right:5px!important;
+    scrollbar-gutter:stable;
+  }
+
+  body.is-admin #managePanel{
+    grid-column:1 / -1!important;
+    grid-row:2!important;
+    width:100%!important;
+  }
+  body.is-admin .hof-history-row{
+    grid-column:1 / -1!important;
+    grid-row:3!important;
+    width:100%!important;
+  }
+
+  body.is-admin .social-feed-list::-webkit-scrollbar{width:8px}
+  body.is-admin .social-feed-list::-webkit-scrollbar-track{background:#091827;border-radius:999px}
+  body.is-admin .social-feed-list::-webkit-scrollbar-thumb{background:#29475f;border-radius:999px}
+}
+
+/* Under 1450 px får arbetsytan mer plats genom att staplas i stället för att pressas. */
+@media (min-width:1050px) and (max-width:1449px){
+  body.is-admin .layout{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 330px!important;
+    gap:10px!important;
+  }
+  body.is-admin .left-col,
+  body.is-admin .right-col{display:contents!important}
+  body.is-admin #leaderPanel{grid-column:1!important;grid-row:1!important;width:100%!important;min-width:0!important}
+  body.is-admin #roundPanel{grid-column:2!important;grid-row:1!important;width:100%!important;max-width:none!important;margin:0!important}
+  body.is-admin .social-feed-panel{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important;margin:0!important;height:auto!important}
+  body.is-admin .social-feed-list{max-height:360px!important;overflow-y:auto!important;overflow-x:hidden!important}
+  body.is-admin #managePanel{grid-column:1 / -1!important;grid-row:3!important}
+  body.is-admin .hof-history-row{grid-column:1 / -1!important;grid-row:4!important}
+}
+
+@media (max-width:1049px){
+  body.is-admin .social-feed-panel{width:100%!important;max-width:none!important;height:auto!important;margin-top:0!important}
+  body.is-admin .social-feed-list{max-height:none!important;overflow:visible!important}
 }
 </style>
