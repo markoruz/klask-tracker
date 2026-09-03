@@ -131,7 +131,7 @@
   <section class="panel highlights-panel"><div class="section-head"><div><div class="eyebrow">Karriär</div><h2>Highlights</h2></div></div><div id="highlights" class="highlights"></div><div id="careerSummary" class="career-summary"></div></section>
 </div>
 <section class="panel section rivalry-panel"><div class="section-head"><div><div class="eyebrow">Dueller</div><h2>Rivalitet & H2H</h2></div></div><div class="rivalry-layout"><div id="rivalrySummary" class="rivalry-summary"></div><div id="h2h" class="h2h-grid"></div></div></section>
-<section class="panel section ranking-panel"><div class="section-head"><div><div class="eyebrow">Karriärkurva</div><h2>Rankinghistorik</h2></div><select id="rankingPeriodSelect" class="select"></select></div><div id="rankingHistory" class="chart-wrap"></div></section>
+<section class="panel section ranking-panel"><div class="section-head"><div><div class="eyebrow">Karriärkurva</div><h2>Rankinghistorik</h2></div><select id="rankingPeriodSelect" class="select" onchange="renderRankingHistory()"></select></div><div id="rankingHistory" class="chart-wrap"></div></section>
 <section class="panel section period-panel"><div class="section-head"><div><div class="eyebrow">Arkiv</div><h2>Periodhistorik</h2></div></div><div id="periodHistory" class="period-list"></div></section>
 </div>
 <div id="editModal" class="modal hidden"><div class="modal-card"><h2 style="margin-top:0">Redigera profil</h2><div class="field"><label>Motto / slogan</label><input id="editMotto" maxlength="120"></div><div class="field"><label>Profilbild</label><input id="editImageFile" type="file" accept="image/jpeg,image/png,image/webp"><small style="display:block;margin-top:7px;color:var(--muted)">JPG, PNG eller WebP. Bilden laddas upp till Supabase Storage.</small><div id="currentImageNote" style="margin-top:7px;color:var(--muted);font-size:12px"></div><button id="removeImageBtn" type="button" class="btn" style="margin-top:9px;display:none">Ta bort profilbild</button></div><div class="actions"><button id="cancelEdit" class="btn">Avbryt</button><button id="saveEdit" class="btn">Spara</button></div></div></div>
@@ -198,15 +198,21 @@ function renderRankingHistory(){
     const period=periods().find(p=>p.key===key);
     if(period){
       const rs=[...(period.rounds||[])].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0));
+      // Periodvy: visa rankingens utveckling inom den valda perioden.
+      // Vi räknar efter varje avslutad omgång (3 individuella matcher), och tar alltid med senaste läget.
       for(let end=3;end<=rs.length;end+=3){
         const through=rs.slice(0,end);
         points.push({name:`Omgång ${Math.ceil(end/3)}`,pos:rankingAtRound(playerId,period,through)});
       }
-      if(rs.length%3){const end=rs.length;points.push({name:`Omgång ${Math.ceil(end/3)}`,pos:rankingAtRound(playerId,period,rs)});}
-      caption='Placering under perioden';
+      if(rs.length && rs.length%3){
+        points.push({name:`Omgång ${Math.ceil(rs.length/3)}`,pos:rankingAtRound(playerId,period,rs)});
+      }
+      // Om spelaren ännu inte kvalificerat sig visas ändå periodens tidsaxel.
+      caption=`Placering · ${period.name}`;
     }
   }
   const root=$('#rankingHistory');
+  root.dataset.period=key;
   if(!points.length){root.innerHTML='<div class="chart-empty">Ingen rankinghistorik ännu.</div>';return}
   const ranked=points.filter(x=>x.pos);
   const maxPos=Math.max(3,...ranked.map(x=>x.pos));
@@ -293,7 +299,7 @@ async function init(){
   document.body.classList.toggle('is-admin',isAdmin);
   document.body.classList.toggle('can-edit-profile',canEditProfile);
   renderHero();renderSelectors();renderStats();renderHighlights();renderRankingHistory();renderHistory();
-  $('#periodSelect').onchange=renderStats;$('#rankingPeriodSelect').onchange=renderRankingHistory;$('#opponentSelect').onchange=renderH2H;
+  $('#periodSelect').onchange=renderStats;const rankingPeriodSelect=$('#rankingPeriodSelect');if(rankingPeriodSelect)rankingPeriodSelect.addEventListener('change',renderRankingHistory);$('#opponentSelect').onchange=renderH2H;
   $('#cancelEdit').onclick=()=>$('#editModal').classList.add('hidden');$('#removeImageBtn').onclick=()=>{removeImageRequested=true;$('#editImageFile').value='';$('#currentImageNote').textContent='Profilbilden tas bort när du sparar.';$('#removeImageBtn').style.display='none';};$('#saveEdit').onclick=saveProfile;
 }
 init();
