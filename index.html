@@ -574,7 +574,6 @@ body.is-admin #leaderPanel .rank-name a{gap:7px}
 .feed-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#142e45;border:1px solid #35556d;font-size:20px}
 .feed-copy{min-width:0}.feed-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:950;color:var(--teal);margin-bottom:3px}.feed-title{font-weight:950;font-size:14px;line-height:1.25}.feed-body{margin-top:4px;color:#b8cad8;font-size:11px;line-height:1.5}.feed-time{color:#7891a5;font-size:9px;white-space:nowrap;padding-top:2px}
 .feed-item.roast{border-color:#513445;background:linear-gradient(145deg,#251927,#111c2a)}.feed-item.roast .feed-kicker{color:#ff7b87}.feed-item.roast .feed-icon{background:#321c29;border-color:#69384a}
-.feed-item.achievement{border-color:#5a512c;background:linear-gradient(145deg,#252317,#111d29)}.feed-item.achievement .feed-kicker{color:#f4c542}.feed-item.achievement .feed-icon{background:#312d17;border-color:#6d6129}
 .feed-item.rivalry{border-color:#315065}.feed-item.rivalry .feed-kicker{color:#8fd8ff}
 .feed-empty{padding:22px;border:1px dashed #35526b;border-radius:12px;text-align:center;color:#8fa6b8;font-size:11px}
 @media(max-width:650px){.feed-item{grid-template-columns:36px 1fr}.feed-icon{width:36px;height:36px}.feed-time{grid-column:2}.social-feed-head{align-items:flex-start;flex-direction:column}}
@@ -683,7 +682,7 @@ body.is-admin #leaderPanel .rank-name a{gap:7px}
 </section>
   <section class="panel social-feed-panel">
     <div class="social-feed-head">
-      <div><div class="eyebrow">Ligan lever</div><h2>Klaskflödet</h2><p>Achievements, rivaliteter och obarmhärtig matchanalys.</p></div>
+      <div><div class="eyebrow">Ligan lever</div><h2>Klaskflödet</h2><p>Rivaliteter och obarmhärtig matchanalys.</p></div>
     </div>
     <div id="socialFeed" class="social-feed-list"></div>
   </section>
@@ -868,9 +867,8 @@ function normalizeLoaded(x){
     periodEndedAt:typeof x.periodEndedAt==='string'&&x.periodEndedAt?x.periodEndedAt:null,
     periodPlannedEndAt:typeof x.periodPlannedEndAt==='string'&&x.periodPlannedEndAt?x.periodPlannedEndAt:null,
     inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[],
-    feedEvents:Array.isArray(x.feedEvents)?x.feedEvents:[],
-    achievements:Array.isArray(x.achievements)?x.achievements:[],
-    achievementProgress:(x.achievementProgress&&typeof x.achievementProgress==='object')?x.achievementProgress:{backFromDead:{},rivalryMilestones:{}}
+    feedEvents:Array.isArray(x.feedEvents)?x.feedEvents.filter(e=>e&&e.type!=='achievement'):[],
+    feedProgress:(x.feedProgress&&typeof x.feedProgress==='object')?x.feedProgress:{rivalryMilestones:{...((x.achievementProgress&&x.achievementProgress.rivalryMilestones)||{})}}
   };
 }
 async function fetchRemoteRow(){const{data:row,error}=await sb.from('klask_state').select('data,archive').eq('id',1).maybeSingle();if(error)throw error;return row}
@@ -947,25 +945,13 @@ function getAllTimeRounds(){
 }
 
 
-// ===== Klaskflöde, achievements, rivaliteter & roast-motor =====
-const ACHIEVEMENTS={
-  debut:{title:'Debutanten',icon:'🎟️',description:'Spelat sin första omgång.'},
-  veteran:{title:'Veteranen',icon:'🎮',description:'Spelat 500 matcher.'},
-  immortal:{title:'Odödlig',icon:'♾️',description:'10 matcher i rad utan förlust.'},
-  double:{title:'Dubbeltrubbel',icon:'💥',description:'Förlorat 2 av 3 matcher i en omgång.'},
-  collapse:{title:'Total kollaps',icon:'☠️',description:'Förlorat alla 3 matcher i en omgång.'},
-  clean:{title:'Clean Sheet',icon:'🧼',description:'Klarat en hel omgång utan förlust.'},
-  nemesis:{title:'Nemesis',icon:'⚔️',description:'Hittat spelaren som konsekvent gör livet surt.'},
-  king:{title:'Kung på tronen',icon:'👑',description:'Avslutat en period som #1.'},
-  comeback:{title:'Back from the dead',icon:'🧟',description:'Gått från sist till topp 3 under samma period.'},
-  bottom:{title:'Bottenrekordet',icon:'🕳️',description:'Haft högst förlustprocent bland kvalificerade spelare.'}
-};
+// ===== Klaskflöde, rivaliteter & roast-motor =====
 function ensureSocialState(){
   if(!Array.isArray(data.feedEvents))data.feedEvents=[];
-  if(!Array.isArray(data.achievements))data.achievements=[];
-  if(!data.achievementProgress||typeof data.achievementProgress!=='object')data.achievementProgress={};
-  if(!data.achievementProgress.backFromDead||typeof data.achievementProgress.backFromDead!=='object')data.achievementProgress.backFromDead={};
-  if(!data.achievementProgress.rivalryMilestones||typeof data.achievementProgress.rivalryMilestones!=='object')data.achievementProgress.rivalryMilestones={};
+  if(!data.feedProgress||typeof data.feedProgress!=='object')data.feedProgress={};
+  if(!data.feedProgress.rivalryMilestones||typeof data.feedProgress.rivalryMilestones!=='object'){
+    data.feedProgress.rivalryMilestones={};
+  }
 }
 function playerNameById(id){return (data.players.find(p=>Number(p.id)===Number(id))||{}).name||'Okänd'}
 function addFeedEvent(type,icon,title,body,playerIds=[],extra={}){
@@ -975,38 +961,11 @@ function addFeedEvent(type,icon,title,body,playerIds=[],extra={}){
   data.feedEvents=data.feedEvents.slice(0,100);
   return event;
 }
-function hasAchievement(pid,key){ensureSocialState();return data.achievements.some(a=>Number(a.player_id)===Number(pid)&&a.key===key)}
-function unlockAchievement(pid,key,meta={}){
-  ensureSocialState();
-  if(hasAchievement(pid,key))return false;
-  const def=ACHIEVEMENTS[key];if(!def)return false;
-  const name=playerNameById(pid);
-  const item={key,player_id:Number(pid),title:def.title,description:def.description,icon:def.icon,unlocked_at:new Date().toISOString(),meta};
-  data.achievements.push(item);
-  let detail=def.description;
-  if(key==='nemesis'&&meta.opponent_name)detail=`${meta.opponent_name} är officiellt utsedd till nemesis efter ${meta.losses} förluster på ${meta.together} gemensamma matcher.`;
-  if(key==='immortal'&&meta.streak)detail=`${meta.streak} matcher i rad utan förlust. Någon borde kontrollera om bordet är riggat.`;
-  addFeedEvent('achievement',def.icon,`${name} låser upp ${def.title}`,detail,[pid],{achievement_key:key});
-  return true;
-}
 function chronological(rounds){return [...rounds].sort((a,b)=>(Number(a.id)||0)-(Number(b.id)||0))}
 function careerRoundsFor(pid,rounds=getAllTimeRounds()){return chronological(rounds).filter(r=>Array.isArray(r.player_ids)&&r.player_ids.map(Number).includes(Number(pid)))}
-function safeStreakAllTime(pid){
-  const rs=careerRoundsFor(pid);let streak=0;
-  for(let i=rs.length-1;i>=0;i--){if(Number(rs[i].loser_id)===Number(pid))break;streak++}return streak;
-}
-function currentPeriodRanking(rounds=data.rounds){
-  const rows=data.players.filter(p=>!(data.inactivePlayerIds||[]).includes(Number(p.id))).map(p=>playerStatsFromRounds(p,rounds));
-  const ordered=rankingOrder(rows);let pos=0;
-  return ordered.map(x=>({...x,position:x.games>=MIN_MATCHES?++pos:null,qualified:x.games>=MIN_MATCHES}));
-}
 function pairStats(pid,oid,rounds=getAllTimeRounds()){
   const together=rounds.filter(r=>{const ids=(r.player_ids||[]).map(Number);return ids.includes(Number(pid))&&ids.includes(Number(oid))});
   return{together:together.length,myLoss:together.filter(r=>Number(r.loser_id)===Number(pid)).length,oppLoss:together.filter(r=>Number(r.loser_id)===Number(oid)).length};
-}
-function nemesisFor(pid){
-  const others=data.players.filter(p=>Number(p.id)!==Number(pid));
-  return others.map(o=>({opp:o,...pairStats(pid,o.id)})).filter(x=>x.together>=15&&x.myLoss>=8).sort((a,b)=>b.myLoss-a.myLoss||b.together-a.together)[0]||null;
 }
 function seededPick(arr,seed){if(!arr.length)return'';let n=0;for(const ch of String(seed))n=(n*31+ch.charCodeAt(0))>>>0;return arr[n%arr.length]}
 const ROASTS={
@@ -1030,53 +989,34 @@ const ROASTS={
     n=>`Tre matcher registrerade. Någon förlorade, någon överlevde och självbilden är återigen föremål för intern utredning.`
   ]
 };
-function addRoundRoast(playerIds,losers,batchId){
+function addRoundRoast(playerIds,losers,batchId,roundNumber){
   const counts=new Map(playerIds.map(id=>[Number(id),0]));losers.forEach(id=>counts.set(Number(id),(counts.get(Number(id))||0)+1));
   const worst=[...counts.entries()].sort((a,b)=>b[1]-a[1])[0];if(!worst)return;
   const [pid,count]=worst,name=playerNameById(pid);
   const key=count===3?'collapse':count===2?'double':'split';
   const fn=seededPick(ROASTS[key],`${batchId}-${pid}-${count}`);
-  addFeedEvent('roast',count===3?'☠️':'🔥',count===3?`TOTAL KOLLAPS: ${name}`:count===2?`${name} åt två förluster`:'Omgången är bokförd',fn(name),playerIds,{round_batch_id:batchId});
+  addFeedEvent('roast',count===3?'☠️':'🔥',count===3?`TOTAL KOLLAPS: ${name}`:count===2?`${name} åt två förluster`:'Omgången är bokförd',fn(name),playerIds,{round_batch_id:batchId,round_number:roundNumber});
 }
 function maybeAddRivalryEvent(playerIds,batchId){
   ensureSocialState();const ids=playerIds.map(Number),all=getAllTimeRounds();let best=null;
   for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){const st=pairStats(ids[i],ids[j],all);if(!best||st.together>best.together)best={a:ids[i],b:ids[j],...st}}
   if(!best||best.together<10)return;
   const milestone=Math.floor(best.together/10)*10;const pairKey=[best.a,best.b].sort((a,b)=>a-b).join('-');
-  if((Number(data.achievementProgress.rivalryMilestones[pairKey])||0)>=milestone)return;
-  data.achievementProgress.rivalryMilestones[pairKey]=milestone;
+  if((Number(data.feedProgress.rivalryMilestones[pairKey])||0)>=milestone)return;
+  data.feedProgress.rivalryMilestones[pairKey]=milestone;
   const a=playerNameById(best.a),b=playerNameById(best.b);
   const body=`${a} och ${b} har nu delat bord i ${best.together} matcher. ${a} har förlorat ${best.myLoss}, ${b} har förlorat ${best.oppLoss}. Det här är inte längre statistik – det är ett pågående gräl med poängräkning.`;
   addFeedEvent('rivalry','⚔️',`Rivaliteten hårdnar: ${a} vs ${b}`,body,[best.a,best.b],{round_batch_id:batchId,milestone});
 }
-function evaluateRoundAchievements(playerIds,losers,beforeRounds,batchId){
-  ensureSocialState();const ids=playerIds.map(Number),lossCounts=new Map(ids.map(id=>[id,0]));losers.forEach(id=>lossCounts.set(Number(id),(lossCounts.get(Number(id))||0)+1));
-  const beforeRanking=currentPeriodRanking(beforeRounds),afterRanking=currentPeriodRanking(data.rounds);
-  const beforeQualified=beforeRanking.filter(x=>x.qualified);
-  if(beforeQualified.length){const last=beforeQualified[beforeQualified.length-1];data.achievementProgress.backFromDead[String(last.id)]=true}
-  ids.forEach(pid=>{
-    const allBefore=[...archiveCache.flatMap(item=>getArchivedRounds(item)),...beforeRounds];
-    const beforeAppearances=allBefore.filter(r=>(r.player_ids||[]).map(Number).includes(pid)).length;
-    if(beforeAppearances===0)unlockAchievement(pid,'debut');
-    const cnt=lossCounts.get(pid)||0;if(cnt===3)unlockAchievement(pid,'collapse');else if(cnt===2)unlockAchievement(pid,'double');else if(cnt===0)unlockAchievement(pid,'clean');
-    const careerGames=careerRoundsFor(pid).length;if(careerGames>=500)unlockAchievement(pid,'veteran',{games:careerGames});
-    const streak=safeStreakAllTime(pid);if(streak>=10)unlockAchievement(pid,'immortal',{streak});
-    const nem=nemesisFor(pid);if(nem)unlockAchievement(pid,'nemesis',{opponent_id:nem.opp.id,opponent_name:nem.opp.name,losses:nem.myLoss,together:nem.together});
-    const after=afterRanking.find(x=>Number(x.id)===pid);if(after?.qualified&&after.position<=3&&data.achievementProgress.backFromDead[String(pid)])unlockAchievement(pid,'comeback',{position:after.position});
-  });
-  const qualified=afterRanking.filter(x=>x.qualified&&Number.isFinite(x.loss_pct));
-  if(qualified.length){const worst=[...qualified].sort((a,b)=>b.loss_pct-a.loss_pct||b.losses-a.losses)[0];if(worst)unlockAchievement(worst.id,'bottom',{loss_pct:worst.loss_pct});}
-  addRoundRoast(ids,losers,batchId);maybeAddRivalryEvent(ids,batchId);
-}
-function evaluatePeriodEndAchievements(){
-  const ranking=currentPeriodRanking(data.rounds).filter(x=>x.qualified);
-  if(ranking.length&&ranking[0].position===1)unlockAchievement(ranking[0].id,'king',{period:data.listName||data.seasonKey});
+function addRoundFeedEvents(playerIds,losers,batchId,roundNumber){
+  addRoundRoast(playerIds,losers,batchId,roundNumber);
+  maybeAddRivalryEvent(playerIds,batchId);
 }
 function renderSocialFeed(){
   const root=$('#socialFeed');if(!root)return;ensureSocialState();
   const items=[...data.feedEvents].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,18);
   if(!items.length){root.innerHTML='<div class="feed-empty">Inga händelser i Klaskflödet ännu.</div>';return;}
-  root.innerHTML=items.map(e=>{const d=new Date(e.created_at),time=Number.isNaN(d.getTime())?'':d.toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});const kind=e.type==='achievement'?'Achievement':e.type==='rivalry'?'Rivalitet':'Matchrapport';return `<article class="feed-item ${esc(e.type||'')}"><div class="feed-icon">${e.icon||'•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title||'')}</div><div class="feed-body">${esc(e.body||'')}</div></div><time class="feed-time">${esc(time)}</time></article>`}).join('');
+  root.innerHTML=items.map(e=>{const d=new Date(e.created_at),time=Number.isNaN(d.getTime())?'':d.toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});const kind=e.type==='rivalry'?'Rivalitet':`Matchrapport${e.round_number?` · Omgång #${e.round_number}`:''}`;return `<article class="feed-item ${esc(e.type||'')}"><div class="feed-icon">${e.icon||'•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title||'')}</div><div class="feed-body">${esc(e.body||'')}</div></div><time class="feed-time">${esc(time)}</time></article>`}).join('');
 }
 
 let realtimeChannel=null;
@@ -1602,15 +1542,15 @@ function renderHistory(){
   const root=$('#history');
   root.innerHTML='';
   const matches=getHistoryMatches();
-  const rows=matches.slice(0,5);
+  const rows=matches.slice(0,3);
   rows.forEach(m=>root.appendChild(buildHistoryCard(m)));
-  for(let i=rows.length;i<5;i++){
+  for(let i=rows.length;i<3;i++){
     const p=document.createElement('div');
     p.className='history-placeholder';
     p.textContent='Omgång – väntar på resultat';
     root.appendChild(p);
   }
-  if(matches.length>5){
+  if(matches.length>3){
     const more=document.createElement('button');
     more.type='button';
     more.className='btn history-more';
@@ -1638,11 +1578,11 @@ $('#saveRound').onclick=async()=>{
   ensureSocialState();
   const playerIds=[...selected];
   const losers=[...matchLosers];
-  const beforeRounds=data.rounds.map(r=>({...r,player_ids:[...(r.player_ids||[])]}));
   const batchId=`round-${data.nextRoundId}`;
+  const roundNumber=Math.floor(data.rounds.length/3)+1;
   const playedAt=new Date().toISOString();
   losers.forEach(loserId=>{data.rounds.push({id:data.nextRoundId++,player_ids:playerIds,loser_id:loserId,played_at:playedAt});});
-  evaluateRoundAchievements(playerIds,losers,beforeRounds,batchId);
+  addRoundFeedEvents(playerIds,losers,batchId,roundNumber);
   await persistState();
   selected.clear();matchLosers=[null,null,null];$('#loserStage').classList.add('hidden');render();toast('Omgång sparad – 3 matcher registrerade.');
 };
@@ -1741,7 +1681,6 @@ $('#confirmDeleteSeason').onclick=async()=>{
   if(!isAdmin)return toast('Du måste vara inloggad som admin.');
   if(data.periodClosed)return;
   data.periodEndedAt=new Date().toISOString();
-  evaluatePeriodEndAchievements();
   const snap=snapshotCurrentStandings();
   if(!snap){data.periodEndedAt=null;return toast('Det finns ingen ställning att arkivera.');}
   archiveCache.unshift(snap);
@@ -1784,13 +1723,13 @@ $('#confirmStartPeriod').onclick=async()=>{
   const nextPlayerId=data.nextPlayerId;
   const inactivePlayerIds=Array.isArray(data.inactivePlayerIds)?[...data.inactivePlayerIds]:[];
   ensureSocialState();
-  const feedEvents=[...data.feedEvents],achievements=[...data.achievements];
-  const achievementProgress={...data.achievementProgress,backFromDead:{},rivalryMilestones:{...(data.achievementProgress.rivalryMilestones||{})}};
+  const feedEvents=[...data.feedEvents];
+  const feedProgress={rivalryMilestones:{...(data.feedProgress.rivalryMilestones||{})}};
   data={
     players:existingPlayers,rounds:[],nextPlayerId,nextRoundId:1,
     listName:name,seasonKey:currentSeasonKey(startObj),periodClosed:false,
     periodStartedAt:startObj.toISOString(),periodEndedAt:null,periodPlannedEndAt:endObj.toISOString(),
-    inactivePlayerIds,feedEvents,achievements,achievementProgress
+    inactivePlayerIds,feedEvents,feedProgress
   };
   selectedPeriodKey='current';
   selected.clear();matchLosers=[null,null,null];editing=null;showAllHistory=false;selectedPeriodKey='current';
@@ -2225,6 +2164,31 @@ body:not(.is-admin) .right-col > .hof-history-row{grid-column:1 / -1!important}
     new MutationObserver(()=>requestAnimationFrame(syncKlaskFeedHeight)).observe(feed,{childList:true,subtree:true});
   }
   setTimeout(syncKlaskFeedHeight,250);
+})();
+</script>
+
+<script id="admin-feed-height-sync">
+(function(){
+  function syncAdminFeedHeight(){
+    const feed=document.querySelector('.social-feed-panel');
+    if(!feed)return;
+    if(!document.body.classList.contains('is-admin') || window.innerWidth<1450){
+      feed.style.height='';
+      return;
+    }
+    const leader=document.getElementById('leaderPanel');
+    if(!leader)return;
+    feed.style.height=Math.round(leader.getBoundingClientRect().height)+'px';
+  }
+  window.addEventListener('resize',()=>requestAnimationFrame(syncAdminFeedHeight));
+  window.addEventListener('load',()=>requestAnimationFrame(syncAdminFeedHeight));
+  if('ResizeObserver' in window){
+    const leader=document.getElementById('leaderPanel');
+    if(leader)new ResizeObserver(()=>requestAnimationFrame(syncAdminFeedHeight)).observe(leader);
+  }
+  const observer=new MutationObserver(()=>requestAnimationFrame(syncAdminFeedHeight));
+  observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+  setTimeout(syncAdminFeedHeight,250);
 })();
 </script>
 </body>
@@ -2855,6 +2819,6 @@ body.is-admin .player-card .player-remove-btn{top:8px!important;right:8px!import
 
 @media (max-width:1049px){
   body.is-admin .social-feed-panel{width:100%!important;max-width:none!important;height:auto!important;margin-top:0!important}
-  body.is-admin .social-feed-list{max-height:none!important;overflow:visible!important}
+  body.is-admin .social-feed-list{max-height:360px!important;overflow-y:auto!important;overflow-x:hidden!important}
 }
 </style>
