@@ -867,6 +867,7 @@ function normalizeLoaded(x){
     periodEndedAt:typeof x.periodEndedAt==='string'&&x.periodEndedAt?x.periodEndedAt:null,
     periodPlannedEndAt:typeof x.periodPlannedEndAt==='string'&&x.periodPlannedEndAt?x.periodPlannedEndAt:null,
     inactivePlayerIds:Array.isArray(x.inactivePlayerIds)?x.inactivePlayerIds.map(Number).filter(Number.isFinite):[],
+    pendingDraw:(x.pendingDraw&&Array.isArray(x.pendingDraw.player_ids))?{player_ids:x.pendingDraw.player_ids.map(Number).filter(Number.isFinite),created_at:x.pendingDraw.created_at||null}:null,
     feedEvents:Array.isArray(x.feedEvents)?x.feedEvents.filter(e=>e&&e.type!=='achievement'):[],
     feedProgress:(x.feedProgress&&typeof x.feedProgress==='object')?x.feedProgress:{rivalryMilestones:{...((x.achievementProgress&&x.achievementProgress.rivalryMilestones)||{})}}
   };
@@ -1770,6 +1771,21 @@ async function init(){
   data=remote.data;
   archiveCache=remote.archive;
   await loadPlayerProfiles();
+
+  // Consume a saved lottery when returning from lottning.html.
+  if(location.hash==='#registrera' && data.pendingDraw?.player_ids?.length===4){
+    const inactive=new Set((data.inactivePlayerIds||[]).map(Number));
+    const validIds=data.pendingDraw.player_ids.map(Number).filter(id=>
+      !inactive.has(id) && (data.players||[]).some(p=>Number(p.id)===id)
+    );
+    if(validIds.length===4 && new Set(validIds).size===4){
+      selected=new Set(validIds);
+      matchLosers=[null,null,null];
+      data.pendingDraw=null;
+      await persistState();
+    }
+  }
+
   render();
   subscribeRealtime();
   sb.channel('klask-player-profiles-index').on('postgres_changes',{event:'*',schema:'public',table:'klask_player_profiles'},async()=>{await loadPlayerProfiles();render();}).subscribe();
