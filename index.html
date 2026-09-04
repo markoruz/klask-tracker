@@ -2838,3 +2838,86 @@ body.is-admin .player-card .player-remove-btn{top:8px!important;right:8px!import
   body.is-admin .social-feed-list{max-height:360px!important;overflow-y:auto!important;overflow-x:hidden!important}
 }
 </style>
+
+<style id="klask-feed-scroll-definitive-fix">
+/* Definitiv scrollregel för Klaskflödet. Ligger sist för att vinna över äldre overrides. */
+@media (min-width:1181px){
+  body:not(.is-admin) .social-feed-panel,
+  body.is-admin .social-feed-panel{
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+  }
+  body:not(.is-admin) .social-feed-head,
+  body.is-admin .social-feed-head{
+    flex:0 0 auto!important;
+  }
+  body:not(.is-admin) .social-feed-list,
+  body.is-admin .social-feed-list{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding-right:6px!important;
+    scrollbar-gutter:stable;
+    overscroll-behavior:contain;
+  }
+}
+
+/* När adminflödet ligger på egen rad på mellanstora skärmar får det en tydlig scrollhöjd. */
+@media (min-width:1050px) and (max-width:1449px){
+  body.is-admin .social-feed-panel{height:auto!important;overflow:hidden!important}
+  body.is-admin .social-feed-list{max-height:360px!important;overflow-y:auto!important;overflow-x:hidden!important}
+}
+
+/* På mindre skärmar hålls flödet hanterbart utan att bli oändligt långt. */
+@media (max-width:1180px){
+  body:not(.is-admin) .social-feed-list{max-height:420px!important;overflow-y:auto!important;overflow-x:hidden!important;padding-right:6px!important}
+}
+
+.social-feed-list::-webkit-scrollbar{width:8px}
+.social-feed-list::-webkit-scrollbar-track{background:#091827;border-radius:999px}
+.social-feed-list::-webkit-scrollbar-thumb{background:#29475f;border-radius:999px}
+.social-feed-list::-webkit-scrollbar-thumb:hover{background:#355f7d}
+</style>
+
+<script id="klask-feed-height-sync-definitive-fix">
+(function(){
+  function syncKlaskFeedHeightFinal(){
+    const panel=document.querySelector('.social-feed-panel');
+    const leader=document.getElementById('leaderPanel');
+    if(!panel)return;
+
+    const widePublic=!document.body.classList.contains('is-admin') && window.innerWidth>=1181;
+    const wideAdmin=document.body.classList.contains('is-admin') && window.innerWidth>=1450;
+
+    if((widePublic||wideAdmin) && leader){
+      panel.style.setProperty('height',Math.round(leader.getBoundingClientRect().height)+'px','important');
+      panel.style.setProperty('max-height',Math.round(leader.getBoundingClientRect().height)+'px','important');
+    }else{
+      panel.style.removeProperty('height');
+      panel.style.removeProperty('max-height');
+    }
+  }
+
+  window.syncKlaskFeedHeightFinal=syncKlaskFeedHeightFinal;
+  window.addEventListener('resize',()=>requestAnimationFrame(syncKlaskFeedHeightFinal));
+  window.addEventListener('load',()=>requestAnimationFrame(syncKlaskFeedHeightFinal));
+
+  if('ResizeObserver' in window){
+    const leader=document.getElementById('leaderPanel');
+    if(leader)new ResizeObserver(()=>requestAnimationFrame(syncKlaskFeedHeightFinal)).observe(leader);
+  }
+  if('MutationObserver' in window){
+    new MutationObserver(()=>requestAnimationFrame(syncKlaskFeedHeightFinal))
+      .observe(document.body,{attributes:true,attributeFilter:['class']});
+    const feed=document.getElementById('socialFeed');
+    if(feed)new MutationObserver(()=>requestAnimationFrame(syncKlaskFeedHeightFinal))
+      .observe(feed,{childList:true,subtree:true});
+  }
+  setTimeout(syncKlaskFeedHeightFinal,100);
+  setTimeout(syncKlaskFeedHeightFinal,500);
+})();
+</script>
