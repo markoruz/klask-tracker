@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Highlights · Klaskligan</title>
+
+<!-- Delad stilmall FÖRE sidans egna block, så sidlayouten kan överstyra utan !important -->
+<link rel="stylesheet" href="global.css">
+<style>
+/* =============================================================================
+   highlights.html — sidspecifik stil. Bygger vidare på samma ljusa/blå
+   designspråk som resten av sajten. Delade komponenter (.panel, .btn, .field,
+   .modal, .chip, header/nav) kommer från global.css.
+   ============================================================================= */
+#site-header-slot{display:contents}
+
+body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.app{width:min(1120px,calc(100% - 28px));margin:48px auto 80px}
+
+/* Sidhuvud ------------------------------------------------------------------ */
+.page-head{padding:26px;margin-bottom:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.page-head-text{min-width:0}
+.eyebrow{color:var(--teal);font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:800}
+.page-head h1{font-size:32px;letter-spacing:-.7px;margin:5px 0 6px;font-weight:700}
+.page-head p{margin:0;color:var(--muted);max-width:60ch}
+
+.admin-only{display:none}
+body.is-admin .admin-only{display:inline-flex}
+
+/* Veckor ---------------------------------------------------------------- */
+.weeks{display:flex;flex-direction:column;gap:16px}
+.week-card{padding:20px}
+.week-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.week-head h2{margin:0;font-size:19px;font-weight:700}
+.week-head-actions{display:flex;gap:8px;align-items:center}
+.week-count{color:var(--muted);font-size:12px;font-weight:600}
+
+.videos{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.video-card{border:1px solid #ddccb8;border-radius:13px;overflow:hidden;background:#ffffff;display:flex;flex-direction:column}
+.video-embed{position:relative;width:100%;aspect-ratio:16/9;background:#0c1420}
+.video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#dbe3ee;font-size:13px;font-weight:700;text-decoration:none;text-align:center;padding:16px}
+.video-fallback:hover{color:#fff}
+.video-meta{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.video-title{font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.video-date{font-size:10px;color:var(--muted);white-space:nowrap}
+.video-remove{background:none;border:0;color:#c8443a;cursor:pointer;font-size:11px;font-weight:700;padding:0;font-family:inherit}
+.video-remove:hover{text-decoration:underline}
+
+.empty{padding:36px;text-align:center;color:var(--muted);border:1px dashed #c9b79e;border-radius:14px}
+.week-empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed #ddccb8;border-radius:12px;font-size:12px}
+
+@media(max-width:650px){
+  .page-head{padding:18px}
+  .week-card{padding:16px}
+  .videos{grid-template-columns:1fr}
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared.js"></script>
+</head>
+<body>
+
+<div id="site-header-slot"></div>
+
+<main class="app">
+  <section class="panel page-head">
+    <div class="page-head-text">
+      <div class="eyebrow">Klaskligan</div>
+      <h1>Highlights</h1>
+      <p>Veckans bästa (eller sämsta) ögonblick, samlade i mappar per vecka.</p>
+    </div>
+    <button id="newWeekBtn" type="button" class="btn btn-primary admin-only">+ Ny vecka</button>
+  </section>
+
+  <div id="weeks" class="weeks">
+    <div class="empty">Laddar highlights…</div>
+  </div>
+</main>
+
+<!-- Ny vecka -->
+<div id="weekModal" class="modal hidden">
+  <div class="modal-card modal-card-sm">
+    <button id="weekModalClose" class="modal-close" type="button" aria-label="Stäng">&times;</button>
+    <h2 class="modal-title">Ny vecka</h2>
+    <div class="field">
+      <label for="weekLabelInput">Rubrik</label>
+      <input id="weekLabelInput" maxlength="60" placeholder="T.ex. Vecka 37">
+    </div>
+    <div id="weekModalError" class="form-error"></div>
+    <div class="actions">
+      <button id="weekModalCancel" class="btn" type="button">Avbryt</button>
+      <button id="weekModalSave" class="btn btn-primary" type="button">Skapa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ny video -->
+<div id="videoModal" class="modal hidden">
+  <div class="modal-card modal-card-sm">
+    <button id="videoModalClose" class="modal-close" type="button" aria-label="Stäng">&times;</button>
+    <h2 class="modal-title">Lägg till video</h2>
+    <div class="field">
+      <label for="videoUrlInput">Länk (t.ex. YouTube)</label>
+      <input id="videoUrlInput" placeholder="https://youtu.be/...">
+    </div>
+    <div class="field">
+      <label for="videoTitleInput">Titel (valfritt)</label>
+      <input id="videoTitleInput" maxlength="80" placeholder="T.ex. Björns comeback">
+    </div>
+    <div id="videoModalError" class="form-error"></div>
+    <div class="actions">
+      <button id="videoModalCancel" class="btn" type="button">Avbryt</button>
+      <button id="videoModalSave" class="btn btn-primary" type="button">Lägg till</button>
+    </div>
+  </div>
+</div>
+
+<div id="auth-modal-slot"></div>
+
+<script>
+(function () {
+  'use strict';
+  const esc = Klask.esc;
+  const sb = Klask.supabase;
+  const $ = s => document.querySelector(s);
+
+  let weeks = [];
+  let pendingVideoWeekId = null;
+
+  /* ---------------------------------------------------------------------------
+     YouTube-inbäddning. Andra länkar (Google Drive m.fl.) faller tillbaka på
+     en enkel "öppna video"-kort istället för att försöka bädda in dem.
+     --------------------------------------------------------------------------- */
+  function youTubeId(url) {
+    if (!url) return null;
+    try {
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\./, '');
+      if (host === 'youtu.be') return u.pathname.slice(1).split('/')[0] || null;
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+        if (u.pathname === '/watch') return u.searchParams.get('v');
+        const m = u.pathname.match(/^\/(embed|shorts)\/([^/?]+)/);
+        if (m) return m[2];
+      }
+    } catch (e) { /* ogiltig url hanteras av fallback nedan */ }
+    return null;
+  }
+  function videoEmbedHtml(url) {
+    const id = youTubeId(url);
+    if (id) {
+      return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}" title="YouTube-video" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+    }
+    return `<a class="video-fallback" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Öppna video ↗</a>`;
+  }
+
+  function fmtDate(s) {
+    const d = new Date(s);
+    return Number.isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('sv-SE', { day: '2-digit', month: 'short' }).format(d);
+  }
+
+  function videoCardHtml(week, v) {
+    return `<div class="video-card">
+      <div class="video-embed">${videoEmbedHtml(v.video_url)}</div>
+      <div class="video-meta">
+        <span class="video-title" title="${esc(v.title || '')}">${esc(v.title || 'Utan titel')}</span>
+        <span class="video-date">${esc(fmtDate(v.created_at))}</span>
+      </div>
+      <div class="video-meta admin-only" style="padding-top:0">
+        <button class="video-remove" type="button" data-remove-video="${esc(v.id)}">Ta bort video</button>
+      </div>
+    </div>`;
+  }
+
+  function renderWeeks() {
+    const root = $('#weeks');
+    if (!weeks.length) { root.innerHTML = '<div class="empty">Inga highlights ännu. En admin kan skapa den första veckan ovan.</div>'; return; }
+    root.innerHTML = weeks.map(week => {
+      const videos = week.klask_highlights || [];
+      const body = videos.length
+        ? `<div class="videos">${[...videos].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(v => videoCardHtml(week, v)).join('')}</div>`
+        : '<div class="week-empty">Inga videor i den här veckan ännu.</div>';
+      return `<section class="panel week-card">
+        <div class="week-head">
+          <h2>${esc(week.label)}</h2>
+          <div class="week-head-actions">
+            <span class="week-count">${videos.length} ${videos.length === 1 ? 'video' : 'videor'}</span>
+            <button class="btn admin-only" type="button" data-add-video="${esc(week.id)}">+ Video</button>
+            <button class="btn btn-danger admin-only" type="button" data-remove-week="${esc(week.id)}">Ta bort vecka</button>
+          </div>
+        </div>
+        ${body}
+      </section>`;
+    }).join('');
+    bindWeekActions();
+  }
+
+  function bindWeekActions() {
+    document.querySelectorAll('[data-add-video]').forEach(btn => {
+      btn.onclick = () => openVideoModal(btn.dataset.addVideo);
+    });
+    document.querySelectorAll('[data-remove-week]').forEach(btn => {
+      btn.onclick = () => removeWeek(btn.dataset.removeWeek);
+    });
+    document.querySelectorAll('[data-remove-video]').forEach(btn => {
+      btn.onclick = () => removeVideo(btn.dataset.removeVideo);
+    });
+  }
+
+  async function loadWeeks() {
+    const { data, error } = await sb
+      .from('klask_highlight_weeks')
+      .select('id,label,sort_key,created_at,klask_highlights(id,title,video_url,created_at)')
+      .order('sort_key', { ascending: false });
+    if (error) {
+      console.error('Kunde inte läsa highlights', error);
+      $('#weeks').innerHTML = '<div class="empty">Kunde inte läsa highlights. Är databastabellerna skapade i Supabase?</div>';
+      return;
+    }
+    weeks = data || [];
+    renderWeeks();
+  }
+
+  /* ---------------------------------------------------------------------------
+     Modaler
+     --------------------------------------------------------------------------- */
+  function openWeekModal() {
+    $('#weekLabelInput').value = '';
+    $('#weekModalError').textContent = '';
+    $('#weekModal').classList.remove('hidden');
+    setTimeout(() => $('#weekLabelInput').focus(), 30);
+  }
+  function closeWeekModal() { $('#weekModal').classList.add('hidden'); }
+
+  function openVideoModal(weekId) {
+    pendingVideoWeekId = weekId;
+    $('#videoUrlInput').value = '';
+    $('#videoTitleInput').value = '';
+    $('#videoModalError').textContent = '';
+    $('#videoModal').classList.remove('hidden');
+    setTimeout(() => $('#videoUrlInput').focus(), 30);
+  }
+  function closeVideoModal() { $('#videoModal').classList.add('hidden'); pendingVideoWeekId = null; }
+
+  $('#newWeekBtn').onclick = openWeekModal;
+  $('#weekModalClose').onclick = closeWeekModal;
+  $('#weekModalCancel').onclick = closeWeekModal;
+  $('#weekModal').addEventListener('click', e => { if (e.target.id === 'weekModal') closeWeekModal(); });
+  $('#weekModalSave').onclick = async () => {
+    const label = $('#weekLabelInput').value.trim();
+    if (!label) { $('#weekModalError').textContent = 'Ange en rubrik.'; return; }
+    const { error } = await sb.from('klask_highlight_weeks').insert({ label, sort_key: new Date().toISOString() });
+    if (error) { $('#weekModalError').textContent = 'Kunde inte skapa veckan (är du inloggad som admin?).'; console.error(error); return; }
+    closeWeekModal();
+    Klask.toast('Ny vecka skapad.');
+    await loadWeeks();
+  };
+
+  $('#videoModalClose').onclick = closeVideoModal;
+  $('#videoModalCancel').onclick = closeVideoModal;
+  $('#videoModal').addEventListener('click', e => { if (e.target.id === 'videoModal') closeVideoModal(); });
+  $('#videoModalSave').onclick = async () => {
+    const url = $('#videoUrlInput').value.trim();
+    const title = $('#videoTitleInput').value.trim();
+    if (!url) { $('#videoModalError').textContent = 'Klistra in en videolänk.'; return; }
+    if (!/^https?:\/\//i.test(url)) { $('#videoModalError').textContent = 'Länken ska börja med http:// eller https://'; return; }
+    const { error } = await sb.from('klask_highlights').insert({ week_id: pendingVideoWeekId, video_url: url, title: title || null });
+    if (error) { $('#videoModalError').textContent = 'Kunde inte lägga till videon (är du inloggad som admin?).'; console.error(error); return; }
+    closeVideoModal();
+    Klask.toast('Video tillagd.');
+    await loadWeeks();
+  };
+
+  async function removeWeek(weekId) {
+    if (!confirm('Ta bort hela veckan och alla dess videor?')) return;
+    const { error } = await sb.from('klask_highlight_weeks').delete().eq('id', weekId);
+    if (error) { Klask.toast('Kunde inte ta bort veckan.'); console.error(error); return; }
+    Klask.toast('Veckan borttagen.');
+    await loadWeeks();
+  }
+  async function removeVideo(videoId) {
+    if (!confirm('Ta bort den här videon?')) return;
+    const { error } = await sb.from('klask_highlights').delete().eq('id', videoId);
+    if (error) { Klask.toast('Kunde inte ta bort videon.'); console.error(error); return; }
+    Klask.toast('Video borttagen.');
+    await loadWeeks();
+  }
+
+  async function init() {
+    await Klask.mountHeader('highlights');
+    Klask.mountAuthModal({ reloadOnSignIn: true });
+    await loadWeeks();
+  }
+  init();
+})();
+</script>
+</body>
+</html>

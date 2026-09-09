@@ -188,6 +188,7 @@
   const NAV_LINKS = [
     { page: 'index', href: 'index.html', label: 'Tabell' },
     { page: 'players', href: 'players.html', label: 'Spelarprofiler' },
+    { page: 'highlights', href: 'highlights.html', label: 'Highlights' },
     { page: 'lottning', href: 'lottning.html', label: 'Lottning', id: 'lotteryNavLink', adminOnly: true }
   ];
 
