@@ -296,8 +296,10 @@ body.is-admin .rank-name a{gap:7px}
 .feed-reactions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .feed-reaction{display:inline-flex;align-items:center;gap:4px;border:1px solid #ddccb8;background:#ffffff;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800;color:#6b5d4e;cursor:pointer;transition:.12s border-color,.12s background;font-family:inherit}
 .feed-reaction:hover{border-color:var(--teal);background:#f5efe4}
-.feed-reaction.feed-reaction-active{border-color:var(--teal);background:#e3ecfa}
 .feed-reaction b{font-weight:800;color:#2a1f16}
+/* Egen reaktion — förblir markerad tills man klickar igen (då försvinner den). */
+.feed-reaction.feed-reaction-mine{border-color:var(--teal);background:#e3ecfa}
+.feed-reaction.feed-reaction-mine b{color:#1f4fa8}
 .feed-reaction:disabled{opacity:.6;cursor:default}
 
 /* Ny-inlägg-puls vid live-uppdatering --------------------------------------- */
@@ -1135,24 +1137,46 @@ body.period-closed #roundPanel.admin-only{display:none}
   }
   const KIND_LABELS = { rivalry: 'Rivalitet', streak: 'Svit', comeback: 'Comeback', leader: 'Ny ligaledare', personal_best: 'Personbästa' };
   const REACTION_EMOJIS = ['🔥', '😂', '👏', '😭'];
-  let reactionCounts = {}; // { eventId: { '🔥': n, ... } }
+  let reactionState = {}; // { eventId: { '🔥': {count, mine}, ... } }
 
-  /** Hämtar aktuella reaktionsräknare för de synliga inläggen och uppdaterar bara siffrorna i DOM:en. */
+  /** En anonym, beständig id för den här webbläsaren — så att "en reaktion per person"
+      går att hålla koll på utan inloggning. Sparas lokalt, delas aldrig med andra. */
+  function getVisitorId() {
+    const KEY = 'klask_visitor_id';
+    try {
+      let id = localStorage.getItem(KEY);
+      if (!id) { id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`); localStorage.setItem(KEY, id); }
+      return id;
+    } catch (e) {
+      // Privat läge / blockerad lagring: fungerar ändå under sessionen, bara inte ihågkommet nästa besök.
+      if (!getVisitorId._fallback) getVisitorId._fallback = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      return getVisitorId._fallback;
+    }
+  }
+  function applyReactionState(id) {
+    REACTION_EMOJIS.forEach(em => {
+      const btn = document.querySelector(`.feed-reaction[data-event="${CSS.escape(id)}"][data-emoji="${CSS.escape(em)}"]`);
+      if (!btn) return;
+      const s = (reactionState[id] && reactionState[id][em]) || { count: 0, mine: false };
+      const b = btn.querySelector('b'); if (b) b.textContent = String(s.count);
+      btn.classList.toggle('feed-reaction-mine', s.mine);
+    });
+  }
+  /** Hämtar alla reaktionsrader för de synliga inläggen, räknar ihop dem och
+      markerar vilka den här besökaren själv har lämnat. */
   async function refreshFeedReactions(ids) {
     if (!ids.length) return;
     try {
-      const { data: rows, error } = await sb.from('klask_feed_reactions').select('event_id,emoji,count').in('event_id', ids);
+      const visitorId = getVisitorId();
+      const { data: rows, error } = await sb.from('klask_feed_reactions').select('event_id,emoji,visitor_id').in('event_id', ids);
       if (error) throw error;
+      ids.forEach(id => { reactionState[id] = {}; REACTION_EMOJIS.forEach(em => { reactionState[id][em] = { count: 0, mine: false }; }); });
       (rows || []).forEach(r => {
-        reactionCounts[r.event_id] = reactionCounts[r.event_id] || {};
-        reactionCounts[r.event_id][r.emoji] = r.count;
+        if (!reactionState[r.event_id] || !reactionState[r.event_id][r.emoji]) return;
+        reactionState[r.event_id][r.emoji].count++;
+        if (r.visitor_id === visitorId) reactionState[r.event_id][r.emoji].mine = true;
       });
-      ids.forEach(id => {
-        REACTION_EMOJIS.forEach(em => {
-          const b = document.querySelector(`.feed-reaction[data-event="${CSS.escape(id)}"][data-emoji="${CSS.escape(em)}"] b`);
-          if (b) b.textContent = String((reactionCounts[id] && reactionCounts[id][em]) || 0);
-        });
-      });
+      ids.forEach(applyReactionState);
     } catch (e) {
       // Reaktionstabellen finns kanske inte skapad i Supabase ännu — tyst fallback, resten av flödet funkar ändå.
     }
@@ -1160,24 +1184,26 @@ body.period-closed #roundPanel.admin-only{display:none}
   function bindFeedReactionButtons() {
     document.querySelectorAll('.feed-reaction').forEach(btn => {
       btn.onclick = async () => {
-        const eventId = btn.dataset.event, emoji = btn.dataset.emoji;
-        const countEl = btn.querySelector('b');
-        const optimistic = (Number(countEl.textContent) || 0) + 1;
+        const eventId = btn.dataset.event, emoji = btn.dataset.emoji, visitorId = getVisitorId();
+        const current = (reactionState[eventId] && reactionState[eventId][emoji]) || { count: 0, mine: false };
+        const removing = current.mine;
+        const next = { count: current.count + (removing ? -1 : 1), mine: !removing };
+        reactionState[eventId] = reactionState[eventId] || {};
+        reactionState[eventId][emoji] = next;
         btn.disabled = true;
-        countEl.textContent = String(optimistic);
-        btn.classList.add('feed-reaction-active');
+        applyReactionState(eventId);
         try {
-          const { data: newCount, error } = await sb.rpc('increment_feed_reaction', { p_event_id: eventId, p_emoji: emoji });
+          const query = sb.from('klask_feed_reactions');
+          const { error } = removing
+            ? await query.delete().eq('event_id', eventId).eq('emoji', emoji).eq('visitor_id', visitorId)
+            : await query.insert({ event_id: eventId, emoji, visitor_id: visitorId });
           if (error) throw error;
-          reactionCounts[eventId] = reactionCounts[eventId] || {};
-          reactionCounts[eventId][emoji] = newCount;
-          countEl.textContent = String(newCount);
         } catch (e) {
-          countEl.textContent = String(optimistic - 1);
+          reactionState[eventId][emoji] = current; // återställ vid fel
+          applyReactionState(eventId);
           toast('Kunde inte spara reaktionen.');
         } finally {
           btn.disabled = false;
-          setTimeout(() => btn.classList.remove('feed-reaction-active'), 300);
         }
       };
     });
@@ -1189,7 +1215,10 @@ body.period-closed #roundPanel.admin-only{display:none}
     root.innerHTML = items.map(e => {
       const d = new Date(e.created_at), time = Number.isNaN(d.getTime()) ? '' : d.toLocaleString('sv-SE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
       const kind = KIND_LABELS[e.type] || `Matchrapport${e.round_number ? ` · Omgång #${e.round_number}` : ''}`;
-      const reactions = REACTION_EMOJIS.map(em => `<button type="button" class="feed-reaction" data-event="${esc(e.id)}" data-emoji="${em}"><span>${em}</span><b>${(reactionCounts[e.id] && reactionCounts[e.id][em]) || 0}</b></button>`).join('');
+      const reactions = REACTION_EMOJIS.map(em => {
+        const s = (reactionState[e.id] && reactionState[e.id][em]) || { count: 0, mine: false };
+        return `<button type="button" class="feed-reaction${s.mine ? ' feed-reaction-mine' : ''}" data-event="${esc(e.id)}" data-emoji="${em}"><span>${em}</span><b>${s.count}</b></button>`;
+      }).join('');
       return `<article class="feed-item ${esc(e.type || '')}"><div class="feed-icon">${e.icon || '•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title || '')}</div><div class="feed-body">${esc(e.body || '')}</div><div class="feed-reactions">${reactions}</div></div><time class="feed-time">${esc(time)}</time></article>`;
     }).join('');
     bindFeedReactionButtons();
