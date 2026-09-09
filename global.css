@@ -35,11 +35,43 @@
   --teal:#3268d2;
   --teal2:#1f4fa8;
   --red:#c8443a;
+  --green:#249355;
   --gold:#c99a2e;
   --silver:#8f97a1;
   --bronze:#b06a35;
+  --danger-bg:#fbe4e1;
+  --danger-border:#e2a89e;
+  --danger-text:#8a2e26;
+  --body-bg:var(--bg);
   --shadow:0 14px 32px rgba(58,43,27,.12);
   --radius:16px;
+}
+
+/* Mörkt tema — inspirerat av appens ursprungliga (mörka) design. Aktiveras via
+   <html data-theme="dark">, satt av Klask.theme (shared.js) + sparat i localStorage. */
+:root[data-theme="dark"]{
+  --bg:#06111d;
+  --panel:#0d1d2f;
+  --panel2:#0a1928;
+  --card:#162a40;
+  --card2:#13263a;
+  --line:#29475f;
+  --line2:#35526b;
+  --text:#f4f8fc;
+  --muted:#9fb3c9;
+  --soft:#7fa0bd;
+  --teal:#43d7c4;
+  --teal2:#2da99f;
+  --red:#ff6b6b;
+  --green:#54e0a6;
+  --gold:#f5c84b;
+  --silver:#c4ccd6;
+  --bronze:#cd7f32;
+  --danger-bg:#3b202a;
+  --danger-border:#7a4352;
+  --danger-text:#ffd6d3;
+  --body-bg:radial-gradient(circle at 70% 0,#0b2135 0,#06111d 48%,#040b12 100%);
+  --shadow:0 14px 32px rgba(0,0,0,.35);
 }
 
 /* ----------------------------------------------------------------------------
@@ -54,7 +86,7 @@ button,input,select,textarea{font:inherit}
 
 /* Panel ------------------------------------------------------------------- */
 .panel{
-  background:linear-gradient(145deg,#ffffff,#faf5ec);
+  background:linear-gradient(145deg,var(--panel),var(--panel2));
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
@@ -62,8 +94,8 @@ button,input,select,textarea{font:inherit}
 
 /* Knappar ----------------------------------------------------------------- */
 .btn{
-  border:1px solid #cbb99e;
-  background:#ffffff;
+  border:1px solid var(--line2);
+  background:var(--panel);
   color:var(--text);
   padding:10px 14px;
   border-radius:10px;
@@ -74,11 +106,13 @@ button,input,select,textarea{font:inherit}
 .btn:hover{filter:brightness(.97)}
 .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
 .btn-primary{
-  background:linear-gradient(135deg,#3268d2,#1f4fa8);
-  border-color:#1f4fa8;
+  background:linear-gradient(135deg,var(--teal),var(--teal2));
+  border-color:var(--teal2);
   color:white;
 }
-.btn-danger{background:#fbe4e1;border-color:#e2a89e;color:#8a2e26}
+.btn-danger{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger-text)}
+/* Ljus text läser dåligt mot den ljusa mörkläges-turkosen — mörk text ger bättre kontrast där. */
+:root[data-theme="dark"] .btn-primary{color:#05201d}
 .btn-block{width:100%}
 .linkbtn{
   background:none;border:0;padding:0;
@@ -90,11 +124,11 @@ button,input,select,textarea{font:inherit}
   display:inline-flex;
   align-items:center;
   gap:8px;
-  border:1px solid #d9c9b3;
-  background:#f5efe4;
+  border:1px solid var(--line2);
+  background:var(--card2);
   border-radius:999px;
   padding:8px 13px;
-  color:#4a3d2e;
+  color:var(--text);
   font-size:12px;
   font-weight:800;
 }
@@ -105,8 +139,8 @@ button,input,select,textarea{font:inherit}
   color:var(--teal);font-size:10px;
 }
 .chip-button{appearance:none;cursor:pointer;font:inherit}
-.chip-button.danger-chip{border-color:#e2a89e;background:#fbe4e1;color:#8a2e26}
-.chip-button.danger-chip:hover{background:#f7d5d0;border-color:#d98f86}
+.chip-button.danger-chip{border-color:var(--danger-border);background:var(--danger-bg);color:var(--danger-text)}
+.chip-button.danger-chip:hover{filter:brightness(.95)}
 
 /* Avatar (utdata från Klask.renderAvatar) --------------------------------- */
 .avatar{
@@ -118,9 +152,9 @@ button,input,select,textarea{font:inherit}
   place-items:center;
   overflow:hidden;
   border-radius:50%;
-  border:1px solid #c9b79e;
-  background:#f0e6d8;
-  color:#4a3d2e;
+  border:1px solid var(--line2);
+  background:var(--card2);
+  color:var(--text);
   font-weight:950;
   font-size:calc(var(--avatar-size) * .38);
   line-height:1;
@@ -134,15 +168,15 @@ button,input,select,textarea{font:inherit}
 .field input,.field select,.field textarea{
   width:100%;
   padding:10px 12px;
-  border:1px solid #c9b79e;
+  border:1px solid var(--line2);
   border-radius:10px;
-  background:#ffffff;
+  background:var(--panel);
   color:var(--text);
   outline:none;
 }
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
 .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-.form-error{min-height:18px;margin-top:9px;color:#c8443a;font-size:12px}
+.form-error{min-height:18px;margin-top:9px;color:var(--red);font-size:12px}
 
 /* Modal ------------------------------------------------------------------- */
 .modal{
@@ -167,11 +201,11 @@ button,input,select,textarea{font:inherit}
 .modal-card{
   position:relative;
   width:min(620px,100%);
-  background:#ffffff;
-  border:1px solid #ddccb8;
+  background:var(--panel);
+  border:1px solid var(--line);
   border-radius:var(--radius);
   padding:18px;
-  box-shadow:0 20px 50px rgba(42,31,22,.22);
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
 }
 .modal-card-sm{width:min(390px,100%);padding:22px}
 .modal-title{margin:0 0 16px;font-size:20px;color:var(--text)}
@@ -180,7 +214,7 @@ button,input,select,textarea{font:inherit}
   right:12px;top:10px;
   width:32px;height:32px;
   border:0;background:transparent;
-  color:#8a7a68;font-size:24px;line-height:1;cursor:pointer;
+  color:var(--soft);font-size:24px;line-height:1;cursor:pointer;
 }
 .modal-close:hover{color:var(--text)}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
@@ -240,6 +274,12 @@ body.modal-open{overflow:hidden}
   align-items:center;
   gap:30px;
   min-width:0;
+}
+.site-header-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
 }
 .site-brand{
   display:inline-flex;
@@ -304,4 +344,36 @@ body.is-admin .admin-only-nav{display:inline-flex}
   .site-nav{order:3;width:100%;flex-basis:100%;border-top:1px solid rgba(255,255,255,.25);padding-top:7px}
   .site-nav a{flex:1;text-align:center;padding:8px 6px}
   .site-admin-btn,.site-admin-link{padding:8px 10px}
+}
+
+/* Temaknapp (sol/måne) i headern, vänster om admin-knappen. */
+.site-theme-toggle{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px;
+  height:38px;
+  border:1px solid rgba(255,255,255,.5);
+  background:rgba(255,255,255,.12);
+  border-radius:50%;
+  color:#ffffff;
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+.site-theme-toggle:hover{background:rgba(255,255,255,.22)}
+
+/* ----------------------------------------------------------------------------
+   5. Mörkt tema — headern
+   Ljusblå header hör till det ljusa temat; i mörkt läge blir headern istället
+   djupt marinblå, i linje med sidbakgrunden och panelerna.
+   ---------------------------------------------------------------------------- */
+:root[data-theme="dark"] .site-header{
+  background:linear-gradient(120deg,#0d1d2f,#06111d);
+  border-bottom:1px solid var(--line);
+}
+:root[data-theme="dark"] .site-nav a.active{
+  color:#05201d;
+  background:var(--teal);
 }

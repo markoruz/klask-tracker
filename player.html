@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{if(localStorage.getItem('klask-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 <title>Spelarprofil · KLASK</title>
 
 <!-- Delad stilmall FÖRE sidans egna block, så sidlayouten kan överstyra utan !important -->
@@ -29,7 +30,7 @@
      · .rivalry-layout   = display:block, .rivalry-summary 3 kolumner >980px
    ============================================================================= */
 
-body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,sans-serif}
+body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,sans-serif}
 .app{width:min(1120px,calc(100% - 28px));margin:48px auto 60px}
 .back{display:inline-flex;color:var(--muted);text-decoration:none;font-weight:800;margin-bottom:18px}
 .back:hover{color:var(--teal)}
@@ -37,14 +38,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
 
 /* Panel/knapp/avatar: originalet hade egna värden som låg efter global.css
    i kaskaden, så de överstyrs medvetet här. */
-.panel{background:linear-gradient(145deg,#ffffff,#faf5ec);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:none}
-.btn{border:1px solid #c9b79e;background:#ffffff;color:#2a1f16;border-radius:10px;padding:9px 12px;font-weight:850;cursor:pointer}
+.panel{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:none}
+.btn{border:1px solid var(--line2);background:var(--panel);color:var(--text);border-radius:10px;padding:9px 12px;font-weight:850;cursor:pointer}
 .btn:hover{border-color:var(--teal);filter:none}
-.avatar{border-radius:22px;border:1px solid #c9b79e;background:#f5efe4;display:grid;place-items:center;overflow:hidden;font-size:48px;font-weight:950;color:var(--teal)}
+.avatar{border-radius:22px;border:1px solid var(--line2);background:var(--card2);display:grid;place-items:center;overflow:hidden;font-size:48px;font-weight:950;color:var(--teal)}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .admin-btn{display:none}
 .can-edit-profile .admin-btn{display:inline-flex}
-.select{background:#ffffff;color:#2a1f16;border:1px solid #c9b79e;border-radius:9px;padding:7px 10px;font-weight:800}
+.select{background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:9px;padding:7px 10px;font-weight:800}
 
 /* Sektionsrubriker ------------------------------------------------------- */
 .section{margin-top:18px}
@@ -70,7 +71,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
 .hero .avatar{width:118px;height:118px;border-radius:18px}
 .hero h1{font-size:34px;margin:5px 0 6px}
 .hero .admin-btn{grid-column:1/-1;justify-self:start}
-.motto{font-size:16px;color:#6b5d4e;font-style:italic;margin:0}
+.motto{font-size:16px;color:var(--muted);font-style:italic;margin:0}
 @media(max-width:520px){
   .hero{grid-template-columns:86px 1fr}
   .hero .avatar{width:86px;height:86px}
@@ -88,29 +89,29 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
 .stat b{display:block;font-size:25px;margin-top:5px}
 
 /* Formremsan (senaste 6) ------------------------------------------------- */
-.form-strip{margin-top:18px;padding:14px 16px;border:1px solid #ddccb8;border-radius:13px;background:#f5efe4;display:flex;justify-content:space-between;align-items:center;gap:18px}
+.form-strip{margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:var(--card2);display:flex;justify-content:space-between;align-items:center;gap:18px}
 .form-strip .eyebrow{margin-bottom:3px}
 .form-note{font-size:10px;color:var(--muted)}
 .form{display:flex;gap:7px}
-.dot{width:13px;height:13px;border-radius:50%;background:#249355}
-.dot.loss{background:#c8443a}
+.dot{width:13px;height:13px;border-radius:50%;background:var(--green)}
+.dot.loss{background:var(--red)}
 @media(max-width:650px){
   .stats{grid-template-columns:repeat(2,1fr)}
-  .stats-panel .stat{border:1px solid #ddccb8;border-radius:12px;background:#f5efe4}
+  .stats-panel .stat{border:1px solid var(--line);border-radius:12px;background:var(--card2)}
   .form-strip{align-items:flex-start;flex-direction:column}
 }
 
 /* Karriär · Highlights (två kolumner i alla bredder) --------------------- */
-.highlights-panel{background:linear-gradient(155deg,#ffffff,#faf5ec 62%)}
+.highlights-panel{background:linear-gradient(155deg,var(--panel),var(--panel2) 62%)}
 .highlights{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.highlight-card{background:linear-gradient(145deg,#ffffff,#f5efe4);border:1px solid #ddccb8;border-radius:13px;display:flex;flex-direction:column;min-height:96px;padding:12px}
+.highlight-card{background:linear-gradient(145deg,var(--panel),var(--card2));border:1px solid var(--line);border-radius:13px;display:flex;flex-direction:column;min-height:96px;padding:12px}
 .highlight-icon{font-size:20px;line-height:1;margin-bottom:9px}
 .highlight-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:850}
 .highlight-value{font-size:22px;font-weight:950;margin-top:auto;padding-top:9px}
-.highlight-sub{color:#6b5d4e;font-size:10px;margin-top:3px;line-height:1.35}
+.highlight-sub{color:var(--muted);font-size:10px;margin-top:3px;line-height:1.35}
 .career-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-.career-summary-text{color:#6b5d4e;font-size:12px}
-.career-summary-text strong{color:#2a1f16}
+.career-summary-text{color:var(--muted);font-size:12px}
+.career-summary-text strong{color:var(--text)}
 @media(min-width:901px){
   .highlight-card{min-height:118px;padding:16px}
   .highlight-icon{font-size:25px}
@@ -123,49 +124,49 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
 .rivalry-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 10px}
 @media(max-width:980px){.rivalry-summary{grid-template-columns:1fr}}
 
-.rivalry-card{border:1px solid #ddccb8;border-radius:13px;min-width:0}
-.rivalry-feature{position:relative;min-height:132px;padding:13px 14px;background:linear-gradient(145deg,#ffffff,#f5efe4);overflow:hidden}
+.rivalry-card{border:1px solid var(--line);border-radius:13px;min-width:0}
+.rivalry-feature{position:relative;min-height:132px;padding:13px 14px;background:linear-gradient(145deg,var(--panel),var(--card2));overflow:hidden}
 @media(max-width:650px){.rivalry-feature{min-height:116px}}
 /* Denna regel (0,1,1) styr ALLA <span> i kortet — även .rivalry-icon och
    .rival-avatar, som bara har klasspecificitet (0,1,0). Det är därför ikonerna
    renderas i dämpad brun/grå färg i stället för rött/grönt, och det är exakt så
    originalet såg ut. */
 .rivalry-card span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:850}
-.rivalry-feature .rivalry-label{color:#2a1f16;font-size:10px;font-weight:950;letter-spacing:.045em;margin-bottom:14px}
-.rivalry-icon{position:absolute;right:17px;top:47px;width:36px;height:36px;border-radius:50%;background:#f5efe4}
+.rivalry-feature .rivalry-label{color:var(--text);font-size:10px;font-weight:950;letter-spacing:.045em;margin-bottom:14px}
+.rivalry-icon{position:absolute;right:17px;top:47px;width:36px;height:36px;border-radius:50%;background:var(--card2)}
 .rivalry-icon-rival{background:#f0e6f5}
-.rivalry-icon-danger{background:#fbe4e1}
+.rivalry-icon-danger{background:var(--danger-bg)}
 .rivalry-icon-victim{background:#e2f5ea}
 .rivalry-card .rivalry-icon{font-size:0}
 .rivalry-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .rivalry-person{display:flex;align-items:center;gap:10px;min-width:0}
 /* overflow:hidden + img-regeln nedan är en ren buggfix: utan den spretade
    uppladdade profilbilder utanför den runda ramen. */
-.rival-avatar{width:46px;height:46px;flex:0 0 46px;border-radius:50%;overflow:hidden;background:#f5efe4;border:1px solid #c9b79e}
+.rival-avatar{width:46px;height:46px;flex:0 0 46px;border-radius:50%;overflow:hidden;background:var(--card2);border:1px solid var(--line2)}
 .rival-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .rivalry-person-copy{min-width:0;padding-right:36px}
 .rivalry-feature .rivalry-person-copy b{display:block;font-size:18px;line-height:1.15;margin:0 0 4px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rivalry-feature .rivalry-person-copy small{display:block;margin:2px 0 0;color:#6b5d4e;font-size:11px;line-height:1.45}
-.rivalry-loss-pct{color:#2a1f16;font-weight:950}
+.rivalry-feature .rivalry-person-copy small{display:block;margin:2px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+.rivalry-loss-pct{color:var(--text);font-weight:950}
 
 .h2h-grid{display:grid;grid-template-columns:1fr;gap:10px;align-items:stretch}
-.h2h-combined-card{background:#ffffff;border:1px solid #ddccb8;border-radius:13px;padding:14px;display:grid;grid-template-columns:minmax(160px,.8fr) minmax(0,1.6fr);gap:16px;align-items:center;min-width:0}
+.h2h-combined-card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;display:grid;grid-template-columns:minmax(160px,.8fr) minmax(0,1.6fr);gap:16px;align-items:center;min-width:0}
 /* Väljaren är medvetet utan egen yta — den ligger inne i .h2h-combined-card. */
 .h2h-selector-card{background:transparent;border:0;border-radius:0;padding:0;display:flex;flex-direction:column;justify-content:center;min-width:0}
 .h2h-selector-title{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
 .h2h-selector-card .select{width:100%;min-width:0;font-size:11px;padding:7px 28px 7px 9px}
 .h2h-combined-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;align-items:stretch}
-.h2h-metric{padding:5px 14px;border-left:1px solid #ddccb8;min-width:0}
+.h2h-metric{padding:5px 14px;border-left:1px solid var(--line);min-width:0}
 .h2h-metric span{display:block;color:var(--muted);font-size:10px;line-height:1.25}
 .h2h-metric b{display:block;font-size:22px;margin-top:5px;color:var(--text)}
-.h2h-recent{grid-column:1;grid-row:auto;background:#ffffff;border:1px solid #ddccb8;border-radius:13px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+.h2h-recent{grid-column:1;grid-row:auto;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
 .h2h-recent-title{font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em;margin-bottom:9px}
 .h2h-recent-dots{display:flex;gap:7px;align-items:center}
-.h2h-recent-legend{margin-top:8px;color:#6b5d4e;font-size:9px;line-height:1.3}
-.h2h-result{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:950;border:1px solid #c9b79e;background:#f5efe4;color:#2a1f16}
-.h2h-result.me-loss{background:#fbe4e1;border-color:#e2a89e;color:#8a2e26}
-.h2h-result.opp-loss{background:#e3ecfa;border-color:#3268d2;color:#1f4fa8}
-.h2h-result.other-loss{background:#f5efe4;color:#6b5d4e}
+.h2h-recent-legend{margin-top:8px;color:var(--muted);font-size:9px;line-height:1.3}
+.h2h-result{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:950;border:1px solid var(--line2);background:var(--card2);color:var(--text)}
+.h2h-result.me-loss{background:var(--danger-bg);border-color:var(--danger-border);color:var(--danger-text)}
+.h2h-result.opp-loss{background:#e3ecfa;border-color:var(--teal);color:var(--teal2)}
+.h2h-result.other-loss{background:var(--card2);color:var(--muted)}
 @media(min-width:901px){
   .h2h-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
   .h2h-combined-card{grid-column:1/3;grid-row:1}
@@ -174,15 +175,21 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
 @media(max-width:900px){.h2h-selector-card{grid-column:1/-1}}
 @media(max-width:650px){
   .h2h-combined-card{grid-template-columns:1fr}
-  .h2h-combined-metrics{border-top:1px solid #ddccb8;padding-top:10px}
+  .h2h-combined-metrics{border-top:1px solid var(--line);padding-top:10px}
   .h2h-metric:first-child{border-left:0;padding-left:0}
 }
 @media(max-width:520px){.h2h-selector-card{grid-column:auto}}
 @media(max-width:480px){
   .h2h-combined-metrics{grid-template-columns:1fr}
-  .h2h-metric{border-left:0;border-top:1px solid #ddccb8;padding:10px 0}
+  .h2h-metric{border-left:0;border-top:1px solid var(--line);padding:10px 0}
   .h2h-metric:first-child{border-top:0}
 }
+
+/* Mörkt läge: de här ljusa pastellonerna (rivalitetsikoner, opp-loss-prick)
+   byts mot dämpade mörka motsvarigheter. */
+:root[data-theme="dark"] .rivalry-icon-rival{background:#2a1c33}
+:root[data-theme="dark"] .rivalry-icon-victim{background:#123027}
+:root[data-theme="dark"] .h2h-result.opp-loss{background:#123a3a}
 
 /* Rankinghistorik (SVG-diagram) ------------------------------------------ */
 /* Diagrammet ritas direkt mot panelens gradient (ingen egen kortyta) — därför
@@ -191,26 +198,26 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
 .ranking-chart-scroll{width:100%;overflow-x:auto;overflow-y:hidden}
 .ranking-chart{min-width:720px;width:100%;height:auto;display:block}
 .chart-empty{color:var(--muted);padding:26px;text-align:center}
-.chart-caption{display:flex;justify-content:space-between;gap:12px;color:#8a7a68;font-size:10px;margin-top:6px;padding:0 4px;box-sizing:border-box}
+.chart-caption{display:flex;justify-content:space-between;gap:12px;color:var(--soft);font-size:10px;margin-top:6px;padding:0 4px;box-sizing:border-box}
 .chart-legend{display:flex;gap:12px;align-items:center}
 .legend-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;margin-right:4px}
 @media(max-width:760px){.ranking-chart{min-width:680px}}
 
 /* Periodhistorik (tidslinje) --------------------------------------------- */
 .period-list{display:grid;gap:8px;position:relative;padding-left:20px}
-.period-list:before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:#c9b79e}
-.period-row{position:relative;display:grid;grid-template-columns:minmax(150px,1fr) repeat(4,100px);gap:10px;align-items:center;padding:12px 14px;background:#ffffff;border:1px solid #ddccb8;border-radius:10px}
-.period-row:before{content:"";position:absolute;left:-20px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--teal);border:3px solid #ffffff;transform:translateY(-50%)}
+.period-list:before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--line2)}
+.period-row{position:relative;display:grid;grid-template-columns:minmax(150px,1fr) repeat(4,100px);gap:10px;align-items:center;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.period-row:before{content:"";position:absolute;left:-20px;top:50%;width:9px;height:9px;border-radius:50%;background:var(--teal);border:3px solid var(--panel);transform:translateY(-50%)}
 .period-row .name{font-weight:900}
-.period-row .num{text-align:right;color:#8a7a68}
+.period-row .num{text-align:right;color:var(--soft)}
 @media(max-width:760px){.period-row{grid-template-columns:1fr 70px 70px}.period-row .hide-mobile{display:none}}
 @media(max-width:480px){.period-row{grid-template-columns:1fr 58px 58px}}
 
 /* Redigera-profil-modalen. Scoped till #editModal så att den delade
    inloggningsmodalen från global.css behåller sitt eget utseende.
    z-index lägre än headerns, precis som i originalet. */
-#editModal{background:rgba(42,31,22,.45);padding:18px;z-index:20}
-#editModal .modal-card{width:min(480px,100%);background:#ffffff;border:1px solid #ddccb8;border-radius:16px;padding:20px}
+#editModal{background:rgba(0,0,0,.5);padding:18px;z-index:20}
+#editModal .modal-card{width:min(480px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
 #editModal .modal-card h2{margin-top:0}
 #editModal .field small{display:block;margin-top:7px;color:var(--muted)}
 #currentImageNote{margin-top:7px;color:var(--muted);font-size:12px}
@@ -499,19 +506,21 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
     const x = i => points.length === 1 ? L + plotW / 2 : L + i * (plotW / (points.length - 1));
     const y = pos => T + (pos - 1) * (plotH / Math.max(1, maxPos - 1));
 
-    // SVG-attribut kan inte läsa CSS-variabler — färgerna nedan är det ljusa
-    // temats hårdkodade värden: rutnät #e3d5c2, axeltext #8a7a68,
-    // linje/punkt #3268d2 och kontrastring #ffffff.
+    // SVG-attribut kan inte läsa CSS-variabler — färgerna väljs manuellt per tema.
+    const c = Klask.theme.get() === 'dark'
+      ? { grid: '#26425a', axis: '#7fa0bd', line: '#43d7c4', dotRing: '#0d1d2f' }
+      : { grid: '#e3d5c2', axis: '#8a7a68', line: '#3268d2', dotRing: '#ffffff' };
+
     const grid = Array.from({ length: maxPos }, (_, i) => i + 1).map(pos =>
-      `<line x1="${L}" y1="${y(pos)}" x2="${W - R}" y2="${y(pos)}" stroke="#e3d5c2"/>` +
-      `<text x="${L - 13}" y="${y(pos) + 4}" text-anchor="end" fill="#8a7a68" font-size="11">${pos}</text>`
+      `<line x1="${L}" y1="${y(pos)}" x2="${W - R}" y2="${y(pos)}" stroke="${c.grid}"/>` +
+      `<text x="${L - 13}" y="${y(pos) + 4}" text-anchor="end" fill="${c.axis}" font-size="11">${pos}</text>`
     ).join('');
 
     const maxLabels = 10, step = Math.max(1, Math.ceil(points.length / maxLabels));
     const labels = points.map((p, i) => {
       if (i !== 0 && i !== points.length - 1 && i % step !== 0) return '';
       const anchor = i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle';
-      return `<text x="${x(i)}" y="${H - 28}" text-anchor="${anchor}" fill="#8a7a68" font-size="10">${esc(p.label)}</text>`;
+      return `<text x="${x(i)}" y="${H - 28}" text-anchor="${anchor}" fill="${c.axis}" font-size="10">${esc(p.label)}</text>`;
     }).join('');
 
     const segments = []; let seg = [];
@@ -522,11 +531,11 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
     if (seg.length) segments.push(seg);
 
     const paths = segments.map(arr =>
-      `<path d="${arr.map((v, i) => `${i ? 'L' : 'M'} ${v.x.toFixed(1)} ${v.y.toFixed(1)}`).join(' ')}" fill="none" stroke="#3268d2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`
+      `<path d="${arr.map((v, i) => `${i ? 'L' : 'M'} ${v.x.toFixed(1)} ${v.y.toFixed(1)}`).join(' ')}" fill="none" stroke="${c.line}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`
     ).join('');
 
     const dots = points.map((p, i) => Number.isFinite(p.pos)
-      ? `<circle cx="${x(i)}" cy="${y(p.pos)}" r="5" fill="#3268d2" stroke="#ffffff" stroke-width="3"><title>${esc(p.title)}: #${p.pos}</title></circle>`
+      ? `<circle cx="${x(i)}" cy="${y(p.pos)}" r="5" fill="${c.line}" stroke="${c.dotRing}" stroke-width="3"><title>${esc(p.title)}: #${p.pos}</title></circle>`
       : '').join('');
 
     root.innerHTML =
@@ -747,6 +756,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Poppins,system-
       $('#removeImageBtn').style.display = 'none';
     };
     $('#saveEdit').onclick = saveProfile;
+    Klask.theme.onChange(renderRankingHistory);
   }
 
   init();

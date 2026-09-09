@@ -183,7 +183,42 @@
   const auth = { signIn, signOut, getSession, onChange, isAdmin, canEditPlayer, invalidateCache: invalidateAuthCaches };
 
   /* ---------------------------------------------------------------------------
-     5. Header/nav + inloggningsmodal (injiceras i platshållare)
+     5. Tema (ljust/mörkt)
+     Attributet <html data-theme="dark"> styr CSS-tokens i global.css. Sparas i
+     localStorage så det överlever sidnavigering (statiska sidor, ingen SPA).
+     Varje sidas <head> sätter attributet synkront innan render för att undvika
+     flimmer — se den lilla inline-scripten längst upp i varje HTML-fil.
+     --------------------------------------------------------------------------- */
+  const THEME_KEY = 'klask-theme';
+
+  function getTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+  function syncThemeButton() {
+    const btn = document.getElementById('siteThemeToggle');
+    if (!btn) return;
+    const dark = getTheme() === 'dark';
+    btn.textContent = dark ? '☀️' : '🌙';
+    const label = dark ? 'Byt till ljust läge' : 'Byt till mörkt läge';
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  }
+  function setTheme(theme) {
+    if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    else document.documentElement.removeAttribute('data-theme');
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* privat läge etc. */ }
+    syncThemeButton();
+    document.dispatchEvent(new CustomEvent('klask:themechange', { detail: { theme } }));
+  }
+  function toggleTheme() {
+    setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  }
+  function onThemeChange(cb) {
+    document.addEventListener('klask:themechange', e => cb(e.detail.theme));
+  }
+
+  /* ---------------------------------------------------------------------------
+     6. Header/nav + inloggningsmodal (injiceras i platshållare)
      --------------------------------------------------------------------------- */
   const NAV_LINKS = [
     { page: 'index', href: 'index.html', label: 'Tabell' },
@@ -225,8 +260,11 @@
       `<a class="site-brand" href="index.html" aria-label="Klaskligan startsida">KLASKLIGAN</a>` +
       `<nav class="site-nav" aria-label="Huvudmeny">${links}</nav>` +
       `</div>` +
+      `<div class="site-header-right">` +
+      `<button id="siteThemeToggle" type="button" class="site-theme-toggle" aria-label="Byt tema" title="Byt tema"></button>` +
       `<button id="siteAuthBtn" type="button" class="site-admin-link site-auth-btn">` +
       `<span class="chev-label">Admin</span><span class="chev">&#9662;</span></button>` +
+      `</div>` +
       `</div></header>`;
   }
 
@@ -266,6 +304,11 @@
           openAuthModal();
         }
       });
+    }
+    const themeBtn = document.getElementById('siteThemeToggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', toggleTheme);
+      syncThemeButton();
     }
     // Håll header + body.is-admin i synk vid in-/utloggning i vilken flik som helst.
     onChange(async (_event, session) => {
@@ -360,7 +403,7 @@
   }
 
   /* ---------------------------------------------------------------------------
-     6. Datanormalisering (flyttad från index.html, oförändrat beteende)
+     7. Datanormalisering (flyttad från index.html, oförändrat beteende)
      --------------------------------------------------------------------------- */
   function currentSeasonKey(date = new Date()) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -415,7 +458,7 @@
   }
 
   /* ---------------------------------------------------------------------------
-     7. Spelare + profiler — EN sammanslagning (ersätter de 2–3 gamla)
+     8. Spelare + profiler — EN sammanslagning (ersätter de 2–3 gamla)
      --------------------------------------------------------------------------- */
   function toProfileMap(profiles) {
     if (profiles instanceof Map) return profiles;
@@ -470,7 +513,7 @@
   }
 
   /* ---------------------------------------------------------------------------
-     8. Rankingformel (oförändrad) + sortering
+     9. Rankingformel (oförändrad) + sortering
      --------------------------------------------------------------------------- */
   const BAYESIAN_M = 18;
   const MIN_MATCHES = 18;
@@ -530,7 +573,7 @@
   }
 
   /* ---------------------------------------------------------------------------
-     9. Läs/skriv klask_state
+     10. Läs/skriv klask_state
      --------------------------------------------------------------------------- */
   /**
    * Hämtar raden id=1, normaliserar och returnerar {data, archive}.
@@ -577,7 +620,7 @@
   }
 
   /* ---------------------------------------------------------------------------
-     10. Publikt API
+     11. Publikt API
      --------------------------------------------------------------------------- */
   window.Klask = {
     // Supabase
@@ -593,6 +636,9 @@
     // Auth
     auth,
     refreshAuthUI,
+
+    // Tema
+    theme: { get: getTheme, set: setTheme, toggle: toggleTheme, onChange: onThemeChange },
 
     // UI-montering
     mountHeader,

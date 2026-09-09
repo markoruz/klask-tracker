@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{if(localStorage.getItem('klask-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 <title>Lottning | KLASKLIGAN</title>
 
 <!-- global.css FÖRE sidans egna <style>, så sidspecifika regler kan överstyra utan !important -->
@@ -17,7 +18,7 @@
 
 body{
   margin:0;
-  background:var(--bg);
+  background:var(--body-bg);
   color:var(--text);
   font-family:Poppins,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   min-height:100vh;
@@ -42,8 +43,8 @@ body{
 .wheel{
   width:100%;height:100%;
   border-radius:50%;
-  border:8px solid #c9b79e;
-  box-shadow:0 0 0 3px #ffffff,0 18px 48px rgba(58,43,27,.25);
+  border:8px solid var(--line2);
+  box-shadow:0 0 0 3px var(--panel),var(--shadow);
   transition:transform 4.8s cubic-bezier(.12,.68,.08,1);
   overflow:hidden;
 }
@@ -57,7 +58,7 @@ body{
 .wheel-center{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:88px;height:88px;border-radius:50%;
-  background:#ffffff;border:5px solid #c9b79e;
+  background:var(--panel);border:5px solid var(--line2);
   z-index:4;display:grid;place-items:center;
   text-align:center;padding:0 6px;
   font-family:'Patrick Hand SC',Poppins,sans-serif;
@@ -72,9 +73,9 @@ body{
 .player-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .player-check{
   display:flex;align-items:center;gap:9px;padding:9px;
-  border:1px solid var(--line);border-radius:11px;background:#ffffff;cursor:pointer;
+  border:1px solid var(--line);border-radius:11px;background:var(--panel);cursor:pointer;
 }
-.player-check:hover{border-color:#c9b79e}
+.player-check:hover{border-color:var(--line2)}
 .player-check input{accent-color:var(--teal);width:17px;height:17px}
 /* Mindre avatarer än global.css standard (40px) */
 .avatar{--avatar-size:30px;font-size:11px}
@@ -87,14 +88,14 @@ body{
 .result-slot{
   display:grid;grid-template-columns:38px 36px 1fr;align-items:center;gap:10px;
   padding:10px 11px;border:1px solid var(--line);border-radius:12px;
-  background:#ffffff;min-height:58px;
+  background:var(--panel);min-height:58px;
 }
-.result-slot.filled{border-color:rgba(50,104,210,.4);background:linear-gradient(135deg,#e3ecfa,#ffffff)}
+.result-slot.filled{border-color:rgba(50,104,210,.4);background:linear-gradient(135deg,#e3ecfa,var(--panel))}
 .place{font-size:19px;font-weight:950;color:var(--teal)}
-.empty{color:#6b5d4e;font-size:12px}
+.empty{color:var(--muted);font-size:12px}
 .save-row{margin-top:12px;display:grid;gap:8px}
 .notice{
-  padding:13px;border-radius:12px;background:#f5efe4;border:1px solid var(--line);
+  padding:13px;border-radius:12px;background:var(--card2);border:1px solid var(--line);
   color:var(--muted);font-size:12px;line-height:1.5;
 }
 
@@ -102,10 +103,13 @@ body{
 .guard{position:fixed;inset:0;background:var(--bg);z-index:99;display:grid;place-items:center}
 .guard-card{text-align:center}
 .spinner{
-  width:34px;height:34px;border:3px solid #ddccb8;border-top-color:var(--teal);
+  width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--teal);
   border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* Fylld resultatruta: teal-toning i mörkt läge istället för den ljusa blåtoningen. */
+:root[data-theme="dark"] .result-slot.filled{border-color:rgba(67,215,196,.45);background:linear-gradient(135deg,#173a3a,var(--panel))}
 
 /* Responsivt -------------------------------------------------------------- */
 @media(max-width:900px){
@@ -242,21 +246,28 @@ function wheelPool(){
   return players.filter(p=>selected.has(Number(p.id))&&!won.has(Number(p.id)));
 }
 
+/* Canvas kan inte läsa CSS-variabler — färgerna nedan speglar temats tokens manuellt. */
+function wheelColors(){
+  return Klask.theme.get()==='dark'
+    ? { empty:'#13263a', segments:['#1f7a73','#315a7d','#754a86','#9a5b4f','#48704d','#78672e','#425a91','#8b4c68'], stroke:'#0b1b2a' }
+    : { empty:'#f5efe4', segments:['#3268d2','#8a5fb0','#c99a2e','#3fa06e','#c8443a','#5c7a9e','#b06a35','#7a5ca8'], stroke:'#ffffff' };
+}
+
 function drawWheel(){
   const c=$('#wheel'),ctx=c.getContext('2d'),pool=wheelPool(),w=c.width,h=c.height,r=w/2;
+  const colorSet=wheelColors();
   ctx.clearRect(0,0,w,h);
   if(!pool.length){
     // Tom pott: bara en ren cirkel. Statusraden under hjulet säger redan vad som krävs.
-    ctx.fillStyle='#f5efe4';ctx.beginPath();ctx.arc(r,r,r,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=colorSet.empty;ctx.beginPath();ctx.arc(r,r,r,0,Math.PI*2);ctx.fill();
     return;
   }
-  const colors=['#3268d2','#8a5fb0','#c99a2e','#3fa06e','#c8443a','#5c7a9e','#b06a35','#7a5ca8'];
   const step=Math.PI*2/pool.length;
   pool.forEach((p,i)=>{
     const a0=i*step,a1=a0+step;
     ctx.beginPath();ctx.moveTo(r,r);ctx.arc(r,r,r-4,a0,a1);ctx.closePath();
-    ctx.fillStyle=colors[i%colors.length];ctx.fill();
-    ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.stroke();
+    ctx.fillStyle=colorSet.segments[i%colorSet.segments.length];ctx.fill();
+    ctx.strokeStyle=colorSet.stroke;ctx.lineWidth=3;ctx.stroke();
     ctx.save();
     ctx.translate(r,r);
     ctx.rotate(a0+step/2);
@@ -378,6 +389,7 @@ async function init(){
   render();
 }
 init();
+Klask.theme.onChange(drawWheel);
 </script>
 </body>
 </html>
