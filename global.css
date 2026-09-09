@@ -1,105 +1,307 @@
-/* KLASKLIGAN - shared global header */
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* =============================================================================
+   KLASKLIGAN — global.css
+   Delad stilmall för index.html, player.html, players.html och lottning.html.
+   Laddas FÖRE varje sidas egna <style>-block, så att sidspecifik layout kan
+   överstyra det som står här utan !important.
+
+   Design: ljust tema — beige sidbakgrund (#eaddcd) med blå header (#3268d2).
+   Blått ersätter den gamla teal-accenten (var(--teal) pekar nu på blått, så
+   allt som redan använde token följer med automatiskt). Kort/paneler är ljusa
+   (vita/varmvita) istället för mörkblå.
+
+   Innehåll:
+     1. Design-tokens (:root)
+     2. Bas (body, typografi)
+     3. Delade komponenter (.btn, .panel, .modal, .toast, .avatar, .chip, .field)
+     4. Header/nav (.site-header, .site-nav, adminknapp)
+   ============================================================================= */
+
+/* ----------------------------------------------------------------------------
+   1. Design-tokens
+   ---------------------------------------------------------------------------- */
+:root{
+  --bg:#eaddcd;
+  --panel:#ffffff;
+  --panel2:#faf5ec;
+  --card:#ffffff;
+  --card2:#f5efe4;
+  --line:#ddccb8;
+  --line2:#c9b79e;
+  --text:#2a1f16;
+  --muted:#6b5d4e;
+  --soft:#8a7a68;
+  --teal:#3268d2;
+  --teal2:#1f4fa8;
+  --red:#c8443a;
+  --gold:#c99a2e;
+  --silver:#8f97a1;
+  --bronze:#b06a35;
+  --shadow:0 14px 32px rgba(58,43,27,.12);
+  --radius:16px;
+}
+
+/* ----------------------------------------------------------------------------
+   2. Bas
+   ---------------------------------------------------------------------------- */
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit}
+
+/* ----------------------------------------------------------------------------
+   3. Delade komponenter
+   ---------------------------------------------------------------------------- */
+
+/* Panel ------------------------------------------------------------------- */
+.panel{
+  background:linear-gradient(145deg,#ffffff,#faf5ec);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+/* Knappar ----------------------------------------------------------------- */
+.btn{
+  border:1px solid #cbb99e;
+  background:#ffffff;
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:850;
+  font-family:inherit;
+  cursor:pointer;
+}
+.btn:hover{filter:brightness(.97)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn-primary{
+  background:linear-gradient(135deg,#3268d2,#1f4fa8);
+  border-color:#1f4fa8;
+  color:white;
+}
+.btn-danger{background:#fbe4e1;border-color:#e2a89e;color:#8a2e26}
+.btn-block{width:100%}
+.linkbtn{
+  background:none;border:0;padding:0;
+  color:var(--teal);font-weight:800;font-size:11px;font-family:inherit;cursor:pointer;
+}
+
+/* Chips ------------------------------------------------------------------- */
+.chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #d9c9b3;
+  background:#f5efe4;
+  border-radius:999px;
+  padding:8px 13px;
+  color:#4a3d2e;
+  font-size:12px;
+  font-weight:800;
+}
+.chip-check{
+  display:grid;place-items:center;
+  width:16px;height:16px;
+  border:1px solid var(--teal);border-radius:50%;
+  color:var(--teal);font-size:10px;
+}
+.chip-button{appearance:none;cursor:pointer;font:inherit}
+.chip-button.danger-chip{border-color:#e2a89e;background:#fbe4e1;color:#8a2e26}
+.chip-button.danger-chip:hover{background:#f7d5d0;border-color:#d98f86}
+
+/* Avatar (utdata från Klask.renderAvatar) --------------------------------- */
+.avatar{
+  --avatar-size:40px;
+  width:var(--avatar-size);
+  height:var(--avatar-size);
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border-radius:50%;
+  border:1px solid #c9b79e;
+  background:#f0e6d8;
+  color:#4a3d2e;
+  font-weight:950;
+  font-size:calc(var(--avatar-size) * .38);
+  line-height:1;
+  text-transform:uppercase;
+}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Formulärfält ------------------------------------------------------------ */
+.field{display:grid;gap:6px;margin:12px 0}
+.field label{font-size:12px;color:var(--muted);font-weight:850}
+.field input,.field select,.field textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #c9b79e;
+  border-radius:10px;
+  background:#ffffff;
+  color:var(--text);
+  outline:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.form-error{min-height:18px;margin-top:9px;color:#c8443a;font-size:12px}
+
+/* Modal ------------------------------------------------------------------- */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(42,31,22,.45);
+  display:grid;
+  place-items:center;
+  padding:20px;
+  z-index:80;
+}
+.modal-auth{z-index:90}
+.modal-backdrop{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(42,31,22,.4);
+  backdrop-filter:blur(4px);
+  z-index:79;
+}
+.modal-backdrop.open{display:block}
+.modal-card{
+  position:relative;
+  width:min(620px,100%);
+  background:#ffffff;
+  border:1px solid #ddccb8;
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:0 20px 50px rgba(42,31,22,.22);
+}
+.modal-card-sm{width:min(390px,100%);padding:22px}
+.modal-title{margin:0 0 16px;font-size:20px;color:var(--text)}
+.modal-close{
+  position:absolute;
+  right:12px;top:10px;
+  width:32px;height:32px;
+  border:0;background:transparent;
+  color:#8a7a68;font-size:24px;line-height:1;cursor:pointer;
+}
+.modal-close:hover{color:var(--text)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+body.modal-open{overflow:hidden}
+
+.hidden{display:none!important}
+
+/* Toast (nere till höger) ------------------------------------------------- */
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  max-width:min(360px,calc(100% - 36px));
+  background:#2a1f16;
+  border:1px solid #4a3d2e;
+  border-radius:10px;
+  padding:11px 14px;
+  color:#f4ede2;
+  font-size:13px;
+  font-weight:800;
+  box-shadow:var(--shadow);
+  opacity:0;
+  transform:translateY(10px);
+  pointer-events:none;
+  transition:.2s;
+  z-index:120;
+}
+.toast.show{opacity:1;transform:none}
+
+/* ----------------------------------------------------------------------------
+   4. Header/nav (injiceras av Klask.mountHeader)
+   Blå header (#3268d2), oberoende av sidans ljusa bakgrund. Ligger sist så
+   att den vinner över de generiska komponentreglerna ovan.
+   ---------------------------------------------------------------------------- */
+#site-header-slot,#auth-modal-slot{display:contents}
 .site-header{
-  width:min(1120px,calc(100% - 20px))!important;
-  margin:10px auto 10px!important;
-  position:sticky!important;
-  top:10px!important;
-  z-index:30!important;
-  background:rgba(6,17,29,.94)!important;
-  backdrop-filter:blur(14px)!important;
-  border:1px solid #29475f!important;
-  border-radius:16px!important;
-  box-shadow:0 12px 30px rgba(0,0,0,.18)!important;
+  width:100%;
+  position:sticky;
+  top:0;
+  z-index:30;
+  background:linear-gradient(120deg,#4a7fe0,#1f4fa8);
+  border-bottom:1px solid #16386e;
+  box-shadow:0 4px 18px rgba(0,0,0,.22);
 }
 .site-header-inner{
-  min-height:68px!important;
-  height:68px!important;
-  padding:10px 16px!important;
-  display:flex!important;
-  align-items:center!important;
-  gap:28px!important;
+  width:min(1180px,calc(100% - 32px));
+  margin:0 auto;
+  min-height:90px;
+  padding:10px 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+}
+.site-header-left{
+  display:flex;
+  align-items:center;
+  gap:30px;
+  min-width:0;
 }
 .site-brand{
-  display:inline-flex!important;
-  align-items:center!important;
-  gap:10px!important;
-  color:#eef5fb!important;
-  text-decoration:none!important;
-  font-size:20px!important;
-  font-weight:950!important;
-  letter-spacing:-.5px!important;
-  line-height:1!important;
-  white-space:nowrap!important;
-}
-.site-brand-mark{
-  width:30px!important;
-  height:24px!important;
-  flex:0 0 30px!important;
-  position:relative!important;
-  display:inline-block!important;
-}
-.site-brand-mark:before,.site-brand-mark:after{
-  content:""!important;
-  position:absolute!important;
-  left:2px!important;
-  right:2px!important;
-  border:2px solid #526c84!important;
-  border-radius:50%!important;
-}
-.site-brand-mark:before{height:8px!important;bottom:2px!important}
-.site-brand-mark:after{height:5px!important;bottom:7px!important;left:7px!important;right:7px!important}
-.site-brand-mark i{
-  position:absolute!important;
-  left:11px!important;
-  top:0!important;
-  width:8px!important;
-  height:8px!important;
-  border:2px solid #43d7c4!important;
-  border-radius:50%!important;
-  background:#0b1726!important;
+  display:inline-flex;
+  align-items:center;
+  color:#ffffff;
+  text-decoration:none;
+  line-height:1;
+  white-space:nowrap;
+  font-family:'Patrick Hand SC',Poppins,sans-serif;
+  font-size:44px;
+  font-weight:400;
+  letter-spacing:.03em;
 }
 .site-nav{
-  display:flex!important;
-  align-items:center!important;
-  gap:6px!important;
-  flex:1!important;
+  display:flex;
+  align-items:center;
+  gap:4px;
 }
 .site-nav a{
-  color:#aebfd0!important;
-  text-decoration:none!important;
-  padding:9px 13px!important;
-  border-radius:9px!important;
-  font-size:13px!important;
-  font-weight:850!important;
-  line-height:18px!important;
+  color:#dce8fb;
+  text-decoration:none;
+  padding:9px 16px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:850;
+  line-height:18px;
+  white-space:nowrap;
 }
-.site-nav a:hover{color:#fff!important;background:#11263a!important}
-.site-nav a.active{color:#fff!important;background:#173047!important;box-shadow:inset 0 -2px 0 #43d7c4!important}
+.site-nav a:hover{color:#fff;background:rgba(255,255,255,.14)}
+.site-nav a.active{color:#1f4fa8;background:#ffffff}
 .site-admin-btn,.site-admin-link{
-  margin-left:auto!important;
-  white-space:nowrap!important;
-  cursor:pointer!important;
-  color:#dce8f2!important;
-  border:1px solid #35556d!important;
-  background:#10273b!important;
-  border-radius:10px!important;
-  padding:8px 11px!important;
-  font-size:12px!important;
-  font-weight:850!important;
-  line-height:18px!important;
-  font-family:inherit!important;
-  min-height:36px!important;
-  height:36px!important;
-  box-shadow:none!important;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  white-space:nowrap;
+  cursor:pointer;
+  color:#ffffff;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,.5);
+  background:rgba(255,255,255,.12);
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:13px;
+  font-weight:850;
+  line-height:18px;
+  font-family:inherit;
+  min-height:38px;
+  box-shadow:none;
 }
-.site-admin-btn:hover,.site-admin-link:hover{border-color:#43d7c4!important;filter:none!important}
-.admin-only-nav{display:none!important}
-body.is-admin .admin-only-nav{display:inline-flex!important}
+.site-admin-btn .chev,.site-admin-link .chev{
+  display:inline-block;
+  font-size:9px;
+  color:#dce8fb;
+  transform:translateY(1px);
+}
+.site-admin-btn:hover,.site-admin-link:hover{background:rgba(255,255,255,.22);filter:none}
+.admin-only-nav{display:none}
+body.is-admin .admin-only-nav{display:inline-flex}
 @media(max-width:680px){
-  .site-header{width:calc(100% - 10px)!important}
-  .site-header-inner{height:auto!important;min-height:68px!important;gap:10px!important;flex-wrap:wrap!important}
-  .site-brand{font-size:17px!important}
-  .site-nav{order:3!important;width:100%!important;flex-basis:100%!important;border-top:1px solid rgba(53,82,107,.45)!important;padding-top:7px!important}
-  .site-nav a{flex:1!important;text-align:center!important;padding:8px 6px!important}
-  .site-admin-btn,.site-admin-link{padding:8px 10px!important}
+  .site-header-inner{min-height:auto;padding:12px 0;gap:10px;flex-wrap:wrap}
+  .site-header-left{gap:16px;flex-wrap:wrap}
+  .site-nav{order:3;width:100%;flex-basis:100%;border-top:1px solid rgba(255,255,255,.25);padding-top:7px}
+  .site-nav a{flex:1;text-align:center;padding:8px 6px}
+  .site-admin-btn,.site-admin-link{padding:8px 10px}
 }
