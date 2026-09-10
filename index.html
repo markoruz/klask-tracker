@@ -367,7 +367,10 @@ body.is-admin .feed-reaction{padding:2px 6px;font-size:10px;gap:3px}
 .archive-podium-stats{display:grid;grid-template-columns:74px 78px 52px;gap:10px;align-items:center;text-align:right;color:var(--muted);white-space:nowrap}
 .archive-podium-stats span:nth-child(2){color:var(--red)}
 .archive-podium-stats strong{color:var(--teal);font-size:11px}
-.archive-toggle{display:block;margin-top:10px;width:auto;min-height:0;padding:5px 9px;border-radius:7px;font-size:11px;line-height:1.15;color:var(--teal);font-weight:850}
+.archive-actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.archive-toggle{display:block;width:auto;min-height:0;padding:5px 9px;border-radius:7px;font-size:11px;line-height:1.15;color:var(--teal);font-weight:850}
+.archive-wrapped-btn{display:block;width:auto;min-height:0;padding:5px 9px;border-radius:7px;font-size:11px;line-height:1.15;font-weight:850;background:linear-gradient(135deg,var(--teal),var(--teal2));color:#fff;border-color:var(--teal2)}
+:root[data-theme="dark"] .archive-wrapped-btn{color:#05201d}
 .archive-admin-actions{position:absolute;top:10px;right:10px;margin:0;display:flex;gap:6px}
 .archive-admin-actions .btn{padding:5px 8px;min-height:28px;font-size:10px}
 /* Scopad så att den vinner över .archive-head span (11px), precis som förut. */
@@ -439,6 +442,58 @@ body.period-closed .history-panel [data-edit-match]{display:none}
 .period-form-label input{width:100%;box-sizing:border-box;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:9px;padding:10px 11px;font:inherit}
 .period-date-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:620px){.period-date-grid{grid-template-columns:1fr}}
+
+/* ---------------------------------------------------------------------------
+   9b. Klaskligan Wrapped
+   --------------------------------------------------------------------------- */
+.wrapped-modal-card{width:min(860px,100%);position:relative;z-index:2;max-height:92vh;overflow-y:auto}
+.wrapped-card{position:relative;overflow:hidden;text-align:center;padding:72px 40px;min-height:500px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:18px;background:var(--card2)}
+.wrapped-icon{font-size:80px;line-height:1}
+.wrapped-kicker{font-size:13px;text-transform:uppercase;letter-spacing:.16em;font-weight:950;color:var(--teal)}
+.wrapped-heading{font-size:36px;font-weight:950;color:var(--text);line-height:1.2}
+.wrapped-body{color:var(--muted);font-size:17px;max-width:48ch;line-height:1.6}
+.wrapped-card.wrapped-grand .wrapped-heading{font-size:58px}
+.wrapped-podium-mini{display:flex;gap:18px;margin-top:6px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;font-weight:800}
+.wrapped-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
+.wrapped-nav .btn{padding:6px 11px;font-size:11px;font-weight:800}
+.wrapped-dots{display:flex;gap:5px}
+.wrapped-dot{width:6px;height:6px;border-radius:50%;background:var(--line2)}
+.wrapped-dot.active{background:var(--teal)}
+/* Konfetti + fyrverkerier ligger som egna fasta lager över HELA skärmen (inte
+   bara kortet), bakom modal-kortet i staplingsordning tack vare DOM-ordningen. */
+.wrapped-confetti,.wrapped-fireworks{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.wrapped-flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:3}
+.wrapped-flash.wrapped-flash-play{animation-name:wrappedFlash;animation-duration:.6s;animation-timing-function:ease-out;animation-iteration-count:1;animation-fill-mode:forwards}
+@keyframes wrappedFlash{0%{opacity:.75}100%{opacity:0}}
+.confetti-piece{position:absolute;top:-24px;opacity:.95;border-radius:2px;animation-name:confettiFall;animation-timing-function:cubic-bezier(.3,.35,.4,.9);animation-iteration-count:1;animation-fill-mode:forwards}
+.confetti-piece.round{border-radius:50%}
+.confetti-piece.ribbon{border-radius:3px}
+.confetti-piece.c0,.firework-particle.c0{background:var(--teal);color:var(--teal)}
+.confetti-piece.c1,.firework-particle.c1{background:var(--gold);color:var(--gold)}
+.confetti-piece.c2,.firework-particle.c2{background:var(--red);color:var(--red)}
+.confetti-piece.c3,.firework-particle.c3{background:var(--green);color:var(--green)}
+.confetti-piece.c4,.firework-particle.c4{background:var(--silver);color:var(--silver)}
+.confetti-piece.c5,.firework-particle.c5{background:var(--bronze);color:var(--bronze)}
+.confetti-emoji{position:absolute;top:-36px;line-height:1;animation-name:confettiFall;animation-timing-function:cubic-bezier(.3,.35,.4,.9);animation-iteration-count:1;animation-fill-mode:forwards;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+@keyframes confettiFall{
+  0%{transform:translate3d(0,0,0) rotate(0deg);opacity:1}
+  20%{transform:translate3d(var(--swayA,0px),20vh,0) rotate(calc(var(--rot,540deg) * .22));opacity:1}
+  45%{transform:translate3d(var(--swayB,0px),45vh,0) rotate(calc(var(--rot,540deg) * .5));opacity:1}
+  70%{transform:translate3d(var(--swayA,0px),72vh,0) rotate(calc(var(--rot,540deg) * .8));opacity:1}
+  92%{opacity:1}
+  100%{transform:translate3d(var(--swayB,0px),116vh,0) rotate(var(--rot,540deg));opacity:0}
+}
+/* Fyrverkerier: varje "brist" är en punkt som skjuter ut ett tjugotal partiklar
+   radiellt (beräknat i JS via cos/sin) och en ljusblixt i mitten. */
+.firework-burst{position:absolute;width:0;height:0}
+.firework-particle{position:absolute;left:0;top:0;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;opacity:0;box-shadow:0 0 8px 1px currentColor;animation-name:fireworkPop;animation-timing-function:cubic-bezier(.1,.7,.25,1);animation-duration:1.35s;animation-iteration-count:1;animation-fill-mode:forwards}
+.firework-flash{position:absolute;left:-26px;top:-26px;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle,#fff,rgba(255,255,255,0) 70%);opacity:0;animation-name:fireworkFlash;animation-duration:.6s;animation-timing-function:ease-out;animation-iteration-count:1;animation-fill-mode:forwards}
+@keyframes fireworkPop{
+  0%{transform:translate3d(0,0,0) scale(1);opacity:1}
+  60%{opacity:1}
+  100%{transform:translate3d(var(--dx),calc(var(--dy) + 60px),0) scale(.3);opacity:0}
+}
+@keyframes fireworkFlash{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(2)}}
 
 /* ---------------------------------------------------------------------------
    10. Dataexport
@@ -857,6 +912,24 @@ body.period-closed #roundPanel.admin-only{display:none}
   </div>
 </div>
 
+<div id="wrappedModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="wrappedModalTitle">
+  <div id="wrappedFlash" class="wrapped-flash"></div>
+  <div id="wrappedConfetti" class="wrapped-confetti"></div>
+  <div id="wrappedFireworks" class="wrapped-fireworks"></div>
+  <div class="modal-card wrapped-modal-card">
+    <div class="archive-modal-head">
+      <h3 id="wrappedModalTitle">Klaskligan Wrapped</h3>
+      <button id="wrappedModalClose" type="button" class="btn archive-modal-close">Stäng</button>
+    </div>
+    <div id="wrappedCard" class="wrapped-card"></div>
+    <div class="wrapped-nav">
+      <button id="wrappedPrev" type="button" class="btn">← Föregående</button>
+      <div id="wrappedDots" class="wrapped-dots"></div>
+      <button id="wrappedNext" type="button" class="btn btn-primary">Nästa →</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
   <div class="modal-card">
     <h3>Redigera match</h3>
@@ -1272,6 +1345,8 @@ body.period-closed #roundPanel.admin-only{display:none}
     realtimeChannel = sb.channel('klask-state-sync').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'klask_state', filter: 'id=eq.1' }, payload => {
       if (!payload.new) return;
       const previousNewestId = (data.feedEvents && data.feedEvents[0] && data.feedEvents[0].id) || null;
+      const wasClosed = !!(data && data.periodClosed);
+      const prevArchiveLen = archiveCache.length;
       data = Klask.normalizeLoaded(payload.new.data || {});
       archiveCache = Array.isArray(payload.new.archive) ? payload.new.archive : [];
       const newestId = (data.feedEvents && data.feedEvents[0] && data.feedEvents[0].id) || null;
@@ -1285,6 +1360,13 @@ body.period-closed #roundPanel.admin-only{display:none}
           firstCard.classList.add('feed-item-new');
           setTimeout(() => firstCard.classList.remove('feed-item-new'), 1200);
         }
+      }
+      // Klaskligan Wrapped, live: en period stängdes just (av vem som helst, i
+      // vilken flik som helst) — samma reveal som "Visa Klaskligan Wrapped" i
+      // Hall of Fame, poppar upp automatiskt hos alla som har sidan öppen.
+      const periodJustClosed = (!wasClosed && data.periodClosed) || archiveCache.length > prevArchiveLen;
+      if (periodJustClosed && archiveCache[0]) {
+        openWrappedModal(archiveCache[0]);
       }
     }).subscribe();
   }
@@ -1341,6 +1423,197 @@ body.period-closed #roundPanel.admin-only{display:none}
     };
   }
 
+  /* ---------------------------------------------------------------------------
+     Klaskligan Wrapped — beräkningar
+     Rena funktioner som tar en arkiverad periods sparade players/rounds/ranking
+     och räknar fram superlativ i efterhand över HELA perioden. Till skillnad
+     från Klaskflödets check*Event-funktioner ovan (som bara jämför senaste
+     omgången mot det som var innan) itererar de här hela `item.rounds`.
+     --------------------------------------------------------------------------- */
+  function wrappedLongestStreak(rounds, players) {
+    let best = null;
+    players.forEach(p => {
+      const rs = rounds.filter(r => Array.isArray(r.player_ids) && r.player_ids.includes(p.id))
+        .sort((a, b) => new Date(a.played_at) - new Date(b.played_at));
+      let run = 0, max = 0;
+      rs.forEach(r => { if (r.loser_id === p.id) run = 0; else { run++; max = Math.max(max, run); } });
+      if (max > 0 && (!best || max > best.streak)) best = { player: p, streak: max };
+    });
+    return best;
+  }
+  function wrappedBestComeback(rounds, players) {
+    let best = null;
+    players.forEach(p => {
+      const rs = rounds.filter(r => Array.isArray(r.player_ids) && r.player_ids.includes(p.id))
+        .sort((a, b) => new Date(a.played_at) - new Date(b.played_at));
+      let run = 0;
+      rs.forEach(r => {
+        if (r.loser_id === p.id) { run++; return; }
+        if (run >= 3 && (!best || run > best.streak)) best = { player: p, streak: run };
+        run = 0;
+      });
+    });
+    return best;
+  }
+  function wrappedBiggestRivalry(rounds, players) {
+    let best = null;
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i + 1; j < players.length; j++) {
+        const st = pairStats(players[i].id, players[j].id, rounds);
+        if (st.together > 0 && (!best || st.together > best.together)) {
+          best = { a: players[i], b: players[j], ...st };
+        }
+      }
+    }
+    return best;
+  }
+  function computeWrapped(item) {
+    const rounds = getArchivedRounds(item);
+    const players = Array.isArray(item.players) ? item.players : [];
+    const ranking = Array.isArray(item.ranking) ? item.ranking : [];
+    const qualified = ranking.filter(r => r.qualified);
+    const champion = qualified.find(r => r.position === 1) || null;
+    const cellarKing = qualified.length ? qualified[qualified.length - 1] : null;
+    const machine = ranking.length ? ranking.reduce((a, b) => (!a || b.games > a.games ? b : a), null) : null;
+    return {
+      champion, cellarKing, machine,
+      podium: qualified.slice(0, 3),
+      streak: wrappedLongestStreak(rounds, players),
+      comeback: wrappedBestComeback(rounds, players),
+      rivalry: wrappedBiggestRivalry(rounds, players)
+    };
+  }
+  function pct(v) { return v == null ? '–' : v.toFixed(1).replace('.', ',') + '%'; }
+  function wrappedCards(w) {
+    return [
+      {
+        icon: '🏆', kicker: 'Mästaren', grand: true,
+        heading: w.champion ? w.champion.name : 'Ingen kvalificerad vinnare',
+        body: w.champion ? `Vann perioden med ${pct(w.champion.loss_pct)} förlust över ${w.champion.games} matcher.` : `Ingen spelare nådde upp till minst ${MIN_MATCHES} matcher denna period.`,
+        podium: w.podium
+      },
+      {
+        icon: '🕹️', kicker: 'Klaskmaskinen',
+        heading: w.machine ? w.machine.name : '–',
+        body: w.machine ? `Spelade flest matcher: ${w.machine.games} st.` : 'Ingen matchdata denna period.'
+      },
+      {
+        icon: '👑', kicker: 'Källarkungen',
+        heading: w.cellarKing ? w.cellarKing.name : '–',
+        body: w.cellarKing ? `${pct(w.cellarKing.loss_pct)} förlust över ${w.cellarKing.games} matcher. Walk of shame.` : 'Ingen kvalificerad "vinnare" av den här titeln.'
+      },
+      {
+        icon: '🔥', kicker: 'Längsta vinstsvit',
+        heading: w.streak ? w.streak.player.name : '–',
+        body: w.streak ? `${w.streak.streak} matcher i rad utan förlust.` : 'Ingen svit denna period.'
+      },
+      {
+        icon: '⚔️', kicker: 'Månadens rivalitet',
+        heading: w.rivalry ? `${w.rivalry.a.name} vs ${w.rivalry.b.name}` : '–',
+        body: w.rivalry ? `Möttes ${w.rivalry.together} gånger. ${w.rivalry.a.name} förlorade ${w.rivalry.myLoss}, ${w.rivalry.b.name} förlorade ${w.rivalry.oppLoss}.` : 'Ingen rivalitet att tala om än.'
+      },
+      {
+        icon: '💪', kicker: 'Månadens comeback',
+        heading: w.comeback ? w.comeback.player.name : '–',
+        body: w.comeback ? `Bröt en svit på ${w.comeback.streak} förluster i rad.` : 'Ingen dramatisk comeback denna period.'
+      }
+    ];
+  }
+
+  let wrappedCardsCache = [];
+  let wrappedCardIndex = 0;
+  const CONFETTI_EMOJI = ['🎉', '🎊', '✨', '🥳', '🍾'];
+  function confettiHtml() {
+    let out = '';
+    const total = 260;
+    const emojiCount = 40;
+    for (let i = 0; i < total; i++) {
+      const left = (Math.random() * 100).toFixed(1);
+      const delay = (Math.random() * 3.2).toFixed(2);
+      const dur = (3.4 + Math.random() * 3.4).toFixed(2);
+      const swayA = Math.round(Math.random() * 200 - 100);
+      const swayB = Math.round(Math.random() * 260 - 130);
+      const rot = Math.round(500 + Math.random() * 700);
+      if (i < emojiCount) {
+        const size = Math.round(18 + Math.random() * 20);
+        const emoji = CONFETTI_EMOJI[i % CONFETTI_EMOJI.length];
+        out += `<span class="confetti-emoji" style="left:${left}%;font-size:${size}px;animation-delay:${delay}s;animation-duration:${dur}s;--swayA:${swayA}px;--swayB:${swayB}px;--rot:${rot}deg">${emoji}</span>`;
+        continue;
+      }
+      const shapeRoll = Math.random();
+      const shape = shapeRoll < 0.3 ? ' round' : shapeRoll < 0.5 ? ' ribbon' : '';
+      const isRibbon = shape === ' ribbon';
+      const w = isRibbon ? Math.round(4 + Math.random() * 4) : Math.round(7 + Math.random() * 10);
+      const h = isRibbon ? Math.round(18 + Math.random() * 12) : Math.round(w * 1.5);
+      out += `<span class="confetti-piece c${i % 6}${shape}" style="left:${left}%;width:${w}px;height:${h}px;animation-delay:${delay}s;animation-duration:${dur}s;--swayA:${swayA}px;--swayB:${swayB}px;--rot:${rot}deg"></span>`;
+    }
+    return out;
+  }
+  function fireworkBurstHtml(index, delay) {
+    // Sprids över HELA skärmen — med så många brister blir det ändå rikligt
+    // synligt runt kortet, och en del hinner synas innan kortet ens är på plats.
+    const left = (6 + Math.random() * 88).toFixed(1);
+    const top = (4 + Math.random() * 74).toFixed(1);
+    const count = 30;
+    const scale = 0.85 + Math.random() * 0.6;
+    let particles = '';
+    for (let i = 0; i < count; i++) {
+      const angle = (360 / count) * i + (Math.random() * 12 - 6);
+      const dist = Math.round((90 + Math.random() * 110) * scale);
+      const rad = angle * Math.PI / 180;
+      const dx = Math.round(Math.cos(rad) * dist);
+      const dy = Math.round(Math.sin(rad) * dist);
+      particles += `<span class="firework-particle c${(index + i) % 6}" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${delay}s"></span>`;
+    }
+    return `<div class="firework-burst" style="left:${left}%;top:${top}%">${particles}<span class="firework-flash" style="animation-delay:${delay}s"></span></div>`;
+  }
+  function fireworksHtml() {
+    let out = '';
+    const bursts = 16;
+    for (let i = 0; i < bursts; i++) {
+      const delay = (i * 0.32 + Math.random() * 0.22).toFixed(2);
+      out += fireworkBurstHtml(i, delay);
+    }
+    return out;
+  }
+  function renderWrappedCard() {
+    const card = wrappedCardsCache[wrappedCardIndex];
+    if (!card) return;
+    const root = $('#wrappedCard');
+    root.classList.toggle('wrapped-grand', !!card.grand);
+    const runnerUps = Array.isArray(card.podium) ? card.podium.slice(1, 3) : [];
+    const medals = ['🥈', '🥉'];
+    const podiumHtml = runnerUps.length
+      ? `<div class="wrapped-podium-mini">${runnerUps.map((p, i) => `<span>${medals[i]} ${esc(p.name)}</span>`).join('')}</div>`
+      : '';
+    root.innerHTML = `<div class="wrapped-icon">${card.icon}</div><div class="wrapped-kicker">${esc(card.kicker)}</div>` +
+      `<div class="wrapped-heading">${esc(card.heading)}</div><div class="wrapped-body">${esc(card.body)}</div>` + podiumHtml;
+    $('#wrappedConfetti').innerHTML = card.grand ? confettiHtml() : '';
+    $('#wrappedFireworks').innerHTML = card.grand ? fireworksHtml() : '';
+    if (card.grand) {
+      const flash = $('#wrappedFlash');
+      flash.classList.remove('wrapped-flash-play');
+      void flash.offsetWidth;
+      flash.classList.add('wrapped-flash-play');
+    }
+    $('#wrappedDots').innerHTML = wrappedCardsCache.map((_, i) => `<span class="wrapped-dot${i === wrappedCardIndex ? ' active' : ''}"></span>`).join('');
+    $('#wrappedPrev').disabled = wrappedCardIndex === 0;
+    $('#wrappedNext').textContent = wrappedCardIndex === wrappedCardsCache.length - 1 ? 'Stäng' : 'Nästa →';
+  }
+  function openWrappedModal(item) {
+    if (!item) return;
+    wrappedCardsCache = wrappedCards(computeWrapped(item));
+    wrappedCardIndex = 0;
+    $('#wrappedModalTitle').textContent = `Klaskligan Wrapped — ${item.name || 'Period'}`;
+    renderWrappedCard();
+    $('#wrappedModal').classList.remove('hidden');
+  }
+  function closeWrappedModal() {
+    $('#wrappedModal')?.classList.add('hidden');
+    const c = $('#wrappedConfetti'); if (c) c.innerHTML = '';
+    const f = $('#wrappedFireworks'); if (f) f.innerHTML = '';
+  }
+
   function openArchiveModal(item) {
     const modal = $('#archiveModal');
     const title = $('#archiveModalTitle');
@@ -1388,8 +1661,9 @@ body.period-closed #roundPanel.admin-only{display:none}
         : '<span>Ingen spelare kvalificerade sig.</span>';
       const saved = fmtDate(item.saved_at);
       const adminActions = isAdmin ? `<div class="archive-admin-actions"><button type="button" class="btn archive-edit">Redigera</button><button type="button" class="btn btn-danger archive-delete">Ta bort</button></div>` : '';
-      box.innerHTML = `<div class="archive-head"><div class="archive-main"><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div><button type="button" class="btn archive-toggle">Visa slutställning →</button></div>${adminActions}<span class="archive-saved">Sparad ${esc(saved)}</span></div>`;
+      box.innerHTML = `<div class="archive-head"><div class="archive-main"><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div><div class="archive-actions-row"><button type="button" class="btn archive-toggle">Visa slutställning →</button><button type="button" class="btn archive-wrapped-btn">🎉 Klaskligan Wrapped</button></div></div>${adminActions}<span class="archive-saved">Sparad ${esc(saved)}</span></div>`;
       box.querySelector('.archive-toggle').onclick = () => openArchiveModal(item);
+      box.querySelector('.archive-wrapped-btn').onclick = () => openWrappedModal(item);
       const editBtn = box.querySelector('.archive-edit');
       if (editBtn) editBtn.onclick = () => openArchiveEdit(item);
       const deleteBtn = box.querySelector('.archive-delete');
@@ -1917,6 +2191,13 @@ body.period-closed #roundPanel.admin-only{display:none}
     $('#historyModalClose').onclick = closeHistoryModal;
     $('#historyModal').addEventListener('click', e => { if (e.target === $('#historyModal')) closeHistoryModal(); });
     $('#archiveModalClose').onclick = closeArchiveModal;
+    $('#wrappedModalClose').onclick = closeWrappedModal;
+    $('#wrappedModal').addEventListener('click', e => { if (e.target.id === 'wrappedModal') closeWrappedModal(); });
+    $('#wrappedPrev').onclick = () => { if (wrappedCardIndex > 0) { wrappedCardIndex--; renderWrappedCard(); } };
+    $('#wrappedNext').onclick = () => {
+      if (wrappedCardIndex >= wrappedCardsCache.length - 1) closeWrappedModal();
+      else { wrappedCardIndex++; renderWrappedCard(); }
+    };
     $('#archiveModal').addEventListener('click', e => { if (e.target === $('#archiveModal')) closeArchiveModal(); });
 
     $('#archiveEditCancel').onclick = () => { editingArchiveId = null; $('#archiveEditModal').classList.add('hidden'); };
@@ -1984,6 +2265,11 @@ body.period-closed #roundPanel.admin-only{display:none}
       $('#modal').classList.add('hidden');
       render();
       toast('Perioden är avslutad och sparad under Tidigare månader.');
+      // Admins egen flik hinner mutera sitt lokala state innan realtidsekot från
+      // Supabase kommer tillbaka (se subscribeRealtime), så den skulle annars
+      // aldrig se sin egen reveal. Visa den direkt här istället — samma modal
+      // som andra flikar får via realtime och Hall of Fame-knappen.
+      openWrappedModal(archiveCache[0]);
     };
     $('#deleteSeasonModal').addEventListener('click', e => { if (e.target === $('#deleteSeasonModal')) $('#deleteSeasonModal').classList.add('hidden'); });
 
@@ -2089,6 +2375,15 @@ body.period-closed #roundPanel.admin-only{display:none}
     }
 
     render();
+
+    // Djuplänk från t.ex. Slack: index.html?wrapped=<period-id> öppnar
+    // Klaskligan Wrapped direkt för den perioden.
+    const wrappedId = new URLSearchParams(location.search).get('wrapped');
+    if (wrappedId) {
+      const item = archiveCache.find(a => String(a.id) === String(wrappedId));
+      if (item) openWrappedModal(item);
+    }
+
     subscribeRealtime();
     sb.channel('klask-player-profiles-index')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'klask_player_profiles' }, async () => { await loadPlayerProfiles(); render(); })
