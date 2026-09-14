@@ -152,6 +152,7 @@ body{
       <div class="wheel-actions">
         <button id="drawOne" class="btn">Lotta nästa plats</button>
         <button id="drawAll" class="btn btn-primary">Lotta alla</button>
+        <button id="cancelDrawAll" class="btn btn-danger hidden" type="button">Avbryt lottning</button>
         <button id="resetDraw" class="btn">Lotta om</button>
       </div>
       <div id="status" class="status">Välj minst fyra spelare för att börja.</div>
@@ -187,7 +188,7 @@ body{
 'use strict';
 
 let data = null, players = [], profiles = new Map(), selected = new Set(),
-    result = [], rotation = 0, spinning = false;
+    result = [], rotation = 0, spinning = false, drawAllRunning = false, cancelDrawAll = false;
 
 const $ = s => document.querySelector(s);
 
@@ -285,10 +286,10 @@ function render(){
   renderPlayers();
   renderResults();
   drawWheel();
-  const can=selected.size>=4&&result.length<4&&!spinning;
+  const can=selected.size>=4&&result.length<4&&!spinning&&!drawAllRunning;
   $('#drawOne').disabled=!can;
   $('#drawAll').disabled=!can;
-  $('#resetDraw').disabled=spinning;
+  $('#resetDraw').disabled=spinning||drawAllRunning;
   $('#status').textContent=result.length===4
     ? 'Lottningen är klar. Spara resultatet till nästa omgång.'
     : selected.size<4
@@ -313,16 +314,24 @@ async function drawNext(){
   spinning=true;
   render();
   const step=360/pool.length;
-  const timingSeed=performance.now();
-  const extraDegrees=((timingSeed*13.731)%360);
-  rotation+=360*6+extraDegrees;
+  // Välj vinnaren rättvist FÖRST (kryptografiskt jämnt fördelat index), och
+  // snurra sedan till en punkt en bit in i den klicken — aldrig nära gränsen
+  // mot grannklicken. Annars kan pilen råka stanna precis på linjen mellan
+  // två namn, vilket ser ut som att lottningen inte gav något tydligt svar.
+  const winIdx=randomIndex(pool.length);
+  // Litet skyddsavstånd — precis nog för att aldrig hamna exakt på gränsen,
+  // men hjulet ska fortfarande kunna stanna nästan intill den för spänningens skull.
+  const margin=Math.min(step*0.02,0.6);
+  const pointerAngle=winIdx*step+margin+Math.random()*Math.max(step-margin*2,0);
+  const targetNormalized=((360-pointerAngle)%360+360)%360;
+  const currentNormalized=((rotation%360)+360)%360;
+  let delta=targetNormalized-currentNormalized;
+  if(delta<=0) delta+=360;
+  rotation+=360*6+delta;
   const wheel=$('#wheel');
   wheel.style.transform=`rotate(${rotation}deg)`;
   await wait(4900);
-  const normalized=((rotation%360)+360)%360;
-  const pointerAngle=(360-normalized)%360;
-  const idx=Math.floor(pointerAngle/step)%pool.length;
-  const winner=pool[idx];
+  const winner=pool[winIdx];
   result.push(winner);
   spinning=false;
   render();
@@ -332,10 +341,24 @@ async function drawNext(){
 
 $('#drawOne').onclick=drawNext;
 $('#drawAll').onclick=async()=>{
-  while(result.length<4&&selected.size>=4){
-    await drawNext();
-    if(result.length<4) await wait(450);
+  drawAllRunning=true;
+  cancelDrawAll=false;
+  $('#cancelDrawAll').classList.remove('hidden');
+  render();
+  try{
+    while(result.length<4&&selected.size>=4&&!cancelDrawAll){
+      await drawNext();
+      if(result.length<4&&!cancelDrawAll) await wait(450);
+    }
+  } finally {
+    drawAllRunning=false;
+    $('#cancelDrawAll').classList.add('hidden');
+    render();
   }
+};
+$('#cancelDrawAll').onclick=()=>{
+  cancelDrawAll=true;
+  Klask.toast('Lottningen avbruten.');
 };
 $('#resetDraw').onclick=()=>{
   result=[];
