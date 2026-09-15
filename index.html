@@ -295,6 +295,9 @@ body.is-admin .rank-name a{gap:7px}
 .feed-item.personal_best{border-color:#d8c2e8;background:linear-gradient(145deg,#f8f2fb,#f0e6f5)}
 .feed-item.personal_best .feed-kicker{color:#7a4d9e}
 .feed-item.personal_best .feed-icon{background:#f0e6f5;border-color:#d8c2e8}
+.feed-item.upset{border-color:#f0b46b;background:linear-gradient(145deg,#fdf3e6,#fbe4c4)}
+.feed-item.upset .feed-kicker{color:#a85d1a}
+.feed-item.upset .feed-icon{background:#fbe4c4;border-color:#f0b46b}
 .feed-empty{padding:22px;border:1px dashed var(--line2);border-radius:12px;text-align:center;color:var(--soft);font-size:11px}
 
 /* Reaktioner ---------------------------------------------------------------- */
@@ -513,12 +516,20 @@ body.period-closed .history-panel [data-edit-match]{display:none}
    --------------------------------------------------------------------------- */
 .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .left-col,.right-col{display:flex;flex-direction:column;gap:10px}
+/* Håller Hall of Fame + Dataexport ihop som EN enhet, så de flyttas
+   tillsammans oavsett bredd — .hof-history-row är annars ett eget, litet
+   rutnät där Dataexport hade blivit en egen, orelaterad tredje ruta. */
+.hof-col{width:100%;min-width:0;display:flex;flex-direction:column;gap:10px}
 @media(min-width:1181px){.layout{gap:8px;align-items:start}.left-col{gap:8px}}
 
 .right-col>.social-feed-panel{min-width:0}
 
-.hof-history-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start;min-width:0}
-.hof-history-row>.hall-of-fame-panel,
+.hof-history-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:stretch;min-width:0}
+/* Dataexport hålls kompakt och knuffas ner till botten av kolumnen (istället
+   för att sträckas ut till en stor, halvtom ruta) så att undersidan hamnar i
+   linje med Matchhistorik. */
+.hof-col>.export-panel{margin-top:auto}
+.hof-history-row>.hof-col,
 .hof-history-row>.history-panel{width:100%;min-width:0;margin-top:0}
 /* Hall of Fame 40 % / Matchhistorik 60 %. */
 @media(min-width:821px){.hof-history-row{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}}
@@ -599,7 +610,7 @@ body:not(.is-admin) .right-col{grid-column:1;width:100%}
 /* Bevarad kuriositet från den gamla kaskaden: i det här smala adminfönstret
    tvingas HoF och historiken till rad 4 i .hof-history-row-rutnätet. */
 @media(min-width:1050px) and (max-width:1220px){
-  body.is-admin .hall-of-fame-panel,
+  body.is-admin .hof-col,
   body.is-admin .history-panel{grid-row:4}
 }
 @media(min-width:1450px){
@@ -735,6 +746,9 @@ body.period-closed #roundPanel.admin-only{display:none}
 :root[data-theme="dark"] .feed-item.personal_best{border-color:#4a3a5c;background:linear-gradient(145deg,#241c2e,#191521)}
 :root[data-theme="dark"] .feed-item.personal_best .feed-kicker{color:#c9a0e8}
 :root[data-theme="dark"] .feed-item.personal_best .feed-icon{background:#312444;border-color:#4a3a5c}
+:root[data-theme="dark"] .feed-item.upset{border-color:#6b4a1f;background:linear-gradient(145deg,#2a2013,#1e160d)}
+:root[data-theme="dark"] .feed-item.upset .feed-kicker{color:#e8b566}
+:root[data-theme="dark"] .feed-item.upset .feed-icon{background:#3a2c14;border-color:#6b4a1f}
 :root[data-theme="dark"] .feed-reaction.feed-reaction-mine{background:#123a3a}
 </style>
 
@@ -814,28 +828,28 @@ body.period-closed #roundPanel.admin-only{display:none}
       </section>
 
       <div class="hof-history-row">
-        <section class="panel archive-panel hall-of-fame-panel">
-          <div class="hall-of-fame-head">
-            <div>
-              <h2>Hall of Fame</h2>
-              <p>Topp 3 från varje avslutad period.</p>
+        <div class="hof-col">
+          <section class="panel archive-panel hall-of-fame-panel">
+            <div class="hall-of-fame-head">
+              <div>
+                <h2>Hall of Fame</h2>
+                <p>Topp 3 från varje avslutad period.</p>
+              </div>
             </div>
-          </div>
-          <div id="archiveList" class="archive-list"></div>
-        </section>
+            <div id="archiveList" class="archive-list"></div>
+          </section>
+
+          <section class="panel export-panel admin-only">
+            <h2>Dataexport</h2>
+            <p>Exportera hela den aktuella listan för säkerhetskopia eller analys.</p>
+            <div class="export-actions">
+              <button id="exportData" type="button" class="btn btn-primary">Exportera data</button>
+            </div>
+          </section>
+        </div>
         <section class="panel history-panel"><h2>Matchhistorik</h2><div id="history" class="history-list"></div></section>
       </div>
     </aside>
-  </section>
-</main>
-
-<main class="app admin-only" style="margin-top:8px">
-  <section class="panel export-panel">
-    <h2>Dataexport</h2>
-    <p>Exportera hela den aktuella listan för säkerhetskopia eller analys.</p>
-    <div class="export-actions">
-      <button id="exportData" type="button" class="btn btn-primary">Exportera data</button>
-    </div>
   </section>
 </main>
 
@@ -1093,7 +1107,16 @@ body.period-closed #roundPanel.admin-only{display:none}
       n => `${n} förlorade alla tre. Ärligt talat hade ett tomt bord presterat likvärdigt ikväll.`,
       n => `Tre av tre för ${n}. Ligans tydligaste skräckexempel just fick ny huvudrollsinnehavare.`,
       n => `${n} spelade tre matcher och tappade alla. Ingen otur, bara ren, oförfalskad inkompetens.`,
-      n => `0–3. ${n} genomgick en fullständig klaskning inför öppen ridå, och alla såg det.`
+      n => `0–3. ${n} genomgick en fullständig klaskning inför öppen ridå, och alla såg det.`,
+      n => `${n} avslutade omgången med facit 0–3. Statistiskt sett ett medvetet val vid det här laget.`,
+      n => `Tre matcher, tre förluster. ${n} har officiellt slutat konkurrera och börjat delta.`,
+      n => `${n} gick igenom hela omgången utan en enda vinst. Ett konststycke, om än åt fel håll.`,
+      n => `0 av 3 för ${n}. Klaskbordet har sett mycket, men sällan så konsekvent uselt.`,
+      n => `${n} förlorade tre raka matcher på en enda kväll. Det krävs faktiskt en viss talang för det.`,
+      n => `Total utradering för ${n}: 0–3. Ingen behöver fråga hur kvällen gick.`,
+      n => `${n} tappade samtliga tre matcher. Det är inte längre en trend, det är en identitet.`,
+      n => `Rent nollresultat för ${n} ikväll. Bordet noterade det, tystnaden gjorde resten.`,
+      n => `${n} spelade som om syftet var att förlora så effektivt som möjligt. Uppdrag lyckat.`
     ],
     double: [
       n => `${n} förlorade 2 av 3. Den enda matchen som överlevdes var tydligen när någon annan hann sabotera först.`,
@@ -1103,7 +1126,15 @@ body.period-closed #roundPanel.admin-only{display:none}
       n => `${n} bjöd på två förluster. Generöst. Ingen hade bett om det, men generöst.`,
       n => `${n} klarade en av tre matcher. Ambitionsnivån ligger tydligen i källaren och trivs där.`,
       n => `Två förluster ikväll för ${n}. Halvdant uselt, om det är någon tröst – vilket det inte är.`,
-      n => `${n} tappade två matcher av tre. Formen är på väg någonstans, men inte uppåt.`
+      n => `${n} tappade två matcher av tre. Formen är på väg någonstans, men inte uppåt.`,
+      n => `${n} klarade sig undan en enda förlust ikväll. Låg ribba, men den nöjde sig med att bara nästan klaras.`,
+      n => `Två av tre för ${n}. Inte en katastrof, bara en tydlig påminnelse om var man befinner sig i tabellen.`,
+      n => `${n} vann en match och förlorade resten. Ett majoritetsbeslut mot sig själv.`,
+      n => `Två förluster för ${n} ikväll – tillräckligt för att märkas, för lite för att förvåna någon.`,
+      n => `${n} höll sig flytande i exakt en match. Resten var mest ett önsketänkande.`,
+      n => `1–2 för ${n}. Balansen lutar åt fel håll, som den brukar göra numera.`,
+      n => `${n} lyckades undvika en fullständig kollaps, men bara precis. Marginalerna var inte imponerande.`,
+      n => `Två förluster på tre matcher för ${n}. Konsekvent, fast inte på det sätt man önskar.`
     ]
   };
   function addRoundRoast(playerIds, losers, batchId, roundNumber) {
@@ -1116,18 +1147,6 @@ body.period-closed #roundPanel.admin-only{display:none}
     const fn = seededPick(ROASTS[key], `${batchId}-${pid}-${count}`);
     addFeedEvent('roast', count === 3 ? '☠️' : '🔥', count === 3 ? `TOTAL KOLLAPS: ${name}` : `${name} åt två förluster`, fn(name), playerIds, { round_batch_id: batchId, round_number: roundNumber });
   }
-  function maybeAddRivalryEvent(playerIds, batchId) {
-    ensureSocialState(); const ids = playerIds.map(Number), all = getAllTimeRounds(); let best = null;
-    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) { const st = pairStats(ids[i], ids[j], all); if (!best || st.together > best.together) best = { a: ids[i], b: ids[j], ...st }; }
-    if (!best || best.together < 10) return;
-    const milestone = Math.floor(best.together / 10) * 10; const pairKey = [best.a, best.b].sort((a, b) => a - b).join('-');
-    if ((Number(data.feedProgress.rivalryMilestones[pairKey]) || 0) >= milestone) return;
-    data.feedProgress.rivalryMilestones[pairKey] = milestone;
-    const a = playerNameById(best.a), b = playerNameById(best.b);
-    const body = `${a} och ${b} har nu delat bord i ${best.together} matcher. ${a} har förlorat ${best.myLoss}, ${b} har förlorat ${best.oppLoss}. Det här är inte längre statistik – det är ett pågående gräl med poängräkning.`;
-    addFeedEvent('rivalry', '⚔️', `Rivaliteten hårdnar: ${a} vs ${b}`, body, [best.a, best.b], { round_batch_id: batchId, milestone });
-  }
-
   /* ----- Klaskflödet 2.0: fler (och mer positiva) händelsetyper --------------- */
   const STREAK_TEMPLATES = [
     (n, s) => `${n} har inte förlorat på ${s} matcher i rad. Resten av ligan borde skämmas lite mer för varje omgång som går.`,
@@ -1136,7 +1155,14 @@ body.period-closed #roundPanel.admin-only{display:none}
     (n, s) => `${s} matcher utan en enda förlust. ${n} har officiellt slutat spela med de andra och börjat spela mot dem.`,
     (n, s) => `${n} är inne på ${s} raka utan förlust. Vid det här laget känns det oförskämt att ens dyka upp till bordet.`,
     (n, s) => `${s} i rad för ${n}. Ligan behöver en intervention, inte fler ursäkter.`,
-    (n, s) => `${n} har vunnit sig igenom ${s} matcher rakt av. Nån får ta ansvar och stoppa det här.`
+    (n, s) => `${n} har vunnit sig igenom ${s} matcher rakt av. Nån får ta ansvar och stoppa det här.`,
+    (n, s) => `${s} matcher utan förlust för ${n}. Det börjar kännas mindre som tur och mer som ett problem för alla andra.`,
+    (n, s) => `${n} har byggt en svit på ${s} matcher. Ingen vet hur man stoppar det, minst av allt de som försökt.`,
+    (n, s) => `${s} raka för ${n}. Klaskbordet har officiellt ett nytt, tillfälligt, permanent problem.`,
+    (n, s) => `${n} vägrar förlora – ${s} matcher i sträck nu. Statistiskt ohållbart, praktiskt sett obehagligt verkligt.`,
+    (n, s) => `${s} matcher, noll förluster, en spelare som uppenbarligen inte fått minnesmailet om att det här ska vara jämnt.`,
+    (n, s) => `${n} har inte smakat en förlust på ${s} matcher. Resten av ligan spelar just nu om andraplatsen.`,
+    (n, s) => `${s} i rad för ${n}. Vid det här laget är frågan inte om sviten tar slut, utan när ligan orkar bry sig.`
   ];
   const COMEBACK_TEMPLATES = [
     (n, s) => `${n} bröt äntligen ${s} raka förluster. Fick ta i ordentligt, men lyckades undvika ännu en förnedring.`,
@@ -1144,7 +1170,13 @@ body.period-closed #roundPanel.admin-only{display:none}
     (n, s) => `${n} vände efter ${s} tunga omgångar. Krisen är avblåst – tills nästa gång.`,
     (n, s) => `${s} raka förluster och sen: plötsligt duglig. ${n} imponerar mest på sig själv just nu.`,
     (n, s) => `${n} slutade blöda efter ${s} förluster i rad. Applåder för att existera på en rimlig nivå.`,
-    (n, s) => `Efter ${s} förluster i följd hittade ${n} botten och sparkade sig uppåt. Tillfälligt, men ändå.`
+    (n, s) => `Efter ${s} förluster i följd hittade ${n} botten och sparkade sig uppåt. Tillfälligt, men ändå.`,
+    (n, s) => `${n} avbröt en svit på ${s} förluster. Det tog sin tid, men bättre sent än aldrig omtalat.`,
+    (n, s) => `Efter ${s} raka förluster visade ${n} äntligen tecken på liv. Låg ribba, men den flyttades faktiskt.`,
+    (n, s) => `${s} förluster i rad, sen en överlevd omgång för ${n}. Krisen är pausad, inte löst.`,
+    (n, s) => `${n} lyckades bryta ${s} förluster på raken. Ingen konfetti, men ett erkännande känns på sin plats.`,
+    (n, s) => `Efter ${s} tunga förluster hittade ${n} ett sätt att inte förlora igen. Metoden är oklar, resultatet obestridligt.`,
+    (n, s) => `${s} raka bakslag för ${n}, och sen: en omgång utan katastrof. Man tar vad man får.`
   ];
   const LEADER_TEMPLATES = [
     n => `${n} tar förstaplatsen. Res dig upp, det är över för resten – tills vidare.`,
@@ -1152,15 +1184,21 @@ body.period-closed #roundPanel.admin-only{display:none}
     n => `${n} tar över toppen. Resten av ligan får nu officiellt anledning att vara sura.`,
     n => `Maktskifte: ${n} leder ligan. Gamla ettan får gå och sörja i sin egen takt.`,
     n => `${n} klättrar till förstaplatsen. Kronan sitter löst, men just nu sitter den där.`,
-    n => `${n} är ny ligaledare. Alla andra spelar nu officiellt om andraplatsen.`
+    n => `${n} är ny ligaledare. Alla andra spelar nu officiellt om andraplatsen.`,
+    n => `${n} tar täten. Historien visar att det sällan varar, men just nu är det sant.`,
+    n => `Ny ligaledare: ${n}. Resten av tabellen ombeds notera det och agera därefter.`,
+    n => `${n} knuffar sig till förstaplatsen. Ett styre som inleds med minst lika mycket osäkerhet som stolthet.`,
+    n => `Maktskifte i ligan: ${n} leder. Firandet rekommenderas hållas kort.`,
+    n => `${n} tar över förstaplatsen. Ingen kröning, bara en siffra som råkar stämma just nu.`,
+    n => `Ny etta i tabellen: ${n}. Allt kan ändras nästa omgång, men just nu räknas det.`
   ];
-  const PERSONAL_BEST_TEMPLATES = [
-    n => `Personbästa för ${n} den här perioden. Sent, men trots allt inte omöjligt.`,
-    n => `${n} slår sitt eget rekord för perioden. Ribban var låg, men den flyttades i alla fall.`,
-    n => `Nytt personbästa för ${n}. Statistiskt sett en chock för alla, inklusive ${n} själv.`,
-    n => `${n} noterar sitt bästa resultat denna period. Bättre sent än aldrig, bättre nu än inte alls.`,
-    n => `Personbästa för ${n}. Njut av det – ribban höjs nu, ingen ursäkt kvar.`,
-    n => `${n} satte nytt personbästa. Ingen såg det komma, minst av allt ${n} själv.`
+  const UPSET_TEMPLATES = [
+    n => `${n} toppar tabellen men förlorade ändå ikväll. Ligans regerande stjärna är inte oövervinnerlig, trots allt.`,
+    n => `Skräll! ${n}, som leder ligan, gick på en förlust. Toppositionen känns plötsligt lite mindre stabil.`,
+    n => `${n} ligger etta i tabellen men klarade inte ikväll. Även ledare har sina dagar.`,
+    n => `Ligaledaren ${n} förlorade en match. Ingen är trygg, inte ens den som ligger bäst till.`,
+    n => `${n} toppar ställningen men bjöd ändå på en förlust. Kronan sitter tydligen löst.`,
+    n => `Kvällens skräll: ${n} — etta i tabellen — förlorade en match mot förväntan.`
   ];
 
   /** Bäst rankad (kvalificerad) spelare givet en uppsättning rundor, eller null om ingen kvalificerar. */
@@ -1219,34 +1257,28 @@ body.period-closed #roundPanel.admin-only{display:none}
     const fn = seededPick(LEADER_TEMPLATES, `${batchId}-${after.id}-leader`);
     addFeedEvent('leader', '👑', `Ny ligaledare: ${name}`, fn(name), [after.id], { round_batch_id: batchId });
   }
-  /** Personbästa (för perioden): ny lägsta Bayesian score för en kvalificerad spelare. */
-  function checkPersonalBestEvent(playerIds, batchId) {
+  /** Skräll: den som låg etta innan omgången finns bland förlorarna i den. */
+  function checkUpsetEvent(playerIds, losers, batchId) {
     ensureSocialState();
-    playerIds.forEach(pid => {
-      const id = Number(pid);
-      const rs = data.rounds.filter(r => Array.isArray(r.player_ids) && r.player_ids.includes(id));
-      const games = rs.length, losses = rs.filter(r => r.loser_id === id).length;
-      if (games < MIN_MATCHES) return;
-      const score = Klask.computeRankingScore(games, losses);
-      const prevBest = data.feedProgress.personalBest[id];
-      if (prevBest === undefined || prevBest === null) { data.feedProgress.personalBest[id] = score; return; }
-      if (score >= Number(prevBest)) { return; }
-      data.feedProgress.personalBest[id] = score;
-      const name = playerNameById(id);
-      const fn = seededPick(PERSONAL_BEST_TEMPLATES, `${batchId}-${id}-best`);
-      addFeedEvent('personal_best', '⭐', `Personbästa: ${name}`, fn(name), [id], { round_batch_id: batchId, score });
-    });
+    const leaderBefore = qualifiedLeader(data.rounds.slice(0, -3));
+    if (!leaderBefore) return;
+    const loserSet = new Set(losers.map(Number));
+    if (!loserSet.has(Number(leaderBefore.id))) return;
+    const name = playerNameById(leaderBefore.id);
+    const fn = seededPick(UPSET_TEMPLATES, `${batchId}-${leaderBefore.id}-upset`);
+    addFeedEvent('upset', '😱', `Skräll: ${name} föll`, fn(name), [leaderBefore.id], { round_batch_id: batchId });
   }
 
   function addRoundFeedEvents(playerIds, losers, batchId, roundNumber) {
     addRoundRoast(playerIds, losers, batchId, roundNumber);
-    maybeAddRivalryEvent(playerIds, batchId);
     checkStreakEvent(playerIds, batchId);
     checkComebackEvent(playerIds, losers, batchId);
     checkLeaderChangeEvent(batchId);
-    checkPersonalBestEvent(playerIds, batchId);
+    checkUpsetEvent(playerIds, losers, batchId);
   }
-  const KIND_LABELS = { rivalry: 'Rivalitet', streak: 'Svit', comeback: 'Comeback', leader: 'Ny ligaledare', personal_best: 'Personbästa' };
+  // rivalry/personal_best skapas inte längre (borttagna händelsetyper), men etiketterna
+  // finns kvar så att redan sparade inlägg av den typen fortsätter rendera korrekt.
+  const KIND_LABELS = { rivalry: 'Rivalitet', streak: 'Svit', comeback: 'Comeback', leader: 'Ny ligaledare', personal_best: 'Personbästa', upset: 'Skräll' };
   const REACTION_EMOJIS = ['🔥', '😂', '👏', '😭'];
   let reactionState = {}; // { eventId: { '🔥': {count, mine}, ... } }
 
