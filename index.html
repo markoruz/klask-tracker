@@ -2233,11 +2233,27 @@ body.period-closed #roundPanel.admin-only{display:none}
       editing.ids.forEach((id, i) => { const r = data.rounds.find(x => x.id === id); if (r) { r.player_ids = playerIds; r.loser_id = editing.losers[i]; } });
       saveData(); $('#modal').classList.add('hidden'); editing = null; render(); toast('Omgång uppdaterad.');
     };
-    $('#modalDelete').onclick = () => {
+    $('#modalDelete').onclick = async () => {
       if (!editing) return;
-      if (!confirm('Radera hela omgången och dess tre matcher?')) return;
-      const ids = new Set(editing.ids); data.rounds = data.rounds.filter(r => !ids.has(r.id));
-      saveData(); $('#modal').classList.add('hidden'); editing = null; render(); toast('Omgång raderad.');
+      if (!confirm('Radera hela omgången, dess tre matcher och eventuella inlägg (samt reaktioner) i Klaskflödet kopplade till den?')) return;
+      const ids = new Set(editing.ids);
+      data.rounds = data.rounds.filter(r => !ids.has(r.id));
+      // Samma batchId som gavs till addRoundFeedEvents() när omgången sparades
+      // (se #saveRound ovan) — det lägsta av de tre rundornas id:n.
+      const batchId = `round-${editing.ids[0]}`;
+      let removedEventIds = [];
+      if (Array.isArray(data.feedEvents)) {
+        removedEventIds = data.feedEvents.filter(e => e.round_batch_id === batchId).map(e => e.id);
+        data.feedEvents = data.feedEvents.filter(e => e.round_batch_id !== batchId);
+      }
+      saveData();
+      if (removedEventIds.length) {
+        // Reaktioner lever i en egen tabell (inte i data-kolumnen) och måste
+        // städas separat, annars blir de kvar som föräldralösa rader.
+        try { await sb.from('klask_feed_reactions').delete().in('event_id', removedEventIds); }
+        catch (e) { /* tyst fallback — reaktionstabellen kanske inte finns, resten funkar ändå */ }
+      }
+      $('#modal').classList.add('hidden'); editing = null; render(); toast('Omgång och tillhörande inlägg/reaktioner raderade.');
     };
 
     $('#historyModalClose').onclick = closeHistoryModal;
@@ -2354,14 +2370,14 @@ body.period-closed #roundPanel.admin-only{display:none}
       const existingPlayers = data.players.map(p => ({ id: p.id, name: p.name }));
       const nextPlayerId = data.nextPlayerId;
       const inactivePlayerIds = Array.isArray(data.inactivePlayerIds) ? [...data.inactivePlayerIds] : [];
-      ensureSocialState();
-      const feedEvents = [...data.feedEvents];
-      const feedProgress = { rivalryMilestones: { ...(data.feedProgress.rivalryMilestones || {}) } };
+      // Klaskflödet är periodbundet precis som rundorna — börjar tomt i den nya
+      // perioden istället för att släpa med händelser (och krockbenägna
+      // round_batch_id:n) från den avslutade perioden.
       data = {
         players: existingPlayers, rounds: [], nextPlayerId, nextRoundId: 1,
         listName: name, seasonKey: currentSeasonKey(startObj), periodClosed: false,
         periodStartedAt: startObj.toISOString(), periodEndedAt: null, periodPlannedEndAt: endObj.toISOString(),
-        inactivePlayerIds, feedEvents, feedProgress
+        inactivePlayerIds, feedEvents: [], feedProgress: {}
       };
       selectedPeriodKey = 'current';
       selected.clear(); matchLosers = [null, null, null]; editing = null;
