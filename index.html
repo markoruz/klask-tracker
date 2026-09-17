@@ -271,13 +271,18 @@ body.is-admin .rank-name a{gap:7px}
 .social-feed-head h2{margin:0;font-size:22px}
 .social-feed-head p{margin:4px 0 0;color:var(--soft);font-size:11px}
 .social-feed-list{display:grid;gap:10px}
-.feed-item{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:start;padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,var(--panel),var(--card2))}
+.feed-item{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:start;padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,var(--panel),var(--card2))}
 .feed-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--card2);border:1px solid var(--line);font-size:20px}
 .feed-copy{min-width:0}
 .feed-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:950;color:var(--teal);margin-bottom:3px}
 .feed-title{font-weight:950;font-size:14px;line-height:1.25}
 .feed-body{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
 .feed-time{color:var(--soft);font-size:9px;white-space:nowrap;padding-top:2px}
+/* Radera-knappen tar feed-time:s plats i adminläge (feed-time är redan dold där,
+   se body.is-admin .feed-time nedan) — de visas aldrig samtidigt. */
+.feed-delete{position:absolute;top:8px;right:8px;z-index:1;display:none;width:22px;height:22px;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;background:var(--panel);color:var(--muted);font-size:11px;font-family:inherit;cursor:pointer;padding:0;line-height:1}
+.feed-delete:hover{color:var(--red);border-color:var(--red)}
+body.is-admin .feed-delete{display:inline-flex}
 .feed-item.roast{border-color:#e2a89e;background:linear-gradient(145deg,#fdeeeb,#fbe4e1)}
 .feed-item.roast .feed-kicker{color:#c8443a}
 .feed-item.roast .feed-icon{background:#fbe4e1;border-color:#e2a89e}
@@ -321,7 +326,7 @@ body.is-admin .social-feed-panel{padding:14px}
 body.is-admin .social-feed-head{margin-bottom:8px}
 body.is-admin .social-feed-head h2{font-size:18px}
 body.is-admin .social-feed-list{gap:6px}
-body.is-admin .feed-item{grid-template-columns:28px minmax(0,1fr);gap:8px;padding:8px 9px;border-radius:10px}
+body.is-admin .feed-item{grid-template-columns:28px minmax(0,1fr);gap:8px;padding:8px 30px 8px 9px;border-radius:10px}
 body.is-admin .feed-icon{width:28px;height:28px;border-radius:8px;font-size:14px}
 body.is-admin .feed-kicker{font-size:8px;margin-bottom:1px}
 body.is-admin .feed-title{font-size:12px;line-height:1.2}
@@ -1083,6 +1088,11 @@ body.period-closed #roundPanel.admin-only{display:none}
     if (!data.feedProgress.personalBest || typeof data.feedProgress.personalBest !== 'object') {
       data.feedProgress.personalBest = {};
     }
+    // Håller koll på vem som är regerande ligaledare och om "Skräll!" redan
+    // visats för den sviten som ledare — se checkUpsetEvent.
+    if (!data.feedProgress.leaderReign || typeof data.feedProgress.leaderReign !== 'object') {
+      data.feedProgress.leaderReign = { id: null, upsetShown: false };
+    }
   }
   function playerNameById(id) { return (data.players.find(p => Number(p.id) === Number(id)) || {}).name || 'Okänd'; }
   function addFeedEvent(type, icon, title, body, playerIds = [], extra = {}) {
@@ -1143,21 +1153,56 @@ body.period-closed #roundPanel.admin-only{display:none}
       n => `Fattar du att du är en match från total katastrof varje gång du sätter dig, ${n}?`,
       n => `${n}, du klarade dig undan med en hårsmån. Sluta bete dig som att det var en bedrift.`,
       n => `Du tappade två av tre matcher, ${n}. Säg åt mig varför det är okej.`,
-      n => `${n}, samma resultat som sist. Fundera på om det säger något om dig.`,
+      n => `${n}, det där var inte imponerande. Fundera på om det säger något om dig.`,
       n => `Är du nöjd med det där, ${n}? För det borde du verkligen inte vara.`,
       n => `${n}, två förluster på tre matcher. Det är inte en trend längre, det är du.`,
       n => `Du hade två chanser att bevisa något ikväll, ${n}, och missade båda.`,
       n => `${n}, ärligt talat — det där var svagt, och du vet det.`,
       n => `Du klarade en av tre, ${n}. Fira det tyst, om du måste fira det alls.`
+    ],
+    // Används bara när det faktiskt stämmer (se previousBatchLossCount) — spelaren
+    // hade EXAKT samma antal förluster i sin senaste omgång också.
+    collapseRepeat: [
+      n => `${n}, det här är andra gången i rad du går 0–3. Det är inte otur längre.`,
+      n => `Igen, ${n}? Samma katastrof som senast — noll matcher, noll bortförklaringar.`,
+      n => `${n}, du klarade inte en enda match förra gången heller. Vid det här laget är det du.`,
+      n => `Två raka totalkollapser för ${n}. Det är ett mönster, inte en enstaka dålig kväll.`,
+      n => `${n}, samma resultat som sist — 0 av 3. Fundera på om det säger något.`,
+      n => `Du gjorde exakt samma sak förra omgången, ${n}. Noll vinster, två gånger i rad.`,
+      n => `${n}, det här är inte en avvikelse längre. Du gjorde precis samma sak senast.`
+    ],
+    doubleRepeat: [
+      n => `${n}, två förluster igen — precis som förra omgången. Det är inte slumpen längre.`,
+      n => `Samma resultat som sist för ${n}: två av tre. Nu är det ett mönster.`,
+      n => `${n}, du gjorde exakt samma sak förra gången. Två förluster, ingen förbättring.`,
+      n => `Igen, ${n}? Två förluster av tre, precis som senast.`,
+      n => `${n}, det här är andra omgången i rad med samma resultat. Fundera på varför.`,
+      n => `Du upprepar dig, ${n}. Två förluster förra gången, två förluster nu.`
     ]
   };
+  /** Hur många förluster hade spelaren i sin senaste omgång (tremacherblock) innan
+      den nuvarande — eller null om spelaren inte var med i någon tidigare omgång.
+      Används för att bara göra historikpåståenden ("samma resultat som sist") när
+      de faktiskt stämmer. */
+  function previousBatchLossCount(pid, roundsBefore) {
+    const sorted = [...roundsBefore].sort((a, b) => (a.id || 0) - (b.id || 0));
+    const batches = [];
+    for (let i = 0; i < sorted.length; i += 3) batches.push(sorted.slice(i, i + 3));
+    for (let i = batches.length - 1; i >= 0; i--) {
+      const batch = batches[i];
+      const inBatch = batch.some(r => Array.isArray(r.player_ids) && r.player_ids.map(Number).includes(Number(pid)));
+      if (inBatch) return batch.filter(r => Number(r.loser_id) === Number(pid)).length;
+    }
+    return null;
+  }
   function addRoundRoast(playerIds, losers, batchId, roundNumber) {
     const counts = new Map(playerIds.map(id => [Number(id), 0])); losers.forEach(id => counts.set(Number(id), (counts.get(Number(id)) || 0) + 1));
     const worst = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]; if (!worst) return;
     const [pid, count] = worst;
     if (count < 2) return; // Matchrapport uppmärksammar bara 2 eller 3 förluster på samma spelare.
     const name = playerNameById(pid);
-    const key = count === 3 ? 'collapse' : 'double';
+    const prevCount = previousBatchLossCount(pid, data.rounds.slice(0, -3));
+    const key = (count === 3 ? 'collapse' : 'double') + (prevCount === count ? 'Repeat' : '');
     const fn = seededPick(ROASTS[key], `${batchId}-${pid}-${count}`);
     addFeedEvent('roast', count === 3 ? '☠️' : '🔥', count === 3 ? `TOTAL KOLLAPS: ${name}` : `${name} åt två förluster`, fn(name), playerIds, { round_batch_id: batchId, round_number: roundNumber });
   }
@@ -1278,8 +1323,17 @@ body.period-closed #roundPanel.admin-only{display:none}
     ensureSocialState();
     const leaderBefore = qualifiedLeader(data.rounds.slice(0, -3));
     if (!leaderBefore) return;
+    const reign = data.feedProgress.leaderReign;
+    if (reign.id !== leaderBefore.id) {
+      // Ny regent sedan vi senast kollade (eller första gången någon leder) —
+      // nollställ så att den här personens första fall som ledare räknas.
+      reign.id = leaderBefore.id;
+      reign.upsetShown = false;
+    }
     const loserSet = new Set(losers.map(Number));
     if (!loserSet.has(Number(leaderBefore.id))) return;
+    if (reign.upsetShown) return; // Redan uppmärksammat en gång under den här sviten som ligaledare.
+    reign.upsetShown = true;
     const name = playerNameById(leaderBefore.id);
     const fn = seededPick(UPSET_TEMPLATES, `${batchId}-${leaderBefore.id}-upset`);
     addFeedEvent('upset', '😱', `Skräll: ${name} föll`, fn(name), [leaderBefore.id], { round_batch_id: batchId });
@@ -1378,10 +1432,26 @@ body.period-closed #roundPanel.admin-only{display:none}
         const s = (reactionState[e.id] && reactionState[e.id][em]) || { count: 0, mine: false };
         return `<button type="button" class="feed-reaction${s.mine ? ' feed-reaction-mine' : ''}" data-event="${esc(e.id)}" data-emoji="${em}"><span>${em}</span><b>${s.count}</b></button>`;
       }).join('');
-      return `<article class="feed-item ${esc(e.type || '')}"><div class="feed-icon">${e.icon || '•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title || '')}</div><div class="feed-body">${esc(e.body || '')}</div><div class="feed-reactions">${reactions}</div></div><time class="feed-time">${esc(time)}</time></article>`;
+      return `<article class="feed-item ${esc(e.type || '')}"><div class="feed-icon">${e.icon || '•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title || '')}</div><div class="feed-body">${esc(e.body || '')}</div><div class="feed-reactions">${reactions}</div></div><time class="feed-time">${esc(time)}</time><button type="button" class="feed-delete" data-event="${esc(e.id)}" title="Ta bort inlägget" aria-label="Ta bort inlägget">✕</button></article>`;
     }).join('');
     bindFeedReactionButtons();
+    bindFeedDeleteButtons();
     refreshFeedReactions(items.map(i => i.id));
+  }
+  function bindFeedDeleteButtons() {
+    if (!isAdmin) return;
+    document.querySelectorAll('.feed-delete').forEach(btn => {
+      btn.onclick = async () => {
+        const eventId = btn.dataset.event;
+        if (!confirm('Ta bort det här inlägget (och eventuella reaktioner) från Klaskflödet?')) return;
+        data.feedEvents = data.feedEvents.filter(e => e.id !== eventId);
+        saveData();
+        try { await sb.from('klask_feed_reactions').delete().eq('event_id', eventId); }
+        catch (e) { /* tyst fallback — reaktionstabellen kanske inte finns, resten funkar ändå */ }
+        render();
+        toast('Inlägget togs bort.');
+      };
+    });
   }
 
   /* ---------------------------------------------------------------------------
