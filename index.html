@@ -1325,10 +1325,19 @@ body.period-closed #roundPanel.admin-only{display:none}
     if (!leaderBefore) return;
     const reign = data.feedProgress.leaderReign;
     if (reign.id !== leaderBefore.id) {
-      // Ny regent sedan vi senast kollade (eller första gången någon leder) —
-      // nollställ så att den här personens första fall som ledare räknas.
+      // Ny regent sedan vi senast kollade — nollställ så att den här personens
+      // första fall i den nya sviten räknas.
+      //
+      // Specialfall: reign.id === null betyder att spårningen aldrig körts
+      // förut för den här perioden (t.ex. direkt efter att den här fixen
+      // lades till). Då vet vi inte om personen redan haft ett "Skräll"-inlägg
+      // under sin pågående svit som ledare — kolla i flödet istället för att
+      // anta att de förtjänar en ny.
+      const neverTracked = reign.id === null;
       reign.id = leaderBefore.id;
-      reign.upsetShown = false;
+      reign.upsetShown = neverTracked
+        ? (data.feedEvents || []).some(e => e.type === 'upset' && Array.isArray(e.player_ids) && e.player_ids.map(Number).includes(Number(leaderBefore.id)))
+        : false;
     }
     const loserSet = new Set(losers.map(Number));
     if (!loserSet.has(Number(leaderBefore.id))) return;
