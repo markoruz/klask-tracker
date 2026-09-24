@@ -59,6 +59,14 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
     </div>
   </section>
 
+  <section class="panel settings-section" id="notifSection" style="display:none">
+    <h2>Notiser</h2>
+    <div class="theme-row">
+      <span id="notifStatusLabel">Få en webbläsarnotis när någon postar i Klaskflödet.</span>
+      <button type="button" id="notifEnableBtn" class="btn">Aktivera</button>
+    </div>
+  </section>
+
   <section class="panel settings-section" id="accountSection" style="display:none">
     <h2>Byt lösenord</h2>
     <div class="settings-form">
@@ -109,8 +117,38 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
   function onAuthStateUpdate() {
     document.getElementById('accountSection').style.display = isSignedIn ? '' : 'none';
     document.getElementById('signedOutHint').style.display = isSignedIn ? 'none' : '';
+    document.getElementById('notifSection').style.display = isSignedIn ? '' : 'none';
     document.getElementById('adminSection').style.display = isAdmin ? '' : 'none';
+    if (isSignedIn) renderNotifSection();
     if (isAdmin) loadAdminData();
+  }
+
+  /** Webbläsarnotiser (Notification-API) för nya inlägg i Klaskflödet — kräver
+      ett uttryckligt knapptryck för att webbläsaren ska visa behörighetsdialogen. */
+  function renderNotifSection() {
+    const label = document.getElementById('notifStatusLabel');
+    const btn = document.getElementById('notifEnableBtn');
+    if (!('Notification' in window)) {
+      label.textContent = 'Din webbläsare stödjer inte notiser.';
+      btn.style.display = 'none';
+      return;
+    }
+    const perm = Notification.permission;
+    if (perm === 'granted') {
+      label.textContent = 'Webbläsarnotiser för nya inlägg är aktiverade.';
+      btn.style.display = 'none';
+    } else if (perm === 'denied') {
+      label.textContent = 'Notiser är blockerade i webbläsarens inställningar för den här sidan.';
+      btn.style.display = 'none';
+    } else {
+      label.textContent = 'Få en webbläsarnotis när någon postar i Klaskflödet.';
+      btn.style.display = '';
+      btn.onclick = async () => {
+        const result = await Notification.requestPermission();
+        renderNotifSection();
+        if (result === 'granted') Klask.toast('Notiser aktiverade!');
+      };
+    }
   }
 
   async function submitPasswordChange() {
