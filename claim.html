@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{if(localStorage.getItem('klask-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<title>Min profil · Klaskligan</title>
+
+<link rel="stylesheet" href="global.css">
+<style>
+/* =============================================================================
+   claim.html — koppla ett konto till en befintlig spelarprofil.
+   Delade komponenter (.panel, .btn, .field, header/nav) kommer från global.css;
+   här ligger bara det som är unikt för claim-flödet.
+   ============================================================================= */
+body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.app{width:min(680px,calc(100% - 28px));margin:48px auto 60px}
+
+.page-head{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:26px;margin-bottom:12px}
+.eyebrow{color:var(--teal);font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:900}
+.page-head h1{font-size:32px;letter-spacing:-1px;margin:5px 0 7px}
+.page-head p{margin:0;color:var(--muted);max-width:520px}
+
+.claim-panel{margin-top:12px}
+.claim-prompt{text-align:center;padding:20px 10px}
+.claim-prompt p{color:var(--muted);margin:0 0 16px}
+
+.claim-list{display:grid;gap:8px;margin-top:8px}
+.claim-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line2);border-radius:12px;background:var(--panel)}
+.claim-row .avatar{width:44px;height:44px;border-radius:12px;font-size:15px}
+.claim-row .name{flex:1;font-weight:700}
+.claim-empty{color:var(--muted);text-align:center;padding:20px}
+.claim-redirect{text-align:center;padding:20px 10px;color:var(--muted)}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared.js"></script>
+</head>
+<body>
+
+<div id="site-header-slot"></div>
+
+<main class="app">
+  <section class="panel page-head">
+    <div class="eyebrow">Konto</div>
+    <h1>Min profil</h1>
+    <p>Koppla ditt konto till din befintliga spelarprofil så kan du ändra din profilbild och slogan, samt posta och kommentera i Klaskflödet.</p>
+  </section>
+
+  <section class="panel claim-panel" id="claimPanel">
+    <div class="claim-empty">Laddar…</div>
+  </section>
+</main>
+
+<div id="auth-modal-slot"></div>
+
+<script>
+(function () {
+  'use strict';
+  const esc = Klask.esc;
+  const sb = Klask.supabase;
+
+  function renderSignedOut() {
+    document.getElementById('claimPanel').innerHTML =
+      `<div class="claim-prompt">` +
+      `<p>Du är inte inloggad ännu.</p>` +
+      `<button id="claimSignInBtn" type="button" class="btn btn-primary">Logga in / skapa konto</button>` +
+      `</div>`;
+    const btn = document.getElementById('claimSignInBtn');
+    if (btn) btn.addEventListener('click', () => Klask.openAuthModal('signup'));
+  }
+
+  function renderRedirecting(playerId) {
+    document.getElementById('claimPanel').innerHTML =
+      `<div class="claim-redirect">Du är redan kopplad — tar dig till din profil…</div>`;
+    location.replace(`player.html?id=${encodeURIComponent(playerId)}`);
+  }
+
+  async function renderPicker() {
+    const panel = document.getElementById('claimPanel');
+    panel.innerHTML = '<div class="claim-empty">Laddar spelare…</div>';
+
+    const { data } = await Klask.loadState();
+    const profiles = await Klask.loadProfiles('player_id,motto,image_url');
+    const allPlayers = Klask.mergePlayersWithProfiles(data.players, profiles, [], { sort: true });
+    const activeIds = new Set((data.players || []).map(p => Number(p.id)));
+
+    const { data: claimedRows, error } = await sb.from('klask_player_accounts').select('player_id');
+    if (error) console.error('Kunde inte hämta kontokopplingar', error);
+    const claimedIds = new Set((claimedRows || []).map(r => Number(r.player_id)));
+
+    const unclaimed = allPlayers.filter(p => activeIds.has(p.id) && !claimedIds.has(p.id));
+
+    if (!unclaimed.length) {
+      panel.innerHTML = '<div class="claim-empty">Alla spelarprofiler är redan kopplade till ett konto. Kontakta admin om något verkar fel.</div>';
+      return;
+    }
+
+    panel.innerHTML =
+      `<p style="color:var(--muted);margin:0 0 12px">Vilken av de här är du?</p>` +
+      `<div class="claim-list">${unclaimed.map(p =>
+        `<div class="claim-row">` +
+        Klask.renderAvatar(p, p, { alt: p.name }) +
+        `<div class="name">${esc(p.name)}</div>` +
+        `<button type="button" class="btn btn-primary claim-pick-btn" data-player="${p.id}">Det här är jag</button>` +
+        `</div>`
+      ).join('')}</div>`;
+
+    panel.querySelectorAll('.claim-pick-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = Number(btn.dataset.player);
+        btn.disabled = true;
+        btn.textContent = 'Kopplar…';
+        const { error } = await Klask.auth.claimPlayer(id);
+        if (error) {
+          Klask.toast('Kunde inte koppla profilen: ' + error.message);
+          btn.disabled = false;
+          btn.textContent = 'Det här är jag';
+          renderPicker(); // ev. race mot en annan claimare — visa aktuell lista igen
+          return;
+        }
+        Klask.toast('Kopplat! Tar dig till din profil.');
+        location.href = `player.html?id=${encodeURIComponent(id)}`;
+      });
+    });
+  }
+
+  async function renderClaimView() {
+    const session = (await Klask.auth.getSession()).data.session;
+    if (!session) { renderSignedOut(); return; }
+    const myId = await Klask.auth.myPlayerId(session);
+    if (myId != null) { renderRedirecting(myId); return; }
+    await renderPicker();
+  }
+
+  async function init() {
+    Klask.mountHeader('my-profile');
+    Klask.mountAuthModal({ onSignIn: renderClaimView });
+    Klask.auth.onChange(() => renderClaimView());
+    await renderClaimView();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

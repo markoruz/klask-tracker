@@ -278,11 +278,12 @@ body.is-admin .rank-name a{gap:7px}
 .feed-title{font-weight:950;font-size:14px;line-height:1.25}
 .feed-body{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.5}
 .feed-time{color:var(--soft);font-size:9px;white-space:nowrap;padding-top:2px}
-/* Radera-knappen tar feed-time:s plats i adminläge (feed-time är redan dold där,
-   se body.is-admin .feed-time nedan) — de visas aldrig samtidigt. */
-.feed-delete{position:absolute;top:8px;right:8px;z-index:1;display:none;width:22px;height:22px;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;background:var(--panel);color:var(--muted);font-size:11px;font-family:inherit;cursor:pointer;padding:0;line-height:1}
+/* Radera-knappen renderas bara i markupen när användaren faktiskt får ta bort
+   inlägget (admin, eller egen post) — syns då direkt, inget extra CSS-villkor
+   behövs. feed-time döljs på just det kortet så de aldrig krockar i hörnet. */
+.feed-delete{position:absolute;top:8px;right:8px;z-index:1;display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;background:var(--panel);color:var(--muted);font-size:11px;font-family:inherit;cursor:pointer;padding:0;line-height:1}
 .feed-delete:hover{color:var(--red);border-color:var(--red)}
-body.is-admin .feed-delete{display:inline-flex}
+.feed-item:has(.feed-delete) .feed-time{display:none}
 .feed-item.roast{border-color:#e2a89e;background:linear-gradient(145deg,#fdeeeb,#fbe4e1)}
 .feed-item.roast .feed-kicker{color:#c8443a}
 .feed-item.roast .feed-icon{background:#fbe4e1;border-color:#e2a89e}
@@ -303,6 +304,9 @@ body.is-admin .feed-delete{display:inline-flex}
 .feed-item.upset{border-color:#f0b46b;background:linear-gradient(145deg,#fdf3e6,#fbe4c4)}
 .feed-item.upset .feed-kicker{color:#a85d1a}
 .feed-item.upset .feed-icon{background:#fbe4c4;border-color:#f0b46b}
+.feed-item.post{border-color:#bdd0ef;background:linear-gradient(145deg,#eef3fc,#e3ecfa)}
+.feed-item.post .feed-kicker{color:#1f4fa8}
+.feed-item.post .feed-icon{background:#e3ecfa;border-color:#bdd0ef}
 .feed-empty{padding:22px;border:1px dashed var(--line2);border-radius:12px;text-align:center;color:var(--soft);font-size:11px}
 
 /* Reaktioner ---------------------------------------------------------------- */
@@ -314,6 +318,32 @@ body.is-admin .feed-delete{display:inline-flex}
 .feed-reaction.feed-reaction-mine{border-color:var(--teal);background:#e3ecfa}
 .feed-reaction.feed-reaction-mine b{color:#1f4fa8}
 .feed-reaction:disabled{opacity:.6;cursor:default}
+
+/* Kommentarer ----------------------------------------------------------------- */
+.feed-comments{margin-top:8px;display:grid;gap:6px}
+.feed-comments:empty{margin-top:0}
+.feed-comment{position:relative;padding:7px 26px 7px 9px;border-left:2px solid var(--line2);font-size:11px;line-height:1.45}
+.feed-comment b{font-weight:900;color:var(--text)}
+.feed-comment-time{color:var(--soft);font-size:9px;margin-left:5px}
+.feed-comment-body{color:var(--muted);margin-top:1px}
+body.is-admin .feed-comment{padding:4px 22px 4px 7px;font-size:10px}
+.feed-comment-delete{position:absolute;top:5px;right:4px;width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:50%;background:var(--panel);color:var(--muted);font-size:9px;font-family:inherit;cursor:pointer;padding:0;line-height:1}
+.feed-comment-delete:hover{color:var(--red);border-color:var(--red)}
+
+/* Egen-inlägg-komponerare + kommentarfält ------------------------------------- */
+.feed-composer{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.feed-composer textarea{flex:1;min-height:38px;max-height:110px;resize:vertical;padding:8px 10px;border:1px solid var(--line2);border-radius:10px;background:var(--panel);color:var(--text);font-family:inherit;font-size:12px;outline:none}
+.feed-composer textarea:focus{border-color:var(--teal)}
+.feed-composer-prompt{margin-bottom:12px;padding:9px 12px;border:1px dashed var(--line2);border-radius:10px;font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.feed-composer-prompt a,.feed-composer-prompt button{color:var(--teal);font-weight:800;background:none;border:none;padding:0;cursor:pointer;font-family:inherit;font-size:11px;text-decoration:none}
+.feed-composer-prompt a:hover,.feed-composer-prompt button:hover{text-decoration:underline}
+.feed-comment-composer{display:flex;gap:6px;margin-top:8px;min-width:0}
+.feed-comment-input{flex:1;min-width:0;padding:6px 9px;border:1px solid var(--line2);border-radius:999px;background:var(--panel);color:var(--text);font-family:inherit;font-size:11px;outline:none}
+.feed-comment-input:focus{border-color:var(--teal)}
+.feed-comment-send{flex-shrink:0;padding:6px 12px;border:1px solid var(--line2);border-radius:999px;background:var(--card2);color:var(--teal);font-weight:800;font-size:11px;font-family:inherit;cursor:pointer}
+.feed-comment-send:hover{border-color:var(--teal)}
+body.is-admin .feed-composer,body.is-admin .feed-composer-prompt{margin-bottom:8px}
+body.is-admin .feed-comment-composer{margin-top:5px}
 
 /* Ny-inlägg-puls vid live-uppdatering --------------------------------------- */
 @keyframes feedNewPulse{0%{box-shadow:0 0 0 0 rgba(50,104,210,.4)}100%{box-shadow:0 0 0 12px rgba(50,104,210,0)}}
@@ -754,6 +784,9 @@ body.period-closed #roundPanel.admin-only{display:none}
 :root[data-theme="dark"] .feed-item.upset{border-color:#6b4a1f;background:linear-gradient(145deg,#2a2013,#1e160d)}
 :root[data-theme="dark"] .feed-item.upset .feed-kicker{color:#e8b566}
 :root[data-theme="dark"] .feed-item.upset .feed-icon{background:#3a2c14;border-color:#6b4a1f}
+:root[data-theme="dark"] .feed-item.post{border-color:#315065;background:linear-gradient(145deg,#152634,#101c28)}
+:root[data-theme="dark"] .feed-item.post .feed-kicker{color:#8fd8ff}
+:root[data-theme="dark"] .feed-item.post .feed-icon{background:#1c3245;border-color:#315065}
 :root[data-theme="dark"] .feed-reaction.feed-reaction-mine{background:#123a3a}
 </style>
 
@@ -829,6 +862,7 @@ body.period-closed #roundPanel.admin-only{display:none}
         <div class="social-feed-head">
           <div><h2>Klaskflödet</h2><p>Rivaliteter och obarmhärtig matchanalys.</p></div>
         </div>
+        <div id="feedComposer"></div>
         <div id="socialFeed" class="social-feed-list"></div>
       </section>
 
@@ -937,7 +971,7 @@ body.period-closed #roundPanel.admin-only{display:none}
   <div id="wrappedFireworks" class="wrapped-fireworks"></div>
   <div class="modal-card wrapped-modal-card">
     <div class="archive-modal-head">
-      <h3 id="wrappedModalTitle">Klaskligan Wrapped</h3>
+      <h3 id="wrappedModalTitle">Wrapped</h3>
       <button id="wrappedModalClose" type="button" class="btn archive-modal-close">Stäng</button>
     </div>
     <div id="wrappedCard" class="wrapped-card"></div>
@@ -982,6 +1016,10 @@ body.period-closed #roundPanel.admin-only{display:none}
   const currentSeasonKey = Klask.currentSeasonKey;
 
   let isAdmin = false, isSignedIn = false, archiveCache = [];
+  let myUserId = null;             // auth.uid() för den inloggade användaren (annars null)
+  let myPlayerId = null;           // spelar-id kopplat till kontot (klask_player_accounts), annars null
+  let feedPosts = [];              // rader från klask_feed_posts (användarinlägg i Klaskflödet)
+  let feedCommentsByTarget = {};   // { targetId: [kommentarsrad, ...] }
   let data = Klask.emptyData();
   let state = { players: [], rounds: [] };
   let selected = new Set();
@@ -1379,37 +1417,220 @@ body.period-closed #roundPanel.admin-only{display:none}
     REACTION_EMOJIS.forEach(em => {
       const btn = document.querySelector(`.feed-reaction[data-event="${CSS.escape(id)}"][data-emoji="${CSS.escape(em)}"]`);
       if (!btn) return;
-      const s = (reactionState[id] && reactionState[id][em]) || { count: 0, mine: false };
+      const s = (reactionState[id] && reactionState[id][em]) || { count: 0, mine: false, playerIds: [] };
       const b = btn.querySelector('b'); if (b) b.textContent = String(s.count);
       btn.classList.toggle('feed-reaction-mine', s.mine);
+      if (s.playerIds && s.playerIds.length) btn.title = s.playerIds.map(playerNameById).join(', ');
+      else btn.removeAttribute('title');
     });
   }
-  /** Hämtar alla reaktionsrader för de synliga inläggen, räknar ihop dem och
-      markerar vilka den här besökaren själv har lämnat. */
+  /** Hämtar alla reaktionsrader för de synliga inläggen, räknar ihop dem, samlar
+      vilka spelare (om inloggade/kopplade) som reagerat, och markerar vilka den
+      här besökaren själv har lämnat — antingen via visitor_id (samma webbläsare)
+      eller via player_id (samma konto, oavsett enhet). */
   async function refreshFeedReactions(ids) {
     if (!ids.length) return;
     try {
       const visitorId = getVisitorId();
-      const { data: rows, error } = await sb.from('klask_feed_reactions').select('event_id,emoji,visitor_id').in('event_id', ids);
+      const { data: rows, error } = await sb.from('klask_feed_reactions').select('event_id,emoji,visitor_id,player_id').in('event_id', ids);
       if (error) throw error;
-      ids.forEach(id => { reactionState[id] = {}; REACTION_EMOJIS.forEach(em => { reactionState[id][em] = { count: 0, mine: false }; }); });
+      ids.forEach(id => { reactionState[id] = {}; REACTION_EMOJIS.forEach(em => { reactionState[id][em] = { count: 0, mine: false, playerIds: [] }; }); });
       (rows || []).forEach(r => {
         if (!reactionState[r.event_id] || !reactionState[r.event_id][r.emoji]) return;
-        reactionState[r.event_id][r.emoji].count++;
-        if (r.visitor_id === visitorId) reactionState[r.event_id][r.emoji].mine = true;
+        const s = reactionState[r.event_id][r.emoji];
+        s.count++;
+        if (r.visitor_id === visitorId || (myPlayerId != null && r.player_id != null && Number(r.player_id) === Number(myPlayerId))) s.mine = true;
+        if (r.player_id != null) s.playerIds.push(Number(r.player_id));
       });
       ids.forEach(applyReactionState);
     } catch (e) {
       // Reaktionstabellen finns kanske inte skapad i Supabase ännu — tyst fallback, resten av flödet funkar ändå.
     }
   }
+  /** Vanliga ord som byts rakt av mot danska — resten "danskas" fonetiskt nedan. */
+  const DANSKA_WORDS = {
+    och: 'og', är: 'er', inte: 'ikke', vad: 'hvad', vem: 'hvem', vart: 'hvor',
+    varför: 'hvorfor', hur: 'hvordan', jag: 'jeg', ni: 'I', oss: 'os', dem: 'dem',
+    att: 'at', för: 'for', till: 'til', från: 'fra', över: 'over', bra: 'god',
+    dålig: 'dårlig', dåligt: 'dårligt', mycket: 'meget', lite: 'lidt', liten: 'lille',
+    tack: 'tak', något: 'noget', ingen: 'ingen', inget: 'intet', vill: 'vil',
+    ska: 'skal', gör: 'gør', göra: 'gøre', säger: 'siger', säga: 'sige', vet: 'ved',
+    roligt: 'sjovt', kul: 'sjovt', igen: 'igen', alla: 'alle', redan: 'allerede',
+    också: 'også', bara: 'bare', alltid: 'altid', aldrig: 'aldrig', idag: 'i dag',
+    imorgon: 'i morgen', igår: 'i går', här: 'her', där: 'der',
+    förlorade: 'tabte', vann: 'vandt', spelade: 'spillede', match: 'kamp',
+    matcher: 'kampe', omgång: 'omgang', omgången: 'omgangen'
+  };
+  const DANSKA_FLOURISHES = [' ikke?', " hva'?", ' altså.', ' jo.', ' øhh.'];
+
+  /** "Danskar" en text för skojs skull — ordbyten + klassisk konsonant-mjukning
+      (p/t/k mellan vokaler blir b/d/g), inte en riktig översättning. */
+  function danskify(text) {
+    if (!text) return text;
+    const out = text.replace(/[A-Za-zÀ-ÖØ-öø-ÿ]+/g, word => {
+      const lower = word.toLowerCase();
+      let replaced = DANSKA_WORDS[lower];
+      if (!replaced) {
+        replaced = lower
+          .replace(/ck/g, 'g')
+          .replace(/([aeiouyåäö])p([aeiouyåäö])/g, '$1b$2')
+          .replace(/([aeiouyåäö])t([aeiouyåäö])/g, '$1d$2')
+          .replace(/([aeiouyåäö])k([aeiouyåäö])/g, '$1g$2')
+          .replace(/ö/g, 'ø');
+      }
+      if (word === word.toUpperCase()) replaced = replaced.toUpperCase();
+      else if (word[0] === word[0].toUpperCase()) replaced = replaced.charAt(0).toUpperCase() + replaced.slice(1);
+      return replaced;
+    });
+    const flourish = Math.random() < 0.4 ? DANSKA_FLOURISHES[Math.floor(Math.random() * DANSKA_FLOURISHES.length)] : '';
+    return out + flourish;
+  }
+
+  /** Hämtar användarinlägg (klask_feed_posts) — egen tabell, rör aldrig klask_state. */
+  async function loadFeedPosts() {
+    try {
+      const { data: rows, error } = await sb.from('klask_feed_posts').select('*').order('created_at', { ascending: false }).limit(30);
+      if (error) throw error;
+      feedPosts = rows || [];
+    } catch (e) {
+      feedPosts = []; // tabellen kanske inte finns ännu — tyst fallback
+    }
+  }
+  function applyCommentsState(id) {
+    const container = document.querySelector(`.feed-comments[data-event="${CSS.escape(id)}"]`);
+    if (!container) return;
+    const list = feedCommentsByTarget[id] || [];
+    container.innerHTML = list.map(c => {
+      const d = new Date(c.created_at), time = Number.isNaN(d.getTime()) ? '' : d.toLocaleString('sv-SE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const canManage = isAdmin || (myUserId && c.author_user_id === myUserId);
+      const del = canManage ? `<button type="button" class="feed-comment-delete" data-comment="${esc(c.id)}" title="Ta bort kommentaren" aria-label="Ta bort kommentaren">✕</button>` : '';
+      return `<div class="feed-comment"><b>${esc(playerNameById(c.author_player_id))}</b><span class="feed-comment-time">${esc(time)}</span>${del}<div class="feed-comment-body">${esc(c.body)}</div></div>`;
+    }).join('');
+    bindCommentDeleteButtons(container);
+  }
+  function bindCommentDeleteButtons(scope) {
+    (scope || document).querySelectorAll('.feed-comment-delete').forEach(btn => {
+      btn.onclick = async () => {
+        const commentId = btn.dataset.comment;
+        if (!confirm('Ta bort kommentaren?')) return;
+        btn.disabled = true;
+        try {
+          const { error } = await sb.from('klask_feed_comments').delete().eq('id', commentId);
+          if (error) throw error;
+          Object.keys(feedCommentsByTarget).forEach(targetId => {
+            feedCommentsByTarget[targetId] = feedCommentsByTarget[targetId].filter(c => c.id !== commentId);
+          });
+          document.querySelectorAll('.feed-comments[data-event]').forEach(el => applyCommentsState(el.dataset.event));
+          toast('Kommentaren togs bort.');
+        } catch (e) {
+          toast('Kunde inte ta bort kommentaren.');
+          btn.disabled = false;
+        }
+      };
+    });
+  }
+  /** Hämtar kommentarer för de angivna inläggen (klask_feed_comments), en egen tabell.
+      Nollställer bara cachen för just dessa id:n, så andra redan hämtade trådar
+      inte rensas bort när funktionen anropas för ett enskilt inlägg (t.ex. efter
+      att man själv postat en kommentar). */
+  async function refreshFeedComments(ids) {
+    if (!ids.length) return;
+    try {
+      const { data: rows, error } = await sb.from('klask_feed_comments').select('*').in('target_id', ids).order('created_at', { ascending: true });
+      if (error) throw error;
+      ids.forEach(id => { feedCommentsByTarget[id] = []; });
+      (rows || []).forEach(c => {
+        (feedCommentsByTarget[c.target_id] || (feedCommentsByTarget[c.target_id] = [])).push(c);
+      });
+      ids.forEach(applyCommentsState);
+    } catch (e) {
+      // Kommentarstabellen finns kanske inte skapad ännu — tyst fallback.
+    }
+  }
+  function commentComposerHtml(id) {
+    if (myPlayerId == null) return '';
+    return `<div class="feed-comment-composer">` +
+      `<input type="text" class="feed-comment-input" data-event="${esc(id)}" maxlength="1000" placeholder="Kommentera…">` +
+      `<button type="button" class="feed-comment-send" data-event="${esc(id)}">Skicka</button>` +
+      `</div>`;
+  }
+  async function submitComment(targetId) {
+    const input = document.querySelector(`.feed-comment-input[data-event="${CSS.escape(targetId)}"]`);
+    if (!input) return;
+    const body = input.value.trim();
+    if (!body) return;
+    const targetType = feedPosts.some(p => p.id === targetId) ? 'post' : 'system_event';
+    input.disabled = true;
+    try {
+      const { error } = await sb.from('klask_feed_comments').insert({ target_type: targetType, target_id: targetId, body });
+      if (error) throw error;
+      input.value = '';
+      await refreshFeedComments([targetId]);
+    } catch (e) {
+      toast('Kunde inte spara kommentaren: ' + (e.message || 'okänt fel'));
+    } finally {
+      input.disabled = false;
+    }
+  }
+  function bindCommentComposers() {
+    document.querySelectorAll('.feed-comment-send').forEach(btn => { btn.onclick = () => submitComment(btn.dataset.event); });
+    document.querySelectorAll('.feed-comment-input').forEach(input => {
+      input.onkeydown = e => { if (e.key === 'Enter') submitComment(input.dataset.event); };
+    });
+  }
+  /** Ny-inlägg-rutan ovanför flödet — text+knapp om kontot är kopplat till en
+      spelare, annars en uppmaning att logga in / koppla profilen. */
+  function renderFeedComposer() {
+    const root = document.getElementById('feedComposer');
+    if (!root) return;
+    if (!isSignedIn) {
+      root.innerHTML = `<div class="feed-composer-prompt"><span>Logga in för att posta i Klaskflödet.</span><button type="button" id="feedComposerSignIn">Logga in</button></div>`;
+      const btn = document.getElementById('feedComposerSignIn');
+      if (btn) btn.onclick = () => Klask.openAuthModal('signin');
+      return;
+    }
+    if (myPlayerId == null) {
+      root.innerHTML = `<div class="feed-composer-prompt"><span>Koppla ditt konto till en spelarprofil för att kunna posta och kommentera.</span><a href="claim.html">Koppla nu →</a></div>`;
+      return;
+    }
+    root.innerHTML = `<div class="feed-composer">` +
+      `<textarea id="feedComposerInput" maxlength="2000" placeholder="Skriv något till Klaskflödet…"></textarea>` +
+      `<button type="button" id="feedComposerSubmit" class="btn btn-primary">Posta</button>` +
+      `</div>`;
+    const input = document.getElementById('feedComposerInput');
+    const btn = document.getElementById('feedComposerSubmit');
+    if (btn) btn.onclick = async () => {
+      const body = danskify(input.value.trim());
+      if (!body) return;
+      btn.disabled = true;
+      try {
+        const { error } = await sb.from('klask_feed_posts').insert({ body });
+        if (error) throw error;
+        input.value = '';
+        await loadFeedPosts();
+        render();
+        toast('Postat!');
+      } catch (e) {
+        toast('Kunde inte posta: ' + (e.message || 'okänt fel'));
+      } finally {
+        btn.disabled = false;
+      }
+    };
+  }
   function bindFeedReactionButtons() {
     document.querySelectorAll('.feed-reaction').forEach(btn => {
       btn.onclick = async () => {
         const eventId = btn.dataset.event, emoji = btn.dataset.emoji, visitorId = getVisitorId();
-        const current = (reactionState[eventId] && reactionState[eventId][emoji]) || { count: 0, mine: false };
+        const current = (reactionState[eventId] && reactionState[eventId][emoji]) || { count: 0, mine: false, playerIds: [] };
         const removing = current.mine;
-        const next = { count: current.count + (removing ? -1 : 1), mine: !removing };
+        if (!removing && myPlayerId == null) { toast('Logga in och koppla din profil för att reagera.'); return; }
+        let nextPlayerIds = current.playerIds || [];
+        if (myPlayerId != null) {
+          nextPlayerIds = removing
+            ? nextPlayerIds.filter(id => Number(id) !== Number(myPlayerId))
+            : [...nextPlayerIds, Number(myPlayerId)];
+        }
+        const next = { count: current.count + (removing ? -1 : 1), mine: !removing, playerIds: nextPlayerIds };
         reactionState[eventId] = reactionState[eventId] || {};
         reactionState[eventId][emoji] = next;
         btn.disabled = true;
@@ -1430,29 +1651,63 @@ body.period-closed #roundPanel.admin-only{display:none}
       };
     });
   }
+  /** Slår ihop systemgenererade händelser (jsonb, data.feedEvents) med
+      användarinlägg (egen tabell, klask_feed_posts) till en enda sorterad lista. */
+  function mergedFeedItems() {
+    const systemItems = data.feedEvents.map(e => ({ ...e, source: 'system' }));
+    const postItems = feedPosts.map(p => ({
+      id: p.id, source: 'post', type: 'post', icon: '💬',
+      title: playerNameById(p.author_player_id), body: p.body, created_at: p.created_at,
+      author_user_id: p.author_user_id, author_player_id: p.author_player_id
+    }));
+    return [...systemItems, ...postItems]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 18);
+  }
   function renderSocialFeed() {
     const root = $('#socialFeed'); if (!root) return; ensureSocialState();
-    const items = [...data.feedEvents].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 18);
+    const items = mergedFeedItems();
     if (!items.length) { root.innerHTML = '<div class="feed-empty">Inga händelser i Klaskflödet ännu.</div>'; return; }
     root.innerHTML = items.map(e => {
       const d = new Date(e.created_at), time = Number.isNaN(d.getTime()) ? '' : d.toLocaleString('sv-SE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-      const kind = KIND_LABELS[e.type] || `Matchrapport${e.round_number ? ` · Omgång #${e.round_number}` : ''}`;
+      const kind = e.source === 'post' ? 'Inlägg' : (KIND_LABELS[e.type] || `Matchrapport${e.round_number ? ` · Omgång #${e.round_number}` : ''}`);
       const reactions = REACTION_EMOJIS.map(em => {
         const s = (reactionState[e.id] && reactionState[e.id][em]) || { count: 0, mine: false };
         return `<button type="button" class="feed-reaction${s.mine ? ' feed-reaction-mine' : ''}" data-event="${esc(e.id)}" data-emoji="${em}"><span>${em}</span><b>${s.count}</b></button>`;
       }).join('');
-      return `<article class="feed-item ${esc(e.type || '')}"><div class="feed-icon">${e.icon || '•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title || '')}</div><div class="feed-body">${esc(e.body || '')}</div><div class="feed-reactions">${reactions}</div></div><time class="feed-time">${esc(time)}</time><button type="button" class="feed-delete" data-event="${esc(e.id)}" title="Ta bort inlägget" aria-label="Ta bort inlägget">✕</button></article>`;
+      // Radera-knapp: systemhändelser bara för admin, inlägg för admin ELLER egen författare.
+      const canDelete = e.source === 'system' ? isAdmin : (isAdmin || (myUserId && e.author_user_id === myUserId));
+      const deleteBtn = canDelete
+        ? `<button type="button" class="feed-delete" data-event="${esc(e.id)}" data-source="${e.source}" title="Ta bort inlägget" aria-label="Ta bort inlägget">✕</button>`
+        : '';
+      return `<article class="feed-item ${esc(e.type || '')}"><div class="feed-icon">${e.icon || '•'}</div><div class="feed-copy"><div class="feed-kicker">${kind}</div><div class="feed-title">${esc(e.title || '')}</div><div class="feed-body">${esc(e.body || '')}</div><div class="feed-reactions">${reactions}</div><div class="feed-comments" data-event="${esc(e.id)}"></div>${commentComposerHtml(e.id)}</div><time class="feed-time">${esc(time)}</time>${deleteBtn}</article>`;
     }).join('');
     bindFeedReactionButtons();
     bindFeedDeleteButtons();
-    refreshFeedReactions(items.map(i => i.id));
+    bindCommentComposers();
+    const ids = items.map(i => String(i.id));
+    refreshFeedReactions(ids);
+    refreshFeedComments(ids);
   }
   function bindFeedDeleteButtons() {
-    if (!isAdmin) return;
     document.querySelectorAll('.feed-delete').forEach(btn => {
       btn.onclick = async () => {
         const eventId = btn.dataset.event;
-        if (!confirm('Ta bort det här inlägget (och eventuella reaktioner) från Klaskflödet?')) return;
+        const source = btn.dataset.source;
+        if (!confirm('Ta bort det här inlägget (och eventuella reaktioner/kommentarer) från Klaskflödet?')) return;
+        if (source === 'post') {
+          try {
+            const { error } = await sb.from('klask_feed_posts').delete().eq('id', eventId);
+            if (error) throw error;
+            feedPosts = feedPosts.filter(p => p.id !== eventId);
+            render();
+            toast('Inlägget togs bort.');
+          } catch (e) {
+            toast('Kunde inte ta bort inlägget.');
+          }
+          return;
+        }
+        // source === 'system' (oförändrad kodväg — jsonb-bloben, admin-only).
         data.feedEvents = data.feedEvents.filter(e => e.id !== eventId);
         saveData();
         try { await sb.from('klask_feed_reactions').delete().eq('event_id', eventId); }
@@ -1506,6 +1761,16 @@ body.period-closed #roundPanel.admin-only{display:none}
     isAdmin = active;
     document.body.classList.toggle('is-admin', active);
     render();
+  }
+
+  /** Håller myUserId/myPlayerId i synk med inloggningsstatus — styr
+      komponeraren och kommentarsfälten i Klaskflödet. */
+  async function refreshMyIdentity() {
+    if (!isSignedIn) { myUserId = null; myPlayerId = null; renderFeedComposer(); return; }
+    const { data: { session } } = await Klask.auth.getSession();
+    myUserId = session ? session.user.id : null;
+    myPlayerId = await Klask.auth.myPlayerId(session);
+    renderFeedComposer();
   }
 
   /* ---------------------------------------------------------------------------
@@ -1731,7 +1996,7 @@ body.period-closed #roundPanel.admin-only{display:none}
     if (!item) return;
     wrappedCardsCache = wrappedCards(computeWrapped(item));
     wrappedCardIndex = 0;
-    $('#wrappedModalTitle').textContent = `Klaskligan Wrapped — ${item.name || 'Period'}`;
+    $('#wrappedModalTitle').textContent = `${item.name || 'Perioden'} Wrapped`;
     renderWrappedCard();
     $('#wrappedModal').classList.remove('hidden');
   }
@@ -1788,7 +2053,7 @@ body.period-closed #roundPanel.admin-only{display:none}
         : '<span>Ingen spelare kvalificerade sig.</span>';
       const saved = fmtDate(item.saved_at);
       const adminActions = isAdmin ? `<div class="archive-admin-actions"><button type="button" class="btn archive-edit">Redigera</button><button type="button" class="btn btn-danger archive-delete">Ta bort</button></div>` : '';
-      box.innerHTML = `<div class="archive-head"><div class="archive-main"><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div><div class="archive-actions-row"><button type="button" class="btn archive-toggle">Visa slutställning →</button><button type="button" class="btn archive-wrapped-btn">🎉 Klaskligan Wrapped</button></div></div>${adminActions}<span class="archive-saved">Sparad ${esc(saved)}</span></div>`;
+      box.innerHTML = `<div class="archive-head"><div class="archive-main"><strong>${esc(item.name)}</strong><div class="archive-podium">${podiumHtml}</div><div class="archive-actions-row"><button type="button" class="btn archive-toggle">Visa slutställning →</button><button type="button" class="btn archive-wrapped-btn">🎉 ${esc(item.name || 'Perioden')} Wrapped</button></div></div>${adminActions}<span class="archive-saved">Sparad ${esc(saved)}</span></div>`;
       box.querySelector('.archive-toggle').onclick = () => openArchiveModal(item);
       box.querySelector('.archive-wrapped-btn').onclick = () => openWrappedModal(item);
       const editBtn = box.querySelector('.archive-edit');
@@ -2492,16 +2757,18 @@ body.period-closed #roundPanel.admin-only{display:none}
 
     // Modalen monteras först (synkront) så att headerns Admin-knapp kan öppna den.
     Klask.mountAuthModal({
-      onSignIn: s => { isSignedIn = s.signedIn; setAdminUI(s.isAdmin); }
+      onSignIn: s => { isSignedIn = s.signedIn; setAdminUI(s.isAdmin); refreshMyIdentity(); }
     });
     const headerState = await Klask.mountHeader('index');
     isSignedIn = headerState.signedIn;
     setAdminUI(headerState.isAdmin);
+    await refreshMyIdentity();
 
     const remote = await Klask.loadState();
     data = remote.data;
     archiveCache = remote.archive;
     await loadPlayerProfiles();
+    await loadFeedPosts();
 
     // Ta emot en sparad lottning när man kommer tillbaka från lottning.html.
     if (location.hash === '#registrera' && data.pendingDraw?.player_ids?.length === 4) {
@@ -2536,6 +2803,7 @@ body.period-closed #roundPanel.admin-only{display:none}
     Klask.auth.onChange(async (_event, session) => {
       isSignedIn = !!session;
       setAdminUI(session ? await Klask.auth.isAdmin(session) : false);
+      await refreshMyIdentity();
     });
   }
 

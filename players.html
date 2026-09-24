@@ -42,6 +42,7 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
 .motto{color:var(--muted);font-size:12px;line-height:1.4;min-height:34px;font-style:italic}
 .meta{margin-top:7px;color:var(--muted);font-size:11px;font-weight:750}
 .empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line2);border-radius:14px;grid-column:1/-1}
+.claim-badge{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:var(--muted);background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:2px 8px}
 
 @media(max-width:820px){.players-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:680px){.players-toolbar{align-items:stretch;flex-direction:column}.search{width:100%}}
@@ -78,21 +79,33 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
 (function () {
   'use strict';
   const esc = Klask.esc;
+  const sb = Klask.supabase;
 
   let players = [];
+  let activeIds = new Set();       // id:n för spelare i nuvarande (icke-arkiverade) rosters
+  let claims = new Map();          // player_id -> claimed_email
+
+  /** Hämtar vilka spelare som kopplat ett konto (klask_player_accounts). */
+  async function fetchClaims() {
+    const { data, error } = await sb.from('klask_player_accounts').select('player_id,claimed_email');
+    if (error) { console.error('Kunde inte hämta kontokopplingar', error); return new Map(); }
+    return new Map((data || []).map(r => [Number(r.player_id), r.claimed_email || '']));
+  }
 
   /** Filtrerar på namn (skiftlägesokänsligt) och renderar kortrutnätet. */
   function render() {
     const q = document.getElementById('playerSearch').value.trim().toLowerCase();
     const list = players.filter(p => String(p.name || '').toLowerCase().includes(q));
     document.getElementById('playersGrid').innerHTML = list.length
-      ? list.map(p =>
-          `<a class="player-card" href="player.html?id=${encodeURIComponent(p.id)}">` +
-          Klask.renderAvatar(p, p, { alt: p.name }) +
-          `<div><h3>${esc(p.name)}</h3>` +
-          `<div class="motto">${p.motto ? esc(p.motto) : 'Ingen slogan ännu.'}</div>` +
-          `<div class="meta">Öppna spelarprofil →</div></div></a>`
-        ).join('')
+      ? list.map(p => {
+          const unclaimed = activeIds.has(p.id) && !claims.has(p.id);
+          const badge = unclaimed ? '<span class="claim-badge">Ej kopplad till konto</span>' : '';
+          return `<a class="player-card" href="player.html?id=${encodeURIComponent(p.id)}">` +
+            Klask.renderAvatar(p, p, { alt: p.name }) +
+            `<div><h3>${esc(p.name)}</h3>` +
+            `<div class="motto">${p.motto ? esc(p.motto) : 'Ingen slogan ännu.'}</div>` +
+            `<div class="meta">Öppna spelarprofil →</div>${badge}</div></a>`;
+        }).join('')
       : '<div class="empty">Ingen spelare hittades.</div>';
   }
 
@@ -105,6 +118,8 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
     const { data, archive } = await Klask.loadState();
     const profiles = await Klask.loadProfiles('player_id,motto,image_url');
     players = Klask.mergePlayersWithProfiles(data.players, profiles, archive);
+    activeIds = new Set((data.players || []).map(p => Number(p.id)));
+    claims = await fetchClaims();
 
     render();
     document.getElementById('playerSearch').addEventListener('input', render);

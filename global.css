@@ -177,6 +177,20 @@ button,input,select,textarea{font:inherit}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal)}
 .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 .form-error{min-height:18px;margin-top:9px;color:var(--red);font-size:12px}
+.auth-mode-toggle{
+  display:block;
+  width:100%;
+  margin-top:10px;
+  padding:4px;
+  background:none;
+  border:none;
+  color:var(--teal);
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+}
+.auth-mode-toggle:hover{text-decoration:underline}
 
 /* Modal ------------------------------------------------------------------- */
 .modal{
@@ -338,6 +352,41 @@ body.modal-open{overflow:hidden}
 .site-admin-btn:hover,.site-admin-link:hover{background:rgba(255,255,255,.22);filter:none}
 .admin-only-nav{display:none}
 body.is-admin .admin-only-nav{display:inline-flex}
+
+/* Inloggningsknappens dropdown (Mitt konto / Logga ut) ---------------------- */
+.site-auth-menu{position:relative}
+.site-auth-dropdown{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  min-width:160px;
+  background:var(--panel);
+  border:1px solid var(--line2);
+  border-radius:12px;
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+  padding:6px;
+  display:grid;
+  gap:2px;
+  z-index:90;
+}
+.site-auth-dropdown.hidden{display:none}
+.site-auth-dropdown-item{
+  display:block;
+  width:100%;
+  padding:9px 12px;
+  border:none;
+  background:none;
+  border-radius:8px;
+  color:var(--text);
+  text-decoration:none;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:750;
+  text-align:left;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+.site-auth-dropdown-item:hover{background:var(--card2)}
 @media(max-width:680px){
   .site-header-inner{min-height:auto;padding:12px 0;gap:10px;flex-wrap:wrap}
   .site-header-left{gap:16px;flex-wrap:wrap}

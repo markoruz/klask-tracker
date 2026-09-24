@@ -96,11 +96,16 @@
   let adminCache = null;             // null = okänt, true/false = cachat svar
   let adminInFlight = null;          // dedupar parallella anrop
   const canEditCache = new Map();    // playerId -> boolean
+  let myPlayerIdCache = undefined;   // undefined = ej hämtat, null = ingen koppling, number = spelar-id
+  let myPlayerIdInFlight = null;
 
   function invalidateAuthCaches() {
     adminCache = null;
     adminInFlight = null;
     canEditCache.clear();
+    myPlayerIdCache = undefined;
+    myPlayerIdInFlight = null;
+    myPlayerNameCache.clear();
   }
 
   async function getSession() {
@@ -155,8 +160,43 @@
     return allowed;
   }
 
+  /**
+   * Vilket spelar-id är den inloggade användaren kopplad till (klask_player_accounts)?
+   * null = inloggad men ingen koppling ännu (visa claim.html). Cachas per session.
+   */
+  async function myPlayerId(sessionOverride) {
+    if (myPlayerIdCache !== undefined) return myPlayerIdCache;
+    if (myPlayerIdInFlight) return myPlayerIdInFlight;
+    myPlayerIdInFlight = (async () => {
+      const session = await currentSession(sessionOverride);
+      if (!session) { myPlayerIdCache = null; return null; }
+      const { data, error } = await sb.from('klask_player_accounts')
+        .select('player_id').eq('user_id', session.user.id).maybeSingle();
+      if (error) {
+        console.error('Kunde inte hämta kopplad spelarprofil', error);
+        return null;
+      }
+      myPlayerIdCache = data ? Number(data.player_id) : null;
+      return myPlayerIdCache;
+    })();
+    try { return await myPlayerIdInFlight; }
+    finally { myPlayerIdInFlight = null; }
+  }
+
+  /** Kopplar den inloggade användaren till en (ledig) spelarprofil. */
+  async function claimPlayer(playerId) {
+    const id = Number(playerId);
+    if (!Number.isFinite(id)) return { data: null, error: new Error('Ogiltigt spelar-id') };
+    const { data, error } = await sb.rpc('claim_klask_player', { p_player_id: id });
+    if (!error && data === true) myPlayerIdCache = id;
+    return { data, error };
+  }
+
   async function signIn(email, password) {
     return sb.auth.signInWithPassword({ email, password });
+  }
+  async function signUp(email, password) {
+    return sb.auth.signUp({ email, password });
   }
   async function signOut() {
     invalidateAuthCaches();
@@ -180,7 +220,10 @@
   // Master-lyssnare: nollställ cachen FÖRE sidornas (uppskjutna) callbacks.
   if (sb) sb.auth.onAuthStateChange(() => { invalidateAuthCaches(); });
 
-  const auth = { signIn, signOut, getSession, onChange, isAdmin, canEditPlayer, invalidateCache: invalidateAuthCaches };
+  const auth = {
+    signIn, signUp, signOut, getSession, onChange, isAdmin, canEditPlayer,
+    myPlayerId, claimPlayer, invalidateCache: invalidateAuthCaches
+  };
 
   /* ---------------------------------------------------------------------------
      5. Tema (ljust/mörkt)
@@ -262,21 +305,51 @@
       `</div>` +
       `<div class="site-header-right">` +
       `<button id="siteThemeToggle" type="button" class="site-theme-toggle" aria-label="Byt tema" title="Byt tema"></button>` +
+      `<div class="site-auth-menu">` +
       `<button id="siteAuthBtn" type="button" class="site-admin-link site-auth-btn">` +
-      `<span class="chev-label">Admin</span><span class="chev">&#9662;</span></button>` +
+      `<span class="chev-label">Logga in</span><span class="chev">&#9662;</span></button>` +
+      `<div id="siteAuthDropdown" class="site-auth-dropdown hidden" role="menu">` +
+      `<a id="siteAuthMyAccount" class="site-auth-dropdown-item" href="claim.html" role="menuitem">Min profil</a>` +
+      `<a class="site-auth-dropdown-item" href="settings.html" role="menuitem">Inställningar</a>` +
+      `<button id="siteAuthSignOut" type="button" class="site-auth-dropdown-item" role="menuitem">Logga ut</button>` +
+      `</div>` +
+      `</div>` +
       `</div>` +
       `</div></header>`;
   }
 
-  function syncAuthButton() {
+  /** Cache för det egna spelarnamnet (visas i inloggningsknappen istället för "Logga ut"). */
+  let myPlayerNameCache = new Map(); // playerId -> name
+
+  /** Slår upp namnet för den inloggade användarens kopplade spelare (om någon). */
+  async function myPlayerName(sessionOverride) {
+    const id = await myPlayerId(sessionOverride);
+    if (id == null) return null;
+    if (myPlayerNameCache.has(id)) return myPlayerNameCache.get(id);
+    const { data } = await loadState();
+    const p = (data.players || []).find(pl => Number(pl.id) === Number(id));
+    const name = p ? p.name : null;
+    if (name) myPlayerNameCache.set(id, name);
+    return name;
+  }
+
+  async function syncAuthButton(sessionOverride) {
     const btn = document.getElementById('siteAuthBtn');
     const label = btn && btn.querySelector('.chev-label');
-    if (label) label.textContent = headerSignedIn ? 'Logga ut' : 'Admin';
+    if (!label) return;
+    if (!headerSignedIn) { label.textContent = 'Logga in'; return; }
+    const name = await myPlayerName(sessionOverride);
+    label.textContent = name || 'Min profil';
+  }
+
+  function closeAuthDropdown() {
+    const d = document.getElementById('siteAuthDropdown');
+    if (d) d.classList.add('hidden');
   }
 
   /**
-   * Läs om sessionen, uppdatera adminknappen och body.is-admin
-   * (som styr synligheten för Lottning-länken via .admin-only-nav).
+   * Läs om sessionen, uppdatera inloggningsknappen (namn/"Logga in") och
+   * body.is-admin (som styr synligheten för Lottning-länken via .admin-only-nav).
    * @returns {Promise<{signedIn:boolean,isAdmin:boolean,session:object|null}>}
    */
   async function refreshAuthUI(sessionOverride) {
@@ -284,8 +357,19 @@
     headerSignedIn = !!session;
     const admin = session ? await isAdmin(session) : false;
     if (document.body) document.body.classList.toggle('is-admin', admin);
-    syncAuthButton();
+    await syncAuthButton(session);
+    await syncMyAccountLink(session);
+    if (!headerSignedIn) closeAuthDropdown();
     return { signedIn: headerSignedIn, isAdmin: admin, session };
+  }
+
+  /** Pekar "Min profil"-länken i dropdownen mot player.html?id=... om kopplad, annars claim.html. */
+  async function syncMyAccountLink(session) {
+    const link = document.getElementById('siteAuthMyAccount');
+    if (!link) return;
+    if (!session) { link.setAttribute('href', 'claim.html'); return; }
+    const pid = await myPlayerId(session);
+    link.setAttribute('href', pid != null ? `player.html?id=${pid}` : 'claim.html');
   }
 
   /**
@@ -295,16 +379,28 @@
   async function mountHeader(activePage) {
     slot('site-header-slot').innerHTML = headerMarkup(activePage);
     const btn = document.getElementById('siteAuthBtn');
+    const dropdown = document.getElementById('siteAuthDropdown');
+    const signOutBtn = document.getElementById('siteAuthSignOut');
     if (btn) {
-      btn.addEventListener('click', async () => {
-        if (headerSignedIn) {
-          await signOut();
-          location.href = 'index.html';
-        } else {
-          openAuthModal();
-        }
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (!headerSignedIn) { openAuthModal(); return; }
+        if (dropdown) dropdown.classList.toggle('hidden');
       });
     }
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', async () => {
+        await signOut();
+        location.href = 'index.html';
+      });
+    }
+    // Stäng dropdownen vid klick utanför eller Escape.
+    document.addEventListener('click', e => {
+      if (dropdown && !dropdown.classList.contains('hidden') && e.target !== btn && !dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuthDropdown(); });
     const themeBtn = document.getElementById('siteThemeToggle');
     if (themeBtn) {
       themeBtn.addEventListener('click', toggleTheme);
@@ -321,6 +417,8 @@
     return state;
   }
 
+  let authMode = 'signin'; // 'signin' | 'signup'
+
   function authModalMarkup() {
     return `<div id="authModal" class="modal modal-auth hidden" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">` +
       `<div class="modal-card modal-card-sm panel">` +
@@ -332,14 +430,32 @@
       `<input id="siteAuthPassword" type="password" placeholder="Lösenord" autocomplete="current-password"></div>` +
       `<button id="siteAuthSubmit" class="btn btn-primary btn-block" type="button">Logga in</button>` +
       `<div id="siteAuthError" class="form-error" role="alert"></div>` +
+      `<button id="siteAuthModeToggle" class="auth-mode-toggle" type="button">Ny här? Skapa konto</button>` +
       `</div></div>`;
   }
 
-  function openAuthModal() {
+  /** Växlar modalens läge mellan inloggning och kontoskapande. */
+  function setAuthMode(mode) {
+    authMode = mode === 'signup' ? 'signup' : 'signin';
+    const title = document.getElementById('authModalTitle');
+    const submit = document.getElementById('siteAuthSubmit');
+    const toggle = document.getElementById('siteAuthModeToggle');
+    const passEl = document.getElementById('siteAuthPassword');
+    const err = document.getElementById('siteAuthError');
+    if (title) title.textContent = authMode === 'signup' ? 'Skapa konto' : 'Logga in';
+    if (submit) submit.textContent = authMode === 'signup' ? 'Skapa konto' : 'Logga in';
+    if (toggle) toggle.textContent = authMode === 'signup' ? 'Har du redan ett konto? Logga in' : 'Ny här? Skapa konto';
+    if (passEl) passEl.setAttribute('autocomplete', authMode === 'signup' ? 'new-password' : 'current-password');
+    if (err) err.textContent = '';
+  }
+
+  /**
+   * @param {'signin'|'signup'} [mode] vilket läge modalen ska öppnas i (default 'signin').
+   */
+  function openAuthModal(mode) {
     const m = document.getElementById('authModal');
     if (!m) return;
-    const err = document.getElementById('siteAuthError');
-    if (err) err.textContent = '';
+    setAuthMode(mode || 'signin');
     m.classList.remove('hidden');
     document.body.classList.add('modal-open');
     setTimeout(() => { const e = document.getElementById('siteAuthEmail'); if (e) e.focus(); }, 40);
@@ -348,6 +464,16 @@
     const m = document.getElementById('authModal');
     if (m) m.classList.add('hidden');
     document.body.classList.remove('modal-open');
+  }
+
+  /** @param {string|function(object):string} message statisk text eller (state)=>text */
+  async function finishSignedInSubmit(message) {
+    invalidateAuthCaches();
+    const state = await refreshAuthUI();
+    toast(typeof message === 'function' ? message(state) : message);
+    if (typeof authModalOptions.onSignIn === 'function') authModalOptions.onSignIn(state);
+    else if (authModalOptions.reloadOnSignIn) location.reload();
+    return state;
   }
 
   async function submitAuthModal() {
@@ -361,6 +487,25 @@
       if (err) err.textContent = 'Fyll i e-post och lösenord.';
       return false;
     }
+
+    if (authMode === 'signup') {
+      const { data, error } = await signUp(email, password);
+      if (error) {
+        if (err) err.textContent = 'Kunde inte skapa konto: ' + error.message;
+        return false;
+      }
+      if (!data || !data.session) {
+        // E-postbekräftelse krävs (styrs i Supabase Auth-inställningarna) — ingen session än.
+        toast('Konto skapat! Kolla din e-post för att bekräfta kontot innan du loggar in.');
+        setAuthMode('signin');
+        return true;
+      }
+      if (passEl) passEl.value = '';
+      closeAuthModal();
+      await finishSignedInSubmit('Konto skapat och inloggad.');
+      return true;
+    }
+
     const { error } = await signIn(email, password);
     if (error) {
       if (err) err.textContent = 'Kunde inte logga in: ' + error.message;
@@ -368,11 +513,7 @@
     }
     if (passEl) passEl.value = '';
     closeAuthModal();
-    invalidateAuthCaches();
-    const state = await refreshAuthUI();
-    toast(state.isAdmin ? 'Inloggad som admin.' : 'Inloggad.');
-    if (typeof authModalOptions.onSignIn === 'function') authModalOptions.onSignIn(state);
-    else if (authModalOptions.reloadOnSignIn) location.reload();
+    await finishSignedInSubmit(state => state.isAdmin ? 'Inloggad som admin.' : 'Inloggad.');
     return true;
   }
 
@@ -393,10 +534,12 @@
     const close = document.getElementById('authModalClose');
     const submit = document.getElementById('siteAuthSubmit');
     const pass = document.getElementById('siteAuthPassword');
+    const modeToggle = document.getElementById('siteAuthModeToggle');
     if (close) close.addEventListener('click', closeAuthModal);
     if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeAuthModal(); });
     if (submit) submit.addEventListener('click', submitAuthModal);
     if (pass) pass.addEventListener('keydown', e => { if (e.key === 'Enter') submitAuthModal(); });
+    if (modeToggle) modeToggle.addEventListener('click', () => setAuthMode(authMode === 'signup' ? 'signin' : 'signup'));
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) closeAuthModal();
     });

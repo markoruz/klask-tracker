@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>(function(){try{if(localStorage.getItem('klask-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
+<title>Inställningar · Klaskligan</title>
+
+<link rel="stylesheet" href="global.css">
+<style>
+/* =============================================================================
+   settings.html — tema, eget lösenord, och (admin) spelarkontohantering.
+   ============================================================================= */
+body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.app{width:min(1120px,calc(100% - 28px));margin:48px auto 60px}
+
+.page-head{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:26px;margin-bottom:12px}
+.eyebrow{color:var(--teal);font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:900}
+.page-head h1{font-size:32px;letter-spacing:-1px;margin:5px 0 7px}
+.page-head p{margin:0;color:var(--muted);max-width:520px}
+
+.settings-section{margin-top:12px;padding:20px}
+.settings-section h2{margin:0 0 4px;font-size:18px}
+.settings-section>p{margin:0}
+.settings-form{max-width:420px}
+
+.theme-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel)}
+.theme-row span{font-weight:700}
+
+.admin-players-list{display:grid;gap:8px;margin-top:10px}
+.admin-player-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--panel);flex-wrap:wrap}
+.admin-player-row .name{font-weight:700}
+.admin-player-row .status{color:var(--muted);font-size:12px;margin-top:2px}
+.admin-player-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-player-actions .btn{padding:7px 12px;font-size:12px}
+.admin-badge{color:var(--teal)}
+.admin-self-hint{align-self:center;font-size:11px;color:var(--muted);font-style:italic}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="shared.js"></script>
+</head>
+<body>
+
+<div id="site-header-slot"></div>
+
+<main class="app">
+  <section class="panel page-head">
+    <div class="eyebrow">Konto</div>
+    <h1>Inställningar</h1>
+    <p>Tema, ditt lösenord, och — om du är admin — hantering av andra spelares kontokopplingar.</p>
+  </section>
+
+  <section class="panel settings-section">
+    <h2>Utseende</h2>
+    <div class="theme-row">
+      <span id="themeToggleLabel">Ljust läge</span>
+      <button type="button" id="themeToggleBtn" class="btn">Byt tema</button>
+    </div>
+  </section>
+
+  <section class="panel settings-section" id="accountSection" style="display:none">
+    <h2>Byt lösenord</h2>
+    <div class="settings-form">
+      <div class="field"><label for="newPassword">Nytt lösenord</label>
+        <input id="newPassword" type="password" placeholder="Minst 6 tecken" autocomplete="new-password"></div>
+      <div class="field"><label for="newPasswordConfirm">Bekräfta nytt lösenord</label>
+        <input id="newPasswordConfirm" type="password" placeholder="Upprepa lösenordet" autocomplete="new-password"></div>
+      <button type="button" id="passwordSubmit" class="btn btn-primary">Spara nytt lösenord</button>
+      <div id="passwordError" class="form-error" role="alert"></div>
+    </div>
+  </section>
+
+  <section class="panel settings-section" id="signedOutHint">
+    <p style="color:var(--muted)">Logga in för att kunna byta lösenord.</p>
+  </section>
+
+  <section class="panel settings-section" id="adminSection" style="display:none">
+    <h2>Hantera spelarkonton</h2>
+    <p style="color:var(--muted);margin:6px 0 0">Skicka en återställningslänk eller ta bort en kontokoppling.</p>
+    <div id="adminPlayersList" class="admin-players-list">Laddar…</div>
+  </section>
+</main>
+
+<div id="auth-modal-slot"></div>
+
+<script>
+(function () {
+  'use strict';
+  const esc = Klask.esc;
+  const sb = Klask.supabase;
+
+  let isAdmin = false, isSignedIn = false, myUserId = null;
+  let players = [], activeIds = new Set(), claims = new Map(); // player_id -> {userId, email}
+  let adminUserIds = new Set();
+
+  function renderTheme() {
+    const btn = document.getElementById('themeToggleBtn');
+    const label = document.getElementById('themeToggleLabel');
+    const sync = () => {
+      const dark = Klask.theme.get() === 'dark';
+      label.textContent = dark ? 'Mörkt läge' : 'Ljust läge';
+    };
+    btn.onclick = () => { Klask.theme.toggle(); sync(); };
+    Klask.theme.onChange(sync);
+    sync();
+  }
+
+  function onAuthStateUpdate() {
+    document.getElementById('accountSection').style.display = isSignedIn ? '' : 'none';
+    document.getElementById('signedOutHint').style.display = isSignedIn ? 'none' : '';
+    document.getElementById('adminSection').style.display = isAdmin ? '' : 'none';
+    if (isAdmin) loadAdminData();
+  }
+
+  async function submitPasswordChange() {
+    const pw1El = document.getElementById('newPassword'), pw2El = document.getElementById('newPasswordConfirm');
+    const err = document.getElementById('passwordError');
+    err.textContent = '';
+    const pw1 = pw1El.value, pw2 = pw2El.value;
+    if (pw1.length < 6) { err.textContent = 'Lösenordet måste vara minst 6 tecken.'; return; }
+    if (pw1 !== pw2) { err.textContent = 'Lösenorden matchar inte.'; return; }
+    const btn = document.getElementById('passwordSubmit');
+    btn.disabled = true;
+    try {
+      const { error } = await sb.auth.updateUser({ password: pw1 });
+      if (error) throw error;
+      pw1El.value = ''; pw2El.value = '';
+      Klask.toast('Lösenordet uppdaterat.');
+    } catch (e) {
+      err.textContent = 'Kunde inte uppdatera lösenordet: ' + e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  /** Hämtar vilka spelare som kopplat ett konto (klask_player_accounts). */
+  async function fetchClaims() {
+    const { data, error } = await sb.from('klask_player_accounts').select('player_id,user_id,claimed_email');
+    if (error) { console.error('Kunde inte hämta kontokopplingar', error); return new Map(); }
+    return new Map((data || []).map(r => [Number(r.player_id), { userId: r.user_id, email: r.claimed_email || '' }]));
+  }
+  /** Hämtar vilka user_id som har adminroll (klask_user_roles, role='admin'). */
+  async function fetchAdminUserIds() {
+    const { data, error } = await sb.from('klask_user_roles').select('user_id').eq('role', 'admin');
+    if (error) { console.error('Kunde inte hämta adminroller', error); return new Set(); }
+    return new Set((data || []).map(r => r.user_id));
+  }
+
+  function renderAdminPlayers() {
+    const panel = document.getElementById('adminPlayersList');
+    const current = players.filter(p => activeIds.has(p.id));
+    if (!current.length) { panel.innerHTML = ''; return; }
+    panel.innerHTML = current.map(p => {
+      const claim = claims.get(p.id);
+      const isPlayerAdmin = !!(claim && adminUserIds.has(claim.userId));
+      const isSelf = !!(claim && claim.userId === myUserId);
+      const statusBits = [claim ? `Kopplad till <b>${esc(claim.email)}</b>` : 'Ej kopplad'];
+      if (isPlayerAdmin) statusBits.push('<b class="admin-badge">Admin</b>');
+      const actions = [];
+      if (claim) {
+        actions.push(`<button type="button" class="btn admin-reset-btn" data-email="${esc(claim.email)}">Skicka återställningslänk</button>`);
+        if (isPlayerAdmin && isSelf) {
+          actions.push(`<span class="admin-self-hint" title="Du kan inte ta bort din egen adminåtkomst härifrån.">Admin (du)</span>`);
+        } else if (isPlayerAdmin) {
+          actions.push(`<button type="button" class="btn btn-danger admin-revoke-btn" data-user="${esc(claim.userId)}">Ta bort adminåtkomst</button>`);
+        } else {
+          actions.push(`<button type="button" class="btn admin-grant-btn" data-user="${esc(claim.userId)}">Ge adminåtkomst</button>`);
+        }
+        actions.push(`<button type="button" class="btn btn-danger admin-unlink-btn" data-player="${p.id}">Ta bort koppling</button>`);
+      }
+      return `<div class="admin-player-row"><div><div class="name">${esc(p.name)}</div><div class="status">${statusBits.join(' · ')}</div></div><div class="admin-player-actions">${actions.join('')}</div></div>`;
+    }).join('');
+    panel.querySelectorAll('.admin-reset-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const email = btn.dataset.email;
+        if (!confirm(`Skicka återställningslänk till ${email}?`)) return;
+        btn.disabled = true;
+        try {
+          const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+          if (error) throw error;
+          Klask.toast('Återställningslänk skickad.');
+        } catch (e) {
+          Klask.toast('Kunde inte skicka länken: ' + e.message);
+        } finally {
+          btn.disabled = false;
+        }
+      };
+    });
+    panel.querySelectorAll('.admin-grant-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const userId = btn.dataset.user;
+        if (!confirm('Ge den här personen adminåtkomst? Det ger fullständig admin-behörighet i hela appen.')) return;
+        btn.disabled = true;
+        try {
+          const { error } = await sb.from('klask_user_roles').insert({ user_id: userId, role: 'admin' });
+          if (error) throw error;
+          adminUserIds.add(userId);
+          renderAdminPlayers();
+          Klask.toast('Adminåtkomst tillagd.');
+        } catch (e) {
+          Klask.toast('Kunde inte ge adminåtkomst: ' + e.message);
+          btn.disabled = false;
+        }
+      };
+    });
+    panel.querySelectorAll('.admin-revoke-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const userId = btn.dataset.user;
+        if (!confirm('Ta bort adminåtkomst för den här personen?')) return;
+        btn.disabled = true;
+        try {
+          const { error } = await sb.from('klask_user_roles').delete().eq('user_id', userId).eq('role', 'admin');
+          if (error) throw error;
+          adminUserIds.delete(userId);
+          renderAdminPlayers();
+          Klask.toast('Adminåtkomst borttagen.');
+        } catch (e) {
+          Klask.toast('Kunde inte ta bort adminåtkomst: ' + e.message);
+          btn.disabled = false;
+        }
+      };
+    });
+    panel.querySelectorAll('.admin-unlink-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const id = Number(btn.dataset.player);
+        if (!confirm('Ta bort kontokopplingen för den här spelaren? Kontot kan då claima om profilen, eller så kan någon annan claima den.')) return;
+        const { error } = await sb.from('klask_player_accounts').delete().eq('player_id', id);
+        if (error) { Klask.toast('Kunde inte ta bort kopplingen.'); console.error(error); return; }
+        claims.delete(id);
+        renderAdminPlayers();
+        Klask.toast('Kopplingen borttagen.');
+      };
+    });
+  }
+
+  async function loadAdminData() {
+    const { data } = await Klask.loadState();
+    const profiles = await Klask.loadProfiles('player_id,motto,image_url');
+    players = Klask.mergePlayersWithProfiles(data.players, profiles, []);
+    activeIds = new Set((data.players || []).map(p => Number(p.id)));
+    const session = (await Klask.auth.getSession()).data.session;
+    myUserId = session ? session.user.id : null;
+    [claims, adminUserIds] = await Promise.all([fetchClaims(), fetchAdminUserIds()]);
+    renderAdminPlayers();
+  }
+
+  async function init() {
+    Klask.mountAuthModal({
+      onSignIn: s => { isSignedIn = s.signedIn; isAdmin = s.isAdmin; onAuthStateUpdate(); }
+    });
+    const headerState = await Klask.mountHeader('settings');
+    isSignedIn = headerState.signedIn;
+    isAdmin = headerState.isAdmin;
+    renderTheme();
+    onAuthStateUpdate();
+
+    document.getElementById('passwordSubmit').onclick = submitPasswordChange;
+
+    Klask.auth.onChange(async (event, session) => {
+      isSignedIn = !!session;
+      isAdmin = session ? await Klask.auth.isAdmin(session) : false;
+      onAuthStateUpdate();
+      // Klickar man på en återställningslänk hamnar man här i en tillfällig
+      // recovery-session — samma lösenordsfält kan då användas direkt.
+      if (event === 'PASSWORD_RECOVERY') {
+        Klask.toast('Ange ett nytt lösenord nedan.');
+        const el = document.getElementById('newPassword');
+        if (el) el.focus();
+      }
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
