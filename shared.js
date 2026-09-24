@@ -398,7 +398,7 @@
       const { data: state } = await loadState();
       const player = (state.players || []).find(p => Number(p.id) === Number(post.author_player_id));
       const name = player ? player.name : 'Någon';
-      const n = new Notification(`${name} postade i Klaskflödet`, { body: post.body, tag: 'klask-feed-post' });
+      const n = new Notification(`${name} postade i Klaskflödet`, { body: post.body, tag: 'klask-feed-post', requireInteraction: true });
       n.onclick = () => { window.focus(); if (!isOnVisibleFeedPage()) location.href = 'index.html'; n.close(); };
     } catch (e) { /* tyst fallback — t.ex. webbläsare utan Notification-stöd */ }
   }
