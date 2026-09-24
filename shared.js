@@ -376,6 +376,41 @@
    * Injicera header/nav i <div id="site-header-slot"></div>.
    * @param {'index'|'players'|'player'|'lottning'} activePage
    */
+  /** Webbläsarnotis när en RIKTIG person postar i Klaskflödet — gemensam för
+      alla sidor (inte bara index.html), så det går att få notisen oavsett
+      vilken sida man råkar stå på. Aldrig för egna inlägg. Undertrycks bara
+      när man redan står på Tabell-sidan OCH den är synlig (då syns det nya
+      inlägget ändå direkt i flödet där) — annars visas notisen alltid, även
+      om fliken är synlig men på en annan sida, eftersom man annars aldrig
+      skulle få veta. */
+  function isOnVisibleFeedPage() {
+    return /(^|\/)(index\.html)?$/.test(location.pathname) && document.visibilityState === 'visible';
+  }
+
+  async function handleFeedPostInsert(payload) {
+    try {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      const post = payload.new;
+      if (!post) return;
+      const session = await currentSession();
+      if (!session || post.author_user_id === session.user.id) return;
+      if (isOnVisibleFeedPage()) return;
+      const { data: state } = await loadState();
+      const player = (state.players || []).find(p => Number(p.id) === Number(post.author_player_id));
+      const name = player ? player.name : 'Någon';
+      const n = new Notification(`${name} postade i Klaskflödet`, { body: post.body, tag: 'klask-feed-post' });
+      n.onclick = () => { window.focus(); if (!isOnVisibleFeedPage()) location.href = 'index.html'; n.close(); };
+    } catch (e) { /* tyst fallback — t.ex. webbläsare utan Notification-stöd */ }
+  }
+
+  let feedPostNotifyChannel = null;
+  function subscribeFeedPostNotifications() {
+    if (feedPostNotifyChannel || !sb) return;
+    feedPostNotifyChannel = sb.channel('klask-feed-post-notify')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'klask_feed_posts' }, handleFeedPostInsert)
+      .subscribe();
+  }
+
   async function mountHeader(activePage) {
     slot('site-header-slot').innerHTML = headerMarkup(activePage);
     const btn = document.getElementById('siteAuthBtn');
@@ -401,6 +436,7 @@
       }
     });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuthDropdown(); });
+    subscribeFeedPostNotifications();
     const themeBtn = document.getElementById('siteThemeToggle');
     if (themeBtn) {
       themeBtn.addEventListener('click', toggleTheme);

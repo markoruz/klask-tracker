@@ -1760,24 +1760,6 @@ body.period-closed #roundPanel.admin-only{display:none}
     }).subscribe();
   }
 
-  /** Webbläsarnotis när en RIKTIG person postar (inte de automatiska
-      systemhändelserna, som går via en helt annan kanal ovan). Kräver att
-      besökaren är inloggad och tidigare aktiverat notiser under Inställningar
-      (Notification.requestPermission() kräver ett knapptryck där för att
-      webbläsaren ska visa dialogen alls). Visas inte för egna inlägg, och inte
-      om fliken redan är synlig (då syns det ändå direkt i flödet). */
-  function notifyNewPost(post) {
-    if (!isSignedIn || !post) return;
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    if (myUserId && post.author_user_id === myUserId) return;
-    if (document.visibilityState === 'visible') return;
-    const name = playerNameById(post.author_player_id);
-    try {
-      const n = new Notification(`${name} postade i Klaskflödet`, { body: post.body, tag: 'klask-feed-post' });
-      n.onclick = () => { window.focus(); n.close(); };
-    } catch (e) { /* tyst fallback — vissa webbläsare/enheter stödjer inte Notification */ }
-  }
-
   /** Live-uppdatering för användarinlägg/kommentarer — egna tabeller, separat
       kanal från klask-state-sync ovan (rör aldrig varandra). */
   let feedPostsChannel = null, feedCommentsChannel = null;
@@ -1796,7 +1778,6 @@ body.period-closed #roundPanel.admin-only{display:none}
               firstCard.classList.add('feed-item-new');
               setTimeout(() => firstCard.classList.remove('feed-item-new'), 1200);
             }
-            notifyNewPost(payload.new);
           }
         })
         .subscribe();
