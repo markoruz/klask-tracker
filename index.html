@@ -1722,6 +1722,7 @@ body.period-closed #roundPanel.admin-only{display:none}
      Realtid
      --------------------------------------------------------------------------- */
   let realtimeChannel = null;
+  const wrappedAutoShownIds = new Set(); // förhindrar att samma period poppar upp automatiskt flera gånger
   function subscribeRealtime() {
     if (realtimeChannel) return;
     realtimeChannel = sb.channel('klask-state-sync').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'klask_state', filter: 'id=eq.1' }, payload => {
@@ -1743,14 +1744,52 @@ body.period-closed #roundPanel.admin-only{display:none}
           setTimeout(() => firstCard.classList.remove('feed-item-new'), 1200);
         }
       }
-      // Klaskligan Wrapped, live: en period stängdes just (av vem som helst, i
-      // vilken flik som helst) — samma reveal som "Visa Klaskligan Wrapped" i
-      // Hall of Fame, poppar upp automatiskt hos alla som har sidan öppen.
-      const periodJustClosed = (!wasClosed && data.periodClosed) || archiveCache.length > prevArchiveLen;
-      if (periodJustClosed && archiveCache[0]) {
+      // Wrapped, live: en period stängdes just (av vem som helst, i vilken flik
+      // som helst) — samma reveal som Wrapped-knappen i Hall of Fame, poppar upp
+      // automatiskt hos alla som har sidan öppen. Kräver att BÅDA signalerna
+      // (periodClosed-flaggan slog om OCH arkivet faktiskt blev längre) stämmer
+      // — annars kan en enskild, tillfälligt osynkad signal trigga den i onödan.
+      // Plus ett dedup-skydd så samma period aldrig poppar upp automatiskt två
+      // gånger för samma öppna flik.
+      const periodJustClosed = (!wasClosed && data.periodClosed) && archiveCache.length > prevArchiveLen;
+      const newestArchiveId = archiveCache[0] && archiveCache[0].id;
+      if (periodJustClosed && newestArchiveId != null && !wrappedAutoShownIds.has(newestArchiveId)) {
+        wrappedAutoShownIds.add(newestArchiveId);
         openWrappedModal(archiveCache[0]);
       }
     }).subscribe();
+  }
+
+  /** Live-uppdatering för användarinlägg/kommentarer — egna tabeller, separat
+      kanal från klask-state-sync ovan (rör aldrig varandra). */
+  let feedPostsChannel = null, feedCommentsChannel = null;
+  function subscribeFeedRealtime() {
+    if (!feedPostsChannel) {
+      feedPostsChannel = sb.channel('klask-feed-posts-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'klask_feed_posts' }, async payload => {
+          const previousNewestId = feedPosts[0] && feedPosts[0].id;
+          await loadFeedPosts();
+          render();
+          const newestId = feedPosts[0] && feedPosts[0].id;
+          if (payload.eventType === 'INSERT' && newestId && newestId !== previousNewestId) {
+            toast('Nytt i Klaskflödet!');
+            const firstCard = document.querySelector('#socialFeed .feed-item');
+            if (firstCard) {
+              firstCard.classList.add('feed-item-new');
+              setTimeout(() => firstCard.classList.remove('feed-item-new'), 1200);
+            }
+          }
+        })
+        .subscribe();
+    }
+    if (!feedCommentsChannel) {
+      feedCommentsChannel = sb.channel('klask-feed-comments-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'klask_feed_comments' }, payload => {
+          const targetId = (payload.new && payload.new.target_id) || (payload.old && payload.old.target_id);
+          if (targetId) refreshFeedComments([targetId]);
+        })
+        .subscribe();
+    }
   }
 
   /* ---------------------------------------------------------------------------
@@ -2787,14 +2826,20 @@ body.period-closed #roundPanel.admin-only{display:none}
     render();
 
     // Djuplänk från t.ex. Slack: index.html?wrapped=<period-id> öppnar
-    // Klaskligan Wrapped direkt för den perioden.
+    // Wrapped direkt för den perioden. Query-parametern plockas bort ur
+    // adressraden direkt efteråt — annars poppar Wrapped upp igen varje gång
+    // sidan laddas om, används från bakåtknappen, eller länken bokmärks.
     const wrappedId = new URLSearchParams(location.search).get('wrapped');
     if (wrappedId) {
       const item = archiveCache.find(a => String(a.id) === String(wrappedId));
-      if (item) openWrappedModal(item);
+      if (item) { wrappedAutoShownIds.add(item.id); openWrappedModal(item); }
+      const url = new URL(location.href);
+      url.searchParams.delete('wrapped');
+      history.replaceState(null, '', url.pathname + url.search + url.hash);
     }
 
     subscribeRealtime();
+    subscribeFeedRealtime();
     sb.channel('klask-player-profiles-index')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'klask_player_profiles' }, async () => { await loadPlayerProfiles(); render(); })
       .subscribe();
