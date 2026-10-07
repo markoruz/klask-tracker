@@ -201,8 +201,21 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
 .chart-empty{color:var(--muted);padding:26px;text-align:center}
 .chart-caption{display:flex;justify-content:space-between;gap:12px;color:var(--soft);font-size:10px;margin-top:6px;padding:0 4px;box-sizing:border-box}
 .chart-legend{display:flex;gap:12px;align-items:center}
+.chart-legend span{white-space:nowrap}
+.chart-caption{flex-wrap:wrap}
 .legend-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block;margin-right:4px}
+.legend-dot.ok{background:var(--green)}
+.legend-dot.bad{background:var(--red)}
 @media(max-width:760px){.ranking-chart{min-width:680px}}
+
+/* Växlare Rankinghistorik / Form + periodval för formkurvan -------------- */
+.curve-toggle{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden;flex:none}
+.curve-toggle button{border:0;background:transparent;color:var(--muted);padding:6px 12px;font-size:12px;font-weight:850;font-family:inherit;cursor:pointer}
+.curve-toggle button.active{background:var(--card2);color:var(--text)}
+.curve-period-row{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;color:var(--muted);font-weight:800}
+#formPeriodSelect{padding:5px 8px;font-size:12px}
+.curve-readout{min-height:18px;margin:2px 4px 6px;font-size:12px;color:var(--muted)}
+.form-chart-svg{touch-action:pan-x pan-y}
 
 /* Periodhistorik (tidslinje) --------------------------------------------- */
 .period-list{display:grid;gap:8px;position:relative;padding-left:20px}
@@ -266,7 +279,17 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
   </section>
 
   <section class="panel section ranking-panel">
-    <div class="section-head"><div><div class="eyebrow">Karriärkurva</div><h2>Rankinghistorik</h2></div></div>
+    <div class="section-head">
+      <div><div class="eyebrow">Karriärkurva</div><h2 id="curveTitle">Rankinghistorik</h2></div>
+      <div class="curve-toggle" role="group" aria-label="Välj graf">
+        <button type="button" id="curveRankBtn" class="active" aria-pressed="true">Rankinghistorik</button>
+        <button type="button" id="curveFormBtn" aria-pressed="false">Form</button>
+      </div>
+    </div>
+    <div id="curvePeriodRow" class="curve-period-row hidden">
+      <label for="formPeriodSelect">Period</label>
+      <select id="formPeriodSelect" class="select"></select>
+    </div>
     <div id="rankingHistory" class="chart-wrap"></div>
   </section>
 
@@ -548,12 +571,116 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
     renderRankingChart(rankingSeriesForAll(), 'Placering per månad', 'Ingen kvalificerad rankinghistorik ännu.');
   }
 
+  /* Formkurva: en period i taget. Ett steg upp per match utan förlust, ett steg
+     ner per förlust — Y är alltså icke-förluster minus förluster hittills. */
+  const signed = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v);
+
+  function formMatchesFor(period) {
+    return [...(period.rounds || [])]
+      .filter(r => (r.player_ids || []).map(Number).includes(playerId))
+      .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0))
+      .map(r => ({ loss: Number(r.loser_id) === playerId, played_at: r.played_at }));
+  }
+
+  function niceStep(range) {
+    return [1, 2, 5, 10, 20, 50, 100, 200, 500].find(s => range / s <= 6) || 1000;
+  }
+
+  function renderFormChart() {
+    const root = $('#rankingHistory');
+    if (!root) return;
+    const period = periods().find(p => p.key === $('#formPeriodSelect').value) || periods()[0];
+    const matches = formMatchesFor(period);
+    if (!matches.length) { root.innerHTML = '<div class="chart-empty">Inga matcher i den här perioden ännu.</div>'; return; }
+
+    const sr = [0];
+    matches.forEach(m => sr.push(sr[sr.length - 1] + (m.loss ? -1 : 1)));
+    const n = sr.length, count = matches.length;
+    const lo = Math.min(0, ...sr), hi = Math.max(0, ...sr);
+    const pad = Math.max(2, (hi - lo) * 0.08), a = lo - pad, b = hi + pad;
+
+    const W = 1000, H = 310, L = 62, R = 38, T = 28, B = 52, plotW = W - L - R, plotH = H - T - B;
+    const x = k => L + k / (n - 1) * plotW;
+    const y = v => T + plotH - (v - a) / (b - a) * plotH;
+    const c = Klask.theme.get() === 'dark'
+      ? { grid: '#26425a', axis: '#7fa0bd', ring: '#0d1d2f' }
+      : { grid: '#e3d5c2', axis: '#8a7a68', ring: '#ffffff' };
+
+    const step = niceStep(b - a), ticks = [];
+    for (let v = Math.ceil(a / step) * step; v <= b; v += step) ticks.push(v);
+    const grid = ticks.map(v =>
+      `<line x1="${L}" y1="${y(v)}" x2="${W - R}" y2="${y(v)}" stroke="${c.grid}"/>` +
+      `<text x="${L - 13}" y="${y(v) + 4}" text-anchor="end" fill="${c.axis}" font-size="11">${signed(v)}</text>`
+    ).join('');
+
+    const steps = matches.map((m, k) =>
+      `<line x1="${x(k).toFixed(1)}" y1="${y(sr[k]).toFixed(1)}" x2="${x(k + 1).toFixed(1)}" y2="${y(sr[k + 1]).toFixed(1)}" ` +
+      `style="stroke:var(${m.loss ? '--red' : '--green'})" stroke-width="3" stroke-linecap="round"/>`
+    ).join('');
+
+    const tickCount = Math.min(4, count), xl = [0];
+    for (let j = 1; j <= tickCount; j++) xl.push(Math.round(count * j / tickCount));
+    const labels = [...new Set(xl)].map(k => {
+      const anchor = k === 0 ? 'start' : k === count ? 'end' : 'middle';
+      return `<text x="${x(k)}" y="${H - 22}" text-anchor="${anchor}" fill="${c.axis}" font-size="10">${k === 0 ? 'Start' : 'Match ' + k}</text>`;
+    }).join('');
+
+    const end = sr[n - 1];
+    const endDot = `<circle cx="${x(n - 1)}" cy="${y(end)}" r="5" style="fill:var(${end >= 0 ? '--green' : '--red'})" stroke="${c.ring}" stroke-width="3"/>`;
+    const hint = 'Hovra över grafen för att se enskilda matcher.';
+
+    root.innerHTML =
+      `<div class="curve-readout" id="curveReadout" aria-live="polite">${hint}</div>` +
+      `<div class="ranking-chart-scroll"><svg class="ranking-chart form-chart-svg" id="formChartSvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Formkurva för ${esc(period.name)}">` +
+        `${grid}<line x1="${L}" y1="${y(0)}" x2="${W - R}" y2="${y(0)}" stroke="${c.axis}" stroke-dasharray="5 4"/>${steps}${endDot}${labels}` +
+        `<line id="formGuide" y1="${T}" y2="${H - B}" stroke="${c.axis}" stroke-width="1" visibility="hidden"/>` +
+        `<rect id="formHover" x="${L}" y="0" width="${plotW}" height="${H}" fill="transparent"/></svg></div>` +
+      `<div class="chart-caption"><span>Upp ett steg per match utan förlust, ner ett steg per förlust. Y = icke-förluster minus förluster.</span>` +
+      `<span class="chart-legend"><span><i class="legend-dot ok"></i>Icke-förlust</span><span><i class="legend-dot bad"></i>Förlust</span></span></div>`;
+
+    const svg = $('#formChartSvg'), hover = $('#formHover'), guide = $('#formGuide'), readout = $('#curveReadout');
+    const showAt = clientX => {
+      const box = svg.getBoundingClientRect();
+      const px = (clientX - box.left) / box.width * W;
+      const k = Math.max(1, Math.min(count, Math.round((px - L) / plotW * count)));
+      const gx = x(k);
+      guide.setAttribute('x1', gx); guide.setAttribute('x2', gx); guide.setAttribute('visibility', 'visible');
+      const losses = matches.slice(0, k).filter(m => m.loss).length;
+      const d = new Date(matches[k - 1].played_at);
+      const date = Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' }) + ' · ';
+      readout.textContent = `${date}Match ${k}: ${matches[k - 1].loss ? 'förlust' : 'ingen förlust'} · ${k - losses} icke-förluster och ${losses} förluster hittills = ${signed(sr[k])}`;
+    };
+    const reset = () => { guide.setAttribute('visibility', 'hidden'); readout.textContent = hint; };
+    hover.addEventListener('pointermove', e => showAt(e.clientX));
+    hover.addEventListener('pointerdown', e => showAt(e.clientX));
+    hover.addEventListener('pointerleave', reset);
+  }
+
+  /* Växlaren överst i kortet: Rankinghistorik (hela karriären) eller Form (en period). */
+  let curveView = 'rank';
+  function renderCurve() {
+    const form = curveView === 'form';
+    $('#curveTitle').textContent = form ? 'Form' : 'Rankinghistorik';
+    $('#curveRankBtn').classList.toggle('active', !form);
+    $('#curveFormBtn').classList.toggle('active', form);
+    $('#curveRankBtn').setAttribute('aria-pressed', String(!form));
+    $('#curveFormBtn').setAttribute('aria-pressed', String(form));
+    $('#curvePeriodRow').classList.toggle('hidden', !form);
+    if (form) renderFormChart(); else renderRankingHistory();
+  }
+
   function renderSelectors() {
     const options = '<option value="all">Totalt · alla perioder</option>' +
       periods().map(p => `<option value="${p.key}">${esc(p.name)}${p.current ? ' · aktuell' : ''}</option>`).join('');
     const ps = $('#periodSelect');
     ps.innerHTML = options;
     ps.value = 'all';
+
+    // Formkurvans egna periodval: aktuell period är förvald, men har spelaren
+    // inga matcher där (t.ex. precis efter periodbyte) väljs senaste period med matcher.
+    const fps = $('#formPeriodSelect');
+    fps.innerHTML = periods().map(p => `<option value="${p.key}">${esc(p.name)}${p.current ? ' · aktuell' : ''}</option>`).join('');
+    fps.value = (periods().find(p => formMatchesFor(p).length > 0) || periods()[0]).key;
 
     const opp = $('#opponentSelect');
     opp.innerHTML = players.filter(p => Number(p.id) !== playerId)
@@ -744,10 +871,13 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
     renderSelectors();
     renderStats();
     renderHighlights();
-    renderRankingHistory();
+    renderCurve();
     renderHistory();
 
     $('#periodSelect').onchange = renderStats;
+    $('#curveRankBtn').onclick = () => { curveView = 'rank'; renderCurve(); };
+    $('#curveFormBtn').onclick = () => { curveView = 'form'; renderCurve(); };
+    $('#formPeriodSelect').onchange = renderFormChart;
     $('#opponentSelect').onchange = renderH2H;
     $('#cancelEdit').onclick = () => $('#editModal').classList.add('hidden');
     $('#removeImageBtn').onclick = () => {
@@ -757,7 +887,7 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
       $('#removeImageBtn').style.display = 'none';
     };
     $('#saveEdit').onclick = saveProfile;
-    Klask.theme.onChange(renderRankingHistory);
+    Klask.theme.onChange(renderCurve);
   }
 
   init();
