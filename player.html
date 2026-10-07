@@ -138,8 +138,7 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
 .rivalry-icon-rival{background:#f0e6f5}
 .rivalry-icon-danger{background:var(--danger-bg)}
 .rivalry-icon-victim{background:#e2f5ea}
-.rivalry-card .rivalry-icon{font-size:0}
-.rivalry-icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rivalry-card .rivalry-icon{display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;text-transform:none;letter-spacing:0}
 .rivalry-person{display:flex;align-items:center;gap:10px;min-width:0}
 /* overflow:hidden + img-regeln nedan är en ren buggfix: utan den spretade
    uppladdade profilbilder utanför den runda ramen. */
@@ -212,7 +211,9 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
 .curve-toggle{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden;flex:none}
 .curve-toggle button{border:0;background:transparent;color:var(--muted);padding:6px 12px;font-size:12px;font-weight:850;font-family:inherit;cursor:pointer}
 .curve-toggle button.active{background:var(--card2);color:var(--text)}
-.curve-period-row{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;color:var(--muted);font-weight:800}
+.curve-head{align-items:flex-start}
+.curve-controls{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.curve-period-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:800}
 #formPeriodSelect{padding:5px 8px;font-size:12px}
 .curve-readout{min-height:18px;margin:2px 4px 6px;font-size:12px;color:var(--muted)}
 .form-chart-svg{touch-action:pan-x pan-y}
@@ -279,16 +280,18 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
   </section>
 
   <section class="panel section ranking-panel">
-    <div class="section-head">
+    <div class="section-head curve-head">
       <div><div class="eyebrow">Karriärkurva</div><h2 id="curveTitle">Rankinghistorik</h2></div>
-      <div class="curve-toggle" role="group" aria-label="Välj graf">
-        <button type="button" id="curveRankBtn" class="active" aria-pressed="true">Rankinghistorik</button>
-        <button type="button" id="curveFormBtn" aria-pressed="false">Form</button>
+      <div class="curve-controls">
+        <div class="curve-toggle" role="group" aria-label="Välj graf">
+          <button type="button" id="curveRankBtn" class="active" aria-pressed="true">Rankinghistorik</button>
+          <button type="button" id="curveFormBtn" aria-pressed="false">Form</button>
+        </div>
+        <div id="curvePeriodRow" class="curve-period-row hidden">
+          <label for="formPeriodSelect">Period</label>
+          <select id="formPeriodSelect" class="select"></select>
+        </div>
       </div>
-    </div>
-    <div id="curvePeriodRow" class="curve-period-row hidden">
-      <label for="formPeriodSelect">Period</label>
-      <select id="formPeriodSelect" class="select"></select>
     </div>
     <div id="rankingHistory" class="chart-wrap"></div>
   </section>
@@ -479,12 +482,14 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
     $('#highlights').innerHTML =
       `<div class="highlight-card"><div class="highlight-icon">🏆</div><div class="highlight-label">Ligavinster</div><div class="highlight-value">${m.wins}</div><div class="highlight-sub">${m.podiums} pallplacering${m.podiums === 1 ? '' : 'ar'}</div></div>` +
       `<div class="highlight-card"><div class="highlight-icon">📈</div><div class="highlight-label">Bästa placering</div><div class="highlight-value">${bestPos}</div><div class="highlight-sub">Bästa Bayesian: ${bestScore}</div></div>` +
-      `<div class="highlight-card"><div class="highlight-icon">🔥</div><div class="highlight-label">Längsta svit</div><div class="highlight-value">${m.longest}</div><div class="highlight-sub">matcher utan förlust</div></div>` +
+      `<div class="highlight-card"><div class="highlight-icon">🔥</div><div class="highlight-label">Längsta svit</div><div class="highlight-value">${m.longest}</div><div class="highlight-sub">${m.longest === 1 ? 'match' : 'matcher'} utan förlust</div></div>` +
       `<div class="highlight-card"><div class="highlight-icon">🎮</div><div class="highlight-label">Karriärmatcher</div><div class="highlight-value">${m.all.games}</div><div class="highlight-sub">${m.all.losses} registrerade förluster</div></div>`;
     const first = m.ps.length ? m.ps[m.ps.length - 1].p.name : null;
+    const matchWord = n => n === 1 ? 'match' : 'matcher';
     $('#careerSummary').innerHTML =
-      `<div class="career-summary-text">Aktuell svit: <strong>${m.currentStreak} matcher utan förlust</strong>` +
-      `${first ? ` · Statistik finns från <strong>${esc(first)}</strong>` : ''}</div>`;
+      `<div class="career-summary-text" title="Svit = antal matcher i rad utan förlust, räknat över alla perioder fram till senaste matchen.">` +
+      `Aktuell svit: <strong>${m.currentStreak} ${matchWord(m.currentStreak)} utan förlust</strong>` +
+      `${first ? ` · Har spelat sedan <strong>${esc(first)}</strong>` : ''}</div>`;
   }
 
   function renderRivalrySummary() {
@@ -496,19 +501,15 @@ body{margin:0;background:var(--body-bg);color:var(--text);font-family:Poppins,sy
         `<div class="rivalry-person">${avatar(r)}<div class="rivalry-person-copy"><b>${esc(r.opp.name)}</b>${details(r)}</div></div></div>`
       : `<div class="rivalry-card rivalry-feature"><span class="rivalry-label">${label}</span>` +
         `<div class="rivalry-person"><div class="rivalry-person-copy"><b>–</b><small>Ingen data ännu</small></div></div></div>`;
-    const myPct = x => `<small>${x.together} matcher tillsammans</small><small>Din förlustprocent: <strong class="rivalry-loss-pct">${x.together ? (x.myLoss / x.together * 100).toFixed(0) : 0}%</strong></small>`;
+    // Svenskt genitiv: "Marko" → "Markos", men namn som slutar på s/x/z får ingen extra s ("Marcus").
+    const gen = name => /[sxz]$/i.test(name) ? name : name + 's';
+    const myPct = x => `<small>${x.together} matcher tillsammans</small><small>${esc(gen(profilePlayer.name))} förlustprocent: <strong class="rivalry-loss-pct">${x.together ? (x.myLoss / x.together * 100).toFixed(0) : 0}%</strong></small>`;
 
     $('#rivalrySummary').innerHTML =
-      card('Största rival', m.rival,
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5 18.5 1.5l1 1-4 4M9.5 14.5l-4 4-3 1 1-3 4-4M5.5 5.5l13 13M3.5 2.5l17 17"/></svg>',
-        'rivalry-icon-rival', myPct) +
-      card('Tuffaste sällskap', m.danger,
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 19 5v6c0 5-3 8.5-7 11-4-2.5-7-6-7-11V5l7-3Z"/><path d="M12 6v11M9 9h6"/></svg>',
-        'rivalry-icon-danger', myPct) +
-      card('Mest utsatt motspelare', m.victim,
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>',
-        'rivalry-icon-victim',
-        x => `<small>${x.together} matcher tillsammans</small><small>${esc(x.opp.name)}s förlustprocent: <strong class="rivalry-loss-pct">${x.together ? (x.oppLoss / x.together * 100).toFixed(0) : 0}%</strong></small>`);
+      card('Största rival', m.rival, '⚔️', 'rivalry-icon-rival', myPct) +
+      card('Tuffaste sällskap', m.danger, '🥊', 'rivalry-icon-danger', myPct) +
+      card('Mest utsatt motspelare', m.victim, '🎯', 'rivalry-icon-victim',
+        x => `<small>${x.together} matcher tillsammans</small><small>${esc(gen(x.opp.name))} förlustprocent: <strong class="rivalry-loss-pct">${x.together ? (x.oppLoss / x.together * 100).toFixed(0) : 0}%</strong></small>`);
   }
 
   /* Rankinghistorik: en punkt per period, äldst först. */
