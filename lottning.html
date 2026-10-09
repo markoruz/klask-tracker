@@ -83,6 +83,19 @@ body{
 .select-tools{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .count{font-size:11px;color:var(--muted)}
 
+/* "Klar"-markering: spelare som redan är med i nästa omgång och inte ska lottas. */
+.player-check .done-btn{margin-left:auto;flex:none;border:1px solid var(--line2);background:transparent;color:var(--muted);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:850;font-family:inherit;cursor:pointer}
+.player-check .done-btn.on{background:var(--teal);border-color:var(--teal);color:#fff}
+:root[data-theme="dark"] .player-check .done-btn.on{color:#0b1b2a}
+.team-block{margin:0 0 12px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card2)}
+.team-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px}
+.team-chips{display:flex;flex-wrap:wrap;gap:6px}
+.team-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border:1px solid var(--line2);border-radius:999px;background:var(--panel);font-size:12px;font-weight:850}
+.team-chip em{font-style:normal;color:var(--muted);font-size:10px;font-weight:800}
+.team-chip.is-done em{color:var(--teal)}
+.team-chip .avatar{--avatar-size:22px;font-size:9px}
+.team-chip.placeholder{border-style:dashed;color:var(--muted);padding:5px 12px;font-weight:700}
+
 /* Resultat ---------------------------------------------------------------- */
 .results{display:grid;gap:8px}
 .result-slot{
@@ -139,7 +152,7 @@ body{
   <section class="panel hero">
     <div class="eyebrow">Admin · nästa omgång</div>
     <h1>Lottning</h1>
-    <p>Välj vilka som deltar. Hjulet lottar fyra spelare och deras plats 1–4.</p>
+    <p>Välj vilka som är på plats. Är någon redan klar för nästa omgång markerar du den som Klar — hjulet lottar då bara bland övriga, och därefter lottas platserna 1–4.</p>
   </section>
 
   <div class="layout">
@@ -161,7 +174,7 @@ body{
     <aside class="side">
       <section class="panel">
         <div class="select-tools"><h2 style="margin:0">Spelare i lottningen</h2><span id="selectedCount" class="count"></span></div>
-        <p class="panel-sub">Markera alla som är på plats idag.</p>
+        <p class="panel-sub">Markera alla som är på plats idag. Tryck på Klar för dem som redan är med i nästa omgång.</p>
         <div style="display:flex;gap:12px;margin-bottom:10px">
           <button id="selectAll" class="linkbtn">Välj alla</button>
           <button id="selectNone" class="linkbtn">Avmarkera alla</button>
@@ -172,6 +185,10 @@ body{
       <section class="panel">
         <h2>Resultat</h2>
         <p class="panel-sub">Ordningen motsvarar plats 1–4 i nästa omgång.</p>
+        <div id="teamBlock" class="team-block hidden">
+          <div class="team-head"><strong>Med i omgången</strong><span id="teamCount" class="count"></span></div>
+          <div id="teamChips" class="team-chips"></div>
+        </div>
         <div id="results" class="results"></div>
         <div class="save-row">
           <button id="useDraw" class="btn btn-primary" disabled>Använd i nästa omgång</button>
@@ -188,6 +205,8 @@ body{
 'use strict';
 
 let data = null, players = [], profiles = new Map(), selected = new Set(),
+    done = new Set(),   // spelare som redan är klara för nästa omgång (lottas inte)
+    drawn = [],         // spelare som lottats in till omgången (steg 1)
     result = [], rotation = 0, spinning = false, drawAllRunning = false, cancelDrawAll = false;
 
 const $ = s => document.querySelector(s);
@@ -210,22 +229,65 @@ function avatarHtml(p){
   return Klask.renderAvatar(p, profiles.get(Number(p.id)));
 }
 
+/* Laget till nästa omgång: klara spelare först, därefter de som lottats in. */
+function team(){
+  return [...players.filter(p=>done.has(Number(p.id))), ...drawn];
+}
+/* Steg 1 ("who"): lotta in de som saknas. Steg 2 ("seat"): lotta plats 1–4.
+   Utan klara spelare finns bara steg 2 — då är lottningsordningen direkt platsen
+   (samma slumpfördelning som att först välja fyra och sedan lotta platserna). */
+function phase(){
+  return done.size>0 && team().length<4 ? 'who' : 'seat';
+}
+function resetDrawState(){
+  drawn=[];
+  result=[];
+}
+
 function renderPlayers(){
   const root=$('#playerList');
   root.innerHTML='';
   players.forEach(p=>{
+    const id=Number(p.id), isSel=selected.has(id), isDone=done.has(id);
     const l=document.createElement('label');
     l.className='player-check';
-    l.innerHTML=`<input type="checkbox" ${selected.has(Number(p.id))?'checked':''}><span>${avatarHtml(p)}</span><span class="player-name">${Klask.esc(p.name)}</span>`;
+    l.innerHTML=`<input type="checkbox" ${isSel?'checked':''}><span>${avatarHtml(p)}</span><span class="player-name">${Klask.esc(p.name)}</span>`+
+      (isSel?`<button type="button" class="done-btn${isDone?' on':''}" aria-pressed="${isDone}" title="Redan klar för nästa omgång — lottas inte">Klar</button>`:'');
     l.querySelector('input').onchange=e=>{
-      if(spinning){ e.target.checked=!e.target.checked; return }
-      e.target.checked?selected.add(Number(p.id)):selected.delete(Number(p.id));
-      result=[];
+      if(spinning||drawAllRunning){ e.target.checked=!e.target.checked; return }
+      if(e.target.checked) selected.add(id); else { selected.delete(id); done.delete(id); }
+      resetDrawState();
+      render();
+    };
+    const btn=l.querySelector('.done-btn');
+    if(btn) btn.onclick=e=>{
+      e.preventDefault(); e.stopPropagation();
+      if(spinning||drawAllRunning) return;
+      if(done.has(id)) done.delete(id);
+      else {
+        if(done.size>=4) return Klask.toast('Högst fyra spelare kan vara klara.');
+        done.add(id);
+      }
+      resetDrawState();
       render();
     };
     root.appendChild(l);
   });
-  $('#selectedCount').textContent=`${selected.size} valda`;
+  $('#selectedCount').textContent=`${selected.size} valda`+(done.size?` · ${done.size} klara`:'');
+}
+
+function renderTeam(){
+  const block=$('#teamBlock');
+  block.classList.toggle('hidden',done.size===0);
+  if(!done.size) return;
+  const members=team();
+  $('#teamCount').textContent=`${members.length} av 4`;
+  const chips=members.map(p=>{
+    const isDone=done.has(Number(p.id));
+    return `<span class="team-chip${isDone?' is-done':''}">${avatarHtml(p)}${Klask.esc(p.name)}<em>${isDone?'Klar':'Lottad'}</em></span>`;
+  });
+  for(let i=members.length;i<4;i++) chips.push('<span class="team-chip placeholder">Lottas…</span>');
+  $('#teamChips').innerHTML=chips.join('');
 }
 
 function renderResults(){
@@ -243,8 +305,13 @@ function renderResults(){
 }
 
 function wheelPool(){
+  if(phase()==='who'){
+    const taken=new Set(team().map(p=>Number(p.id)));
+    return players.filter(p=>selected.has(Number(p.id))&&!taken.has(Number(p.id)));
+  }
   const won=new Set(result.map(p=>Number(p.id)));
-  return players.filter(p=>selected.has(Number(p.id))&&!won.has(Number(p.id)));
+  const base=done.size>0?team():players.filter(p=>selected.has(Number(p.id)));
+  return base.filter(p=>!won.has(Number(p.id)));
 }
 
 /* Canvas kan inte läsa CSS-variabler — färgerna nedan speglar temats tokens manuellt. */
@@ -282,28 +349,45 @@ function drawWheel(){
   });
 }
 
+function statusText(){
+  if(result.length===4) return 'Lottningen är klar. Spara resultatet till nästa omgång.';
+  if(selected.size<4) return 'Välj minst fyra spelare för att börja.';
+  if(phase()==='who'){
+    const n=4-team().length;
+    return `Steg 1 av 2 · ${n} ${n===1?'spelare':'spelare'} kvar att lotta in bland de övriga.`;
+  }
+  const n=4-result.length;
+  const left=`${n} ${n===1?'plats':'platser'} kvar att lotta`;
+  return done.size>0?`Steg 2 av 2 · ${left} bland de fyra.`:`${left}.`;
+}
+
 function render(){
   renderPlayers();
+  renderTeam();
   renderResults();
   drawWheel();
   const can=selected.size>=4&&result.length<4&&!spinning&&!drawAllRunning;
   $('#drawOne').disabled=!can;
+  $('#drawOne').textContent=phase()==='who'?'Lotta in nästa spelare':'Lotta nästa plats';
   $('#drawAll').disabled=!can;
   $('#resetDraw').disabled=spinning||drawAllRunning;
-  $('#status').textContent=result.length===4
-    ? 'Lottningen är klar. Spara resultatet till nästa omgång.'
-    : selected.size<4
-      ? 'Välj minst fyra spelare för att börja.'
-      : `${4-result.length} ${4-result.length===1?'plats':'platser'} kvar att lotta.`;
+  $('#status').textContent=statusText();
 }
 
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 
 async function drawNext(){
   if(spinning||selected.size<4||result.length>=4) return null;
-  const pool=wheelPool();
+  const ph=phase(), pool=wheelPool();
   if(!pool.length) return null;
-  if(pool.length===1){
+  if(ph==='who'&&pool.length<=4-team().length){
+    // Precis så många kvar som saknas – alla måste med, så det finns inget att lotta.
+    pool.forEach(p=>drawn.push(p));
+    render();
+    Klask.toast(`Med i omgången: ${pool.map(p=>p.name).join(', ')}`);
+    return pool[0];
+  }
+  if(ph==='seat'&&pool.length===1){
     // Bara en spelare kvar i potten – utfallet är givet, ingen anledning att snurra igen.
     const winner=pool[0];
     result.push(winner);
@@ -332,10 +416,17 @@ async function drawNext(){
   wheel.style.transform=`rotate(${rotation}deg)`;
   await wait(4900);
   const winner=pool[winIdx];
-  result.push(winner);
-  spinning=false;
-  render();
-  Klask.toast(`Plats ${result.length}: ${winner.name}`);
+  if(ph==='who'){
+    drawn.push(winner);
+    spinning=false;
+    render();
+    Klask.toast(`Med i omgången: ${winner.name}`);
+  } else {
+    result.push(winner);
+    spinning=false;
+    render();
+    Klask.toast(`Plats ${result.length}: ${winner.name}`);
+  }
   return winner;
 }
 
@@ -347,8 +438,10 @@ $('#drawAll').onclick=async()=>{
   render();
   try{
     while(result.length<4&&selected.size>=4&&!cancelDrawAll){
-      await drawNext();
-      if(result.length<4&&!cancelDrawAll) await wait(450);
+      const before=phase();
+      if(!(await drawNext())) break;
+      // Lite längre paus när steg 1 (vilka som är med) går över i steg 2 (platserna).
+      if(result.length<4&&!cancelDrawAll) await wait(phase()!==before?1100:450);
     }
   } finally {
     drawAllRunning=false;
@@ -361,7 +454,7 @@ $('#cancelDrawAll').onclick=()=>{
   Klask.toast('Lottningen avbruten.');
 };
 $('#resetDraw').onclick=()=>{
-  result=[];
+  resetDrawState();
   rotation=0;
   $('#wheel').style.transition='none';
   $('#wheel').style.transform='rotate(0deg)';
@@ -369,15 +462,16 @@ $('#resetDraw').onclick=()=>{
   render();
 };
 $('#selectAll').onclick=()=>{
-  if(spinning) return;
+  if(spinning||drawAllRunning) return;
   selected=new Set(players.map(p=>Number(p.id)));
-  result=[];
+  resetDrawState();
   render();
 };
 $('#selectNone').onclick=()=>{
-  if(spinning) return;
+  if(spinning||drawAllRunning) return;
   selected.clear();
-  result=[];
+  done.clear();
+  resetDrawState();
   render();
 };
 
